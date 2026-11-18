@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from hashlib import sha256
 import json
+from dataclasses import dataclass
+from hashlib import sha256
 from typing import Iterable
 
 from atlas.executive.models import Mission, MissionRoute
@@ -22,18 +22,23 @@ class ContextCapsule:
     schema_version: str = "1.0"
 
     def integrity_hash(self) -> str:
-        canonical = json.dumps({
-            "capsule_id": self.capsule_id,
-            "objective": self.objective,
-            "identity_kernel": self.identity_kernel,
-            "invariants": self.invariants,
-            "relevant_memory": self.relevant_memory,
-            "evidence_refs": self.evidence_refs,
-            "uncertainties": self.uncertainties,
-            "open_tasks": self.open_tasks,
-            "permissions": self.permissions,
-            "schema_version": self.schema_version,
-        }, sort_keys=True, ensure_ascii=False, default=str)
+        canonical = json.dumps(
+            {
+                "capsule_id": self.capsule_id,
+                "objective": self.objective,
+                "identity_kernel": self.identity_kernel,
+                "invariants": self.invariants,
+                "relevant_memory": self.relevant_memory,
+                "evidence_refs": self.evidence_refs,
+                "uncertainties": self.uncertainties,
+                "open_tasks": self.open_tasks,
+                "permissions": self.permissions,
+                "schema_version": self.schema_version,
+            },
+            sort_keys=True,
+            ensure_ascii=False,
+            default=str,
+        )
         return sha256(canonical.encode("utf-8")).hexdigest()
 
 
@@ -50,11 +55,7 @@ class CoordinationPlan:
 
 
 class ASASCoordinator:
-    """Connective tissue between ATLAS, ministries and context.
-
-    ASAS does not replace ministry expertise. It preserves the mission context,
-    routes dependencies and returns a single integration path.
-    """
+    """Connective tissue between ATLAS, ministries and context."""
 
     def build_capsule(
         self,
@@ -84,7 +85,7 @@ class ASASCoordinator:
         dependencies: list[tuple[str, str]] = []
         primaries = route.primary_ministries
         for i, source in enumerate(primaries):
-            for target in primaries[i + 1:]:
+            for target in primaries[i + 1 :]:
                 dependencies.append((source, target))
 
         return CoordinationPlan(
