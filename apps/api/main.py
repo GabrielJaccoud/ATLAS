@@ -1,3 +1,4 @@
+import hmac
 from __future__ import annotations
 
 from uuid import uuid4
@@ -15,6 +16,7 @@ from atlas.support import SupportCell, SupportRequest, SupportService
 from atlas.opportunities import Opportunity
 from atlas.research import ResearchStatus
 
+from .auth import create_session_token, verify_session_token
 from .db import get_record, init_db, list_record_dicts, save_record
 from .ops import export_backup, metrics_snapshot, write_backup_file
 from .services import (
@@ -44,9 +46,18 @@ app.add_middleware(
 
 
 def require_token(authorization: str | None = Header(default=None)) -> None:
-    expected = f"Bearer {settings.api_token}"
-    if authorization != expected:
-        raise HTTPException(status_code=401, detail="Invalid ATLAS API token.")
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing ATLAS session.")
+    token = authorization.removeprefix("Bearer ").strip()
+    if token == settings.api_token:
+        return
+    if verify_session_token(token):
+        return
+    raise HTTPException(status_code=401, detail="Invalid or expired ATLAS session.")
+
+
+class OwnerLoginRequest(BaseModel):
+    code: str
 
 
 class ChatRequest(BaseModel):
@@ -133,6 +144,18 @@ def health() -> dict[str, object]:
         "cloud_language_model": bool(settings.openai_api_key),
         "local_language_model": bool(settings.ollama_url),
         "database": "postgres" if settings.database_url.startswith("postgres") else "sqlite",
+    }
+
+
+@app.post("/auth/session")
+def owner_session(request: OwnerLoginRequest) -> dict[str, object]:
+    if not hmac.compare_digest(request.code.strip(), settings.owner_code):
+        raise HTTPException(status_code=401, detail="Código do proprietário inválido.")
+    token = create_session_token()
+    return {
+        "token": token,
+        "expires_in_days": settings.session_days,
+        "role": "owner",
     }
 
 
