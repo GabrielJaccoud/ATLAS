@@ -108,7 +108,9 @@ class PossibleWorldsLab:
         for world in worlds:
             prediction = world.prediction_for(experiment_id)
             likelihoods[world.world_id] = (
-                prediction.get(outcome, _EPSILON) if prediction else _EPSILON
+                max(prediction.get(outcome, 0.0), _EPSILON)
+                if prediction
+                else _EPSILON
             )
 
         evidence = sum(priors[wid] * likelihoods[wid] for wid in priors)
