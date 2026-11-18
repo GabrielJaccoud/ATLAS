@@ -7,6 +7,7 @@ from .lab import (
     RealityGap,
     WorldPosterior,
 )
+from .robustness import CounterevidenceTarget, ResidualWorldTrigger, WorldRobustness
 
 __all__ = [
     "ExperimentCandidate",
@@ -16,4 +17,7 @@ __all__ = [
     "PossibleWorldsLab",
     "RealityGap",
     "WorldPosterior",
+    "CounterevidenceTarget",
+    "ResidualWorldTrigger",
+    "WorldRobustness",
 ]
