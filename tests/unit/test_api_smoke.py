@@ -1,8 +1,10 @@
 from fastapi.testclient import TestClient
 
+from apps.api.db import init_db
 from apps.api.main import app
 
 
+init_db()
 client = TestClient(app)
 HEADERS = {"Authorization": "Bearer dev-atlas-token"}
 
