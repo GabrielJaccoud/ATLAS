@@ -1,5 +1,5 @@
 {
-  "name": "ATLAS 1.8",
+  "name": "ATLAS 1.9",
   "short_name": "ATLAS",
   "start_url": "/",
   "scope": "/",
@@ -7,7 +7,7 @@
   "orientation": "portrait",
   "background_color": "#0a0a0b",
   "theme_color": "#0a0a0b",
-  "description": "ATLAS Personal Intelligence System",
+  "description": "ATLAS Personal Intelligence Command Center",
   "icons": [
     {
       "src": "/atlas-icon.svg",

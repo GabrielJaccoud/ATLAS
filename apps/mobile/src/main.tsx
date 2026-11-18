@@ -30,6 +30,29 @@ type WorldProgram = {
   } | null;
 };
 
+type AtlasEvent = {
+  event_id: string;
+  event_type: string;
+  source: string;
+  payload: Record<string, unknown>;
+  priority: number | string;
+  tags?: string[];
+  created_at?: string;
+};
+
+type ResearchItem = {
+  item_id: string;
+  ministry_id: string;
+  question: string;
+  status: string;
+  priority: number;
+};
+
+type WorldData = {
+  nodes: Array<{ node_id: string; kind: string; name: string; attributes?: Record<string, unknown> }>;
+  edges: Array<{ edge_id: string; source: string; relation: string; target: string; weight: number }>;
+};
+
 type ScreenId =
   | "Agora"
   | "Talk"
@@ -106,6 +129,17 @@ function App() {
   const [voiceState, setVoiceState] = useState<"ready" | "listening" | "thinking" | "speaking" | "degraded">("ready");
   const [worldPrograms, setWorldPrograms] = useState<WorldProgram[]>([]);
   const [worldError, setWorldError] = useState("");
+  const [events, setEvents] = useState<AtlasEvent[]>([]);
+  const [researchItems, setResearchItems] = useState<ResearchItem[]>([]);
+  const [world, setWorld] = useState<WorldData>({ nodes: [], edges: [] });
+  const [metrics, setMetrics] = useState<Record<string, unknown> | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState("");
+  const [researchQuestion, setResearchQuestion] = useState("");
+  const [worldNodeName, setWorldNodeName] = useState("");
+  const [missionObjective, setMissionObjective] = useState("");
+  const [councilCadence, setCouncilCadence] = useState("daily");
   const realtimeRef = useRef<RealtimeHandle | null>(null);
 
   async function refresh() {
@@ -117,6 +151,16 @@ function App() {
       const data = await atlasFetch<Status>("/status");
       setStatus(data);
       setConnected(true);
+      const [eventData, researchData, worldData, metricsData] = await Promise.allSettled([
+        atlasFetch<AtlasEvent[]>("/events"),
+        atlasFetch<Array<{ data: ResearchItem }>>("/records/research"),
+        atlasFetch<WorldData>("/world"),
+        atlasFetch<Record<string, unknown>>("/metrics"),
+      ]);
+      if (eventData.status === "fulfilled") setEvents(eventData.value);
+      if (researchData.status === "fulfilled") setResearchItems(researchData.value.map((record) => record.data));
+      if (worldData.status === "fulfilled") setWorld(worldData.value);
+      if (metricsData.status === "fulfilled") setMetrics(metricsData.value);
     } catch {
       setConnected(false);
     }
@@ -136,11 +180,64 @@ function App() {
 
   useEffect(() => {
     refresh();
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        void navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+      }, { once: true });
+    }
     return () => realtimeRef.current?.stop();
   }, []);
 
   useEffect(() => {
-    if (active === "Mundos" || active === "Laboratório") void loadWorlds();
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setCommandOpen((value) => !value);
+      }
+      if (event.key === "Escape") {
+        setCommandOpen(false);
+        setMenuOpen(false);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  async function runAction<T>(path: string, body: unknown, success: (data: T) => string) {
+    if (!connected) {
+      setReply("Pareie este dispositivo para usar os módulos operacionais.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const data = await atlasFetch<T>(path, { method: "POST", body: JSON.stringify(body) });
+      setReply(success(data));
+      if (path === "/research") setResearchQuestion("");
+      if (path === "/world/nodes") setWorldNodeName("");
+      if (path === "/missions/route") setMissionObjective("");
+      await refresh();
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function goTo(screen: ScreenId) {
+    setActive(screen);
+    setMenuOpen(false);
+    setCommandOpen(false);
+    setCommandQuery("");
+  }
+
+  const visibleCommands = navigation.filter((item) => item.toLocaleLowerCase("pt-BR").includes(commandQuery.toLocaleLowerCase("pt-BR")));
+  const criticalEvents = events.filter((event) => {
+    const priority = String(event.priority).toLowerCase();
+    return (Number(priority) >= 30) || priority === "high" || priority === "critical";
+  });
+
+  useEffect(() => {
+    if (active === "Mundos" || active === "Laboratório" || active === "Pesquisa") void loadWorlds();
   }, [active, connected]);
 
   async function pair() {
@@ -263,7 +360,8 @@ function App() {
       <button
         className={`atlas-core voice-core ${compact ? "compact" : ""}`}
         data-state={voiceState}
-        aria-label="Conversar com ATLAS"
+        aria-label={liveVoice ? "Encerrar conversa por voz com ATLAS" : "Conversar com ATLAS por voz"}
+        aria-pressed={liveVoice}
         onClick={toggleRealtime}
       >
         <span className="core-mark">A</span>
@@ -334,7 +432,7 @@ function App() {
                   <input type="file" onChange={(e) => upload(e.target.files?.[0] || null)} />
                 </label>
               </div>
-              {reply && <div className="reply">{reply}</div>}
+              {reply && <div className="reply" aria-live="polite">{reply}</div>}
             </div>
           </>
         );
@@ -347,13 +445,15 @@ function App() {
               <div className="feature-card atlas-surface"><span>Vigilância Crítica</span><strong>Contínua</strong><p>Monitoramento de evidências e anomalias.</p></div>
               <div className="feature-card atlas-surface"><span>Fechamento</span><strong>19:00</strong><p>Comparação com o início do dia.</p></div>
             </div>
+            <div className="section-row"><h3>Eventos registrados</h3><button className="secondary" onClick={() => void refresh()}>Atualizar</button></div>
+            {events.length ? <div className="event-list">{[...events].reverse().map((event) => <article className="event-card atlas-surface" key={event.event_id}><div><span className="eyebrow">{event.source} · prioridade {event.priority}</span><strong>{event.event_type}</strong></div><small>{event.created_at ? new Date(event.created_at).toLocaleString("pt-BR") : event.event_id}</small></article>)}</div> : <div className="empty-state atlas-surface">Ainda não há eventos registrados na API conectada.</div>}
           </>
         );
       case "Urgente":
         return (
           <>
             <SectionHeader eyebrow="Priority" title="Urgente" description="Somente o que exige atenção imediata." />
-            <div className="empty-state atlas-surface"><strong>Nenhum evento crítico carregado.</strong><p>Eventos HIGH/CRITICAL aparecerão aqui com evidência, impacto e ação recomendada.</p></div>
+            {criticalEvents.length ? <div className="event-list">{[...criticalEvents].reverse().map((event) => <article className="event-card critical atlas-surface" key={event.event_id}><div><span className="eyebrow">Prioridade {event.priority} · {event.source}</span><strong>{event.event_type}</strong><p>{JSON.stringify(event.payload)}</p></div><small>{event.created_at ? new Date(event.created_at).toLocaleString("pt-BR") : event.event_id}</small></article>)}</div> : <div className="empty-state atlas-surface"><strong>Nenhum evento de alta prioridade.</strong><p>A lista usa os eventos armazenados pela API. Prioridades normais permanecem no Radar.</p></div>}
           </>
         );
       case "Ciência":
@@ -372,11 +472,13 @@ function App() {
           <>
             <SectionHeader eyebrow="Research" title="Pesquisa" description="Backlog, linhas em andamento, bloqueios e próximos experimentos." />
             <div className="metric-grid">
+              <Metric label="Questões registradas" value={researchItems.length || 0} />
               <Metric label="Bloqueios atuais" value={status?.research?.blocked ?? "—"} />
-              <Metric label="Mundos possíveis" value={worldPrograms.length || "—"} hint="quando API 1.9 estiver pública" />
+              <Metric label="Mundos possíveis" value={worldPrograms.length || "—"} hint="programas carregados" />
               <Metric label="Método" value="RIA" />
-              <Metric label="Critério" value="Teste discriminante" />
             </div>
+            <div className="form-panel atlas-surface"><h3>Registrar uma pergunta de pesquisa</h3><p>Ela entra no backlog do ATLAS com prioridade inicial média.</p><div className="form-row"><input value={researchQuestion} onChange={(event) => setResearchQuestion(event.target.value)} placeholder="Qual pergunta você quer investigar?" /><button className="primary" disabled={busy || !researchQuestion.trim()} onClick={() => void runAction<ResearchItem>("/research", { ministry_id: status?.ministries?.[0]?.id || "research", question: researchQuestion.trim(), priority: 0.5 }, (item) => `Pergunta registrada: ${item.question}`)}>Registrar</button></div></div>
+            {researchItems.length > 0 && <div className="event-list">{researchItems.map((item) => <article className="event-card atlas-surface" key={item.item_id}><div><span className="eyebrow">{item.ministry_id} · {item.status}</span><strong>{item.question}</strong></div><small>Prioridade {item.priority.toFixed(1)}</small></article>)}</div>}
           </>
         );
       case "Mundos":
@@ -398,7 +500,7 @@ function App() {
                   </div>
                 </div>
               ))}
-              {!worldPrograms.length && !worldError && <div className="empty-state atlas-surface">Carregando mundos possíveis…</div>}
+              {!worldPrograms.length && !worldError && <div className="empty-state atlas-surface">{connected ? "Carregando mundos possíveis…" : "Pareie o dispositivo para carregar os mundos possíveis."}</div>}
             </div>
           </>
         );
@@ -437,7 +539,8 @@ function App() {
         return (
           <>
             <SectionHeader eyebrow="Governance" title="Conselho" description="Deliberações, divergências, evidências e decisão." />
-            <div className="empty-state atlas-surface"><strong>Governança pronta para interface dedicada.</strong><p>Epistemic Council, Guardian, Red Team, Integration Chamber e Outcomes Observatory serão exibidos aqui.</p></div>
+            <div className="form-panel atlas-surface"><h3>Preparar uma sessão de conselho</h3><p>O ATLAS registra a pauta e a cadência; nenhuma decisão externa é executada automaticamente.</p><div className="form-row"><select value={councilCadence} onChange={(event) => setCouncilCadence(event.target.value)}><option value="daily">Diária</option><option value="weekly">Semanal</option><option value="periodic">Periódica</option><option value="crisis">Crise</option></select><button className="primary" disabled={busy} onClick={async () => { if (!connected) return setReply("Pareie este dispositivo para usar os módulos operacionais."); setBusy(true); try { const data = await atlasFetch<Record<string, unknown>>(`/councils/${councilCadence}`); setReply(`Sessão preparada: ${String(data.session_id || data.sessionId || "conselho")}`); } catch (error) { setReply(error instanceof Error ? error.message : String(error)); } finally { setBusy(false); } }}>Preparar sessão</button></div></div>
+            <div className="cards-grid"><div className="feature-card atlas-surface"><span>Epistemic Council</span><strong>Qualidade das evidências</strong><p>Examine alegações, fontes, incertezas e contradições.</p></div><div className="feature-card atlas-surface"><span>Red Team</span><strong>Busca de falhas</strong><p>Procure explicações alternativas e contraevidências.</p></div><div className="feature-card atlas-surface"><span>Outcomes Observatory</span><strong>Acompanhamento</strong><p>Compare decisões com os resultados observados.</p></div></div>
           </>
         );
       case "Awareness":
@@ -446,10 +549,12 @@ function App() {
             <SectionHeader eyebrow="Self Model" title="Awareness" description="Saúde operacional, drift, falhas, reflexos e regeneração." />
             <div className="metric-grid">
               <Metric label="Conexão" value={connected ? "ONLINE" : "OFFLINE"} />
-              <Metric label="OpenAI" value={status?.provider?.openai_configured ? "Configurada" : "—"} />
+              <Metric label="OpenAI" value={metrics?.openai_configured ? "Configurada" : "—"} />
               <Metric label="Modo" value={status?.mode?.mode || "—"} />
               <Metric label="Estado" value={voiceState} />
             </div>
+            <div className="section-row"><h3>Métricas da API</h3><button className="secondary" onClick={() => void refresh()}>Atualizar</button></div>
+            <pre className="data-panel atlas-surface">{metrics ? JSON.stringify(metrics, null, 2) : "As métricas aparecerão após o pareamento."}</pre>
           </>
         );
       case "My World":
@@ -457,9 +562,11 @@ function App() {
           <>
             <SectionHeader eyebrow="Personal Intelligence" title="My World" description="Projetos, pessoas, organizações, ativos e relações." />
             <div className="hero-command atlas-surface">
-              <div className="hero-copy"><span className="eyebrow">Knowledge Graph</span><h3>{status?.my_world?.nodes ?? "—"} nós · {status?.my_world?.edges ?? "—"} relações</h3><p>O grafo visual completo será a próxima camada desta superfície.</p></div>
+              <div className="hero-copy"><span className="eyebrow">Knowledge Graph</span><h3>{world.nodes.length} nós · {world.edges.length} relações</h3><p>Cadastre elementos do seu mundo e acompanhe os vínculos salvos na API.</p></div>
               <div className="mini-orbit" />
             </div>
+            <div className="form-panel atlas-surface"><h3>Adicionar ao My World</h3><div className="form-row"><input value={worldNodeName} onChange={(event) => setWorldNodeName(event.target.value)} placeholder="Nome de projeto, pessoa, organização ou ativo" /><button className="primary" disabled={busy || !worldNodeName.trim()} onClick={() => void runAction<{ name: string }>("/world/nodes", { kind: "project", name: worldNodeName.trim(), attributes: {} }, (node) => `Adicionado ao My World: ${node.name}`)}>Adicionar nó</button></div></div>
+            {world.nodes.length > 0 && <div className="cards-grid">{world.nodes.map((node) => <article className="feature-card atlas-surface" key={node.node_id}><span>{node.kind}</span><strong>{node.name}</strong><small>{node.node_id}</small></article>)}</div>}
           </>
         );
       case "Inovação":
@@ -469,13 +576,15 @@ function App() {
             <div className="pipeline atlas-surface">
               {["Fonte", "Hipótese", "Mundo", "Mecanismo", "Tecnologia", "RIA", "Sandbox", "Benchmark"].map((step) => <span key={step}>{step}</span>)}
             </div>
+            <div className="form-panel atlas-surface"><h3>Iniciar uma hipótese</h3><p>Registra a hipótese como pesquisa para posterior formulação e teste discriminante.</p><div className="form-row"><input value={researchQuestion} onChange={(event) => setResearchQuestion(event.target.value)} placeholder="Descreva a hipótese que deseja explorar" /><button className="primary" disabled={busy || !researchQuestion.trim()} onClick={() => void runAction<ResearchItem>("/research", { ministry_id: "innovation", question: researchQuestion.trim(), priority: 0.7 }, (item) => `Hipótese encaminhada ao backlog: ${item.question}`)}>Enviar ao Forge</button></div></div>
           </>
         );
       case "Ações":
         return (
           <>
             <SectionHeader eyebrow="Execution" title="Ações" description="O que o ATLAS recomenda, o que exige aprovação e o que foi executado." />
-            <div className="empty-state atlas-surface"><strong>Nenhuma ação pendente carregada.</strong><p>Ações futuras terão risco, reversibilidade, responsável, evidência e botão de aprovação.</p></div>
+            <div className="form-panel atlas-surface"><h3>Solicitar um plano de ação</h3><p>O ATLAS roteia o objetivo para os ministérios competentes. Este formulário não executa ações externas.</p><textarea rows={3} value={missionObjective} onChange={(event) => setMissionObjective(event.target.value)} placeholder="Descreva o objetivo" /><div className="form-row action-form"><label><input id="external-action" type="checkbox" /> Pode afetar sistemas ou pessoas externas</label><button className="primary" disabled={busy || !missionObjective.trim()} onClick={() => void runAction<Record<string, unknown>>("/missions/route", { objective: missionObjective.trim(), required_skills: ["research", "analysis"], external_action: (document.getElementById("external-action") as HTMLInputElement | null)?.checked || false }, (route) => `Plano roteado. Ministérios: ${Array.isArray(route.primary_ministries) ? route.primary_ministries.join(", ") : "em avaliação"}.`)}>Gerar plano</button></div></div>
+            <div className="empty-state atlas-surface"><strong>Execução externa exige uma etapa própria de aprovação.</strong><p>Esta tela registra e encaminha planos. Não há execução automática de ações externas.</p></div>
           </>
         );
     }
@@ -490,7 +599,7 @@ function App() {
         </div>
         <nav className="side-nav">
           {navigation.map((item) => (
-            <button key={item} className={active === item ? "active" : ""} onClick={() => setActive(item)}>{item}</button>
+            <button key={item} title={item} aria-label={item} className={active === item ? "active" : ""} onClick={() => goTo(item)}><span className="nav-label">{item}</span><span className="nav-mark">{{ Agora: "AG", Talk: "TK", Radar: "RD", Urgente: "!", Ciência: "CI", Pesquisa: "PQ", Mundos: "MU", Laboratório: "LB", Ministérios: "MI", Conselho: "CO", Awareness: "AW", "My World": "MW", Inovação: "IN", Ações: "AC" }[item]}</span></button>
           ))}
         </nav>
         <div className={connected ? "system-pill online" : "system-pill"}>{connected ? "ONLINE" : "NÃO PAREADO"}</div>
@@ -502,8 +611,10 @@ function App() {
             <span className="eyebrow">Private Intelligence System</span>
             <strong>{active}</strong>
           </div>
-          <VoiceCore compact />
+          <div className="command-tools"><button className="secondary command-shortcut" onClick={() => setCommandOpen(true)} aria-label="Abrir busca de módulos">Buscar <kbd>⌘ / Ctrl K</kbd></button><button className="secondary refresh-button" onClick={() => void refresh()} aria-label="Atualizar dados">Atualizar</button><VoiceCore compact /></div>
         </header>
+
+        {reply && active !== "Talk" && <div className="global-feedback" role="status" aria-live="polite">{reply}</div>}
 
         {!connected && (
           <section className="pairing atlas-surface">
@@ -518,9 +629,13 @@ function App() {
         <section className="screen">{renderScreen()}</section>
       </main>
 
-      <nav className="mobile-nav atlas-surface">
-        {primaryMobile.map((item) => <button key={item} className={active === item ? "active" : ""} onClick={() => setActive(item)}>{item}</button>)}
-        <button onClick={() => setActive("Mundos")}>Mais</button>
+      {menuOpen && <><button className="menu-backdrop" aria-label="Fechar menu" onClick={() => setMenuOpen(false)} /><aside className="module-drawer atlas-surface" aria-label="Todos os módulos"><div className="drawer-heading"><div><span className="eyebrow">ATLAS 1.9</span><h2>Módulos</h2></div><button className="secondary" onClick={() => setMenuOpen(false)}>Fechar</button></div><nav>{navigation.map((item) => <button key={item} className={active === item ? "active" : ""} onClick={() => goTo(item)}>{item}<span>›</span></button>)}</nav></aside></>}
+
+      {commandOpen && <div className="command-overlay" role="dialog" aria-modal="true" aria-label="Buscar módulo" onMouseDown={(event) => { if (event.target === event.currentTarget) setCommandOpen(false); }}><div className="command-dialog atlas-surface"><input autoFocus value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} placeholder="Buscar um módulo do ATLAS…" onKeyDown={(event) => { if (event.key === "Enter" && visibleCommands[0]) goTo(visibleCommands[0]); }} /><div className="command-results">{visibleCommands.map((item) => <button key={item} onClick={() => goTo(item)}>{item}<span>↵</span></button>)}{visibleCommands.length === 0 && <p>Nenhum módulo corresponde à busca.</p>}</div><small>Pressione Esc para fechar · Enter para abrir</small></div></div>}
+
+      <nav className="mobile-nav atlas-surface" aria-label="Navegação principal">
+        {primaryMobile.map((item) => <button key={item} className={active === item ? "active" : ""} onClick={() => goTo(item)}>{item}</button>)}
+        <button aria-expanded={menuOpen} onClick={() => setMenuOpen((value) => !value)}>Mais</button>
       </nav>
     </div>
   );
