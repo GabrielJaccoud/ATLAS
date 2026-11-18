@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { atlasFetch, loadConfig, saveConfig } from "./api";
+import { RealtimeHandle, startRealtimeVoice } from "./realtime";
 import "./styles.css";
 
 const tabs = [
@@ -34,7 +35,9 @@ function App() {
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
   const [listening, setListening] = useState(false);
+  const [liveVoice, setLiveVoice] = useState(false);
   const [speakReplies, setSpeakReplies] = useState(true);
+  const realtimeRef = useRef<RealtimeHandle | null>(null);
   const initial = loadConfig();
   const [baseUrl, setBaseUrl] = useState(initial.baseUrl);
   const [token, setToken] = useState(initial.token);
@@ -65,6 +68,7 @@ function App() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
+    return () => realtimeRef.current?.stop();
   }, []);
 
   function speak(text: string) {
@@ -90,14 +94,16 @@ function App() {
     try {
       const data = await atlasFetch<{ text: string; mode: string }>("/chat", {
         method: "POST",
-        body: JSON.stringify({ message: outgoing, context: { surface: "mobile", input: textOverride ? "voice" : "text" } }),
+        body: JSON.stringify({
+          message: outgoing,
+          context: { surface: "mobile", input: textOverride ? "voice" : "text" },
+        }),
       });
       setReply(data.text);
       setMessage("");
       speak(data.text);
     } catch (error) {
-      const text = error instanceof Error ? error.message : String(error);
-      setReply(text);
+      setReply(error instanceof Error ? error.message : String(error));
     } finally {
       setBusy(false);
     }
@@ -119,6 +125,36 @@ function App() {
     speechRecognition.onend = () => setListening(false);
     setListening(true);
     speechRecognition.start();
+  }
+
+  async function toggleRealtime() {
+    setActive("Talk");
+    if (realtimeRef.current) {
+      realtimeRef.current.stop();
+      realtimeRef.current = null;
+      setLiveVoice(false);
+      setReply("Conversa em tempo real encerrada.");
+      return;
+    }
+    if (!connected) {
+      setReply("Conecte o aplicativo ao backend do ATLAS antes de iniciar o modo Realtime.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const handle = await startRealtimeVoice((event) => {
+        if (event?.type === "response.output_audio_transcript.delta" && event.delta) {
+          setReply((current) => current + event.delta);
+        }
+      });
+      realtimeRef.current = handle;
+      setLiveVoice(true);
+      setReply("Modo Realtime ativo. Fale naturalmente e interrompa quando quiser.");
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function upload(file: File | null) {
@@ -166,14 +202,14 @@ function App() {
 
       <section className="hero">
         <button
-          className={listening ? "orb listening" : "orb"}
+          className={liveVoice ? "orb live" : listening ? "orb listening" : "orb"}
           aria-label="Falar com ATLAS"
-          onClick={listen}
+          onClick={liveVoice ? toggleRealtime : listen}
           disabled={busy}
         />
         <div>
           <p className="eyebrow">{active}</p>
-          <h2>{listening ? "Estou ouvindo." : active === "Talk" ? "Fale comigo." : "Como posso ajudar?"}</h2>
+          <h2>{liveVoice ? "Conversa ao vivo." : listening ? "Estou ouvindo." : active === "Talk" ? "Fale comigo." : "Como posso ajudar?"}</h2>
           <p className="muted">
             Voz, pesquisa, projetos, ministérios, conselhos e ações em uma única presença.
           </p>
@@ -185,15 +221,18 @@ function App() {
           <textarea
             value={message}
             onChange={e => setMessage(e.target.value)}
-            placeholder="Escreva ou toque no núcleo para falar com o ATLAS..."
+            placeholder="Escreva ou use os modos de voz do ATLAS..."
             rows={4}
           />
           <div className="actions">
             <button className="primary" onClick={() => send()} disabled={busy || !connected}>
               {busy ? "Processando…" : "Enviar"}
             </button>
-            <button className="secondary" onClick={listen} disabled={busy}>
+            <button className="secondary" onClick={listen} disabled={busy || liveVoice}>
               {listening ? "Ouvindo…" : "Falar"}
+            </button>
+            <button className={liveVoice ? "secondary active-live" : "secondary"} onClick={toggleRealtime} disabled={busy}>
+              {liveVoice ? "Encerrar Live" : "Realtime"}
             </button>
             <label className="upload">
               Anexar arquivo
