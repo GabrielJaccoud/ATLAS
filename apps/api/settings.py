@@ -14,7 +14,11 @@ class Settings(BaseSettings):
 
     openai_api_key: str | None = None
     openai_model: str = "gpt-6-luna"
+    openai_realtime_model: str = "gpt-realtime-2.1-mini"
     openai_base_url: str = "https://api.openai.com/v1"
+
+    ollama_url: str | None = None
+    ollama_model: str = "llama3.2"
 
     def allowed_origins(self) -> list[str]:
         if self.cors_origins.strip() == "*":
