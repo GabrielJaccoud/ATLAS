@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "atlas-futures"
-version = "1.8.0"
-description = "ATLAS — Sistema de Inteligência Causal, Pessoal e Operacional"
+version = "1.9.0"
+description = "ATLAS — Sistema de Inteligência Causal, Pessoal, Experimental e Operacional"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
