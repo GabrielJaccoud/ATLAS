@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "atlas-futures"
-version = "1.7.0"
-description = "ATLAS — Sistema de Inteligência Causal de Futuros"
+version = "1.8.0"
+description = "ATLAS — Sistema de Inteligência Causal, Pessoal e Operacional"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -43,7 +43,8 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP"]
+select = ["E4", "E7", "E9", "F", "B"]
+ignore = ["B008"]
 
 [tool.mypy]
 python_version = "3.12"
