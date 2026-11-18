@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { atlasFetch, loadConfig, saveConfig } from "./api";
 import "./styles.css";
@@ -15,6 +15,17 @@ type Status = {
   my_world?: { nodes: number; edges: number };
 };
 
+type SpeechRecognitionLike = {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  start(): void;
+  stop(): void;
+  onresult: ((event: any) => void) | null;
+  onerror: ((event: any) => void) | null;
+  onend: (() => void) | null;
+};
+
 function App() {
   const [active, setActive] = useState("Agora");
   const [status, setStatus] = useState<Status | null>(null);
@@ -22,9 +33,22 @@ function App() {
   const [message, setMessage] = useState("");
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [speakReplies, setSpeakReplies] = useState(true);
   const initial = loadConfig();
   const [baseUrl, setBaseUrl] = useState(initial.baseUrl);
   const [token, setToken] = useState(initial.token);
+
+  const speechRecognition = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    const Ctor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!Ctor) return null;
+    const recognition: SpeechRecognitionLike = new Ctor();
+    recognition.lang = "pt-BR";
+    recognition.interimResults = false;
+    recognition.continuous = false;
+    return recognition;
+  }, []);
 
   async function refresh() {
     try {
@@ -36,29 +60,65 @@ function App() {
     }
   }
 
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    refresh();
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    }
+  }, []);
+
+  function speak(text: string) {
+    if (!speakReplies || !("speechSynthesis" in window) || !text.trim()) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "pt-BR";
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
 
   async function connect() {
     saveConfig({ baseUrl, token });
     await refresh();
   }
 
-  async function send() {
-    if (!message.trim()) return;
+  async function send(textOverride?: string) {
+    const outgoing = (textOverride ?? message).trim();
+    if (!outgoing) return;
     setBusy(true);
     setReply("");
     try {
       const data = await atlasFetch<{ text: string; mode: string }>("/chat", {
         method: "POST",
-        body: JSON.stringify({ message, context: { surface: "mobile" } }),
+        body: JSON.stringify({ message: outgoing, context: { surface: "mobile", input: textOverride ? "voice" : "text" } }),
       });
       setReply(data.text);
       setMessage("");
+      speak(data.text);
     } catch (error) {
-      setReply(error instanceof Error ? error.message : String(error));
+      const text = error instanceof Error ? error.message : String(error);
+      setReply(text);
     } finally {
       setBusy(false);
     }
+  }
+
+  function listen() {
+    setActive("Talk");
+    if (!speechRecognition) {
+      setReply("Reconhecimento de voz não está disponível neste navegador. Use o campo de texto.");
+      return;
+    }
+    speechRecognition.onresult = (event: any) => {
+      const transcript = event.results?.[0]?.[0]?.transcript?.trim() || "";
+      setMessage(transcript);
+      setListening(false);
+      if (transcript && connected) void send(transcript);
+    };
+    speechRecognition.onerror = () => setListening(false);
+    speechRecognition.onend = () => setListening(false);
+    setListening(true);
+    speechRecognition.start();
   }
 
   async function upload(file: File | null) {
@@ -70,7 +130,9 @@ function App() {
       const data = await atlasFetch<{ artifact_id: string; kind: string }>("/artifacts", {
         method: "POST", body: form,
       });
-      setReply(`Arquivo recebido · ${data.kind} · ${data.artifact_id}`);
+      const text = `Arquivo recebido · ${data.kind} · ${data.artifact_id}`;
+      setReply(text);
+      speak(text);
     } catch (error) {
       setReply(error instanceof Error ? error.message : String(error));
     } finally {
@@ -103,10 +165,15 @@ function App() {
       )}
 
       <section className="hero">
-        <button className="orb" aria-label="Falar com ATLAS" onClick={() => setActive("Talk")} />
+        <button
+          className={listening ? "orb listening" : "orb"}
+          aria-label="Falar com ATLAS"
+          onClick={listen}
+          disabled={busy}
+        />
         <div>
           <p className="eyebrow">{active}</p>
-          <h2>{active === "Talk" ? "Fale comigo." : "Como posso ajudar?"}</h2>
+          <h2>{listening ? "Estou ouvindo." : active === "Talk" ? "Fale comigo." : "Como posso ajudar?"}</h2>
           <p className="muted">
             Voz, pesquisa, projetos, ministérios, conselhos e ações em uma única presença.
           </p>
@@ -118,16 +185,23 @@ function App() {
           <textarea
             value={message}
             onChange={e => setMessage(e.target.value)}
-            placeholder="Escreva ou, futuramente, fale com o ATLAS..."
+            placeholder="Escreva ou toque no núcleo para falar com o ATLAS..."
             rows={4}
           />
           <div className="actions">
-            <button className="primary" onClick={send} disabled={busy || !connected}>
+            <button className="primary" onClick={() => send()} disabled={busy || !connected}>
               {busy ? "Processando…" : "Enviar"}
+            </button>
+            <button className="secondary" onClick={listen} disabled={busy}>
+              {listening ? "Ouvindo…" : "Falar"}
             </button>
             <label className="upload">
               Anexar arquivo
               <input type="file" onChange={e => upload(e.target.files?.[0] || null)} />
+            </label>
+            <label className="toggle">
+              <input type="checkbox" checked={speakReplies} onChange={e => setSpeakReplies(e.target.checked)} />
+              Responder por voz
             </label>
           </div>
           {reply && <div className="reply">{reply}</div>}
