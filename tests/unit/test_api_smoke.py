@@ -12,7 +12,7 @@ HEADERS = {"Authorization": "Bearer dev-atlas-token"}
 def test_health_is_public():
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json()["version"] == "1.8.0"
+    assert response.json()["version"] == "1.9.0"
 
 
 def test_status_requires_token():
