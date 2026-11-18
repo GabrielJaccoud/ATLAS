@@ -1,9 +1,19 @@
 {
-  "name": "ATLAS",
+  "name": "ATLAS 1.8",
   "short_name": "ATLAS",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0a0a0b",
   "theme_color": "#0a0a0b",
-  "description": "ATLAS Personal Intelligence System"
+  "description": "ATLAS Personal Intelligence System",
+  "icons": [
+    {
+      "src": "/atlas-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
