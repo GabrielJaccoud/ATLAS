@@ -1,5 +1,6 @@
-import hmac
 from __future__ import annotations
+
+import hmac
 
 from uuid import uuid4
 
