@@ -119,3 +119,16 @@ def test_metrics_and_backup_are_available():
     backup = client.get("/backup", headers=HEADERS)
     assert backup.status_code == 200
     assert backup.json()["schema"] == "atlas.logical-backup.v1"
+
+
+def test_owner_pairing_returns_session_token():
+    response = client.post("/auth/session", json={"code": "000000"})
+    assert response.status_code == 200
+    token = response.json()["token"]
+    authenticated = client.get("/status", headers={"Authorization": f"Bearer {token}"})
+    assert authenticated.status_code == 200
+
+
+def test_owner_pairing_rejects_wrong_code():
+    response = client.post("/auth/session", json={"code": "wrong"})
+    assert response.status_code == 401
