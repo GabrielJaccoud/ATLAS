@@ -90,3 +90,17 @@ def list_record_dicts(kind: str) -> list[dict[str, object]]:
             select(Record).where(Record.kind == kind).order_by(Record.id.desc())
         ).all()
         return [record_to_dict(row) for row in rows]
+
+
+def list_all_record_dicts() -> list[dict[str, object]]:
+    with SessionLocal() as db:
+        rows = db.scalars(select(Record).order_by(Record.id.asc())).all()
+        return [record_to_dict(row) for row in rows]
+
+
+def count_by_kind() -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in list_all_record_dicts():
+        kind = str(row["kind"])
+        counts[kind] = counts.get(kind, 0) + 1
+    return counts
