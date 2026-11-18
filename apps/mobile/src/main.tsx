@@ -53,6 +53,25 @@ type WorldData = {
   edges: Array<{ edge_id: string; source: string; relation: string; target: string; weight: number }>;
 };
 
+type WorldObservation = {
+  program_id: string;
+  experiment_id: string;
+  outcome: string;
+  posterior: { probabilities: Record<string, number>; surprise_bits?: number };
+};
+
+type ApiRecord<T> = { data: T; created_at?: string };
+
+type HomeSignal = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  action: ScreenId;
+  actionLabel: string;
+  tone: "calm" | "research" | "alert" | "critical";
+  evidence?: string;
+};
+
 type ScreenId =
   | "Agora"
   | "Talk"
@@ -132,6 +151,7 @@ function App() {
   const [events, setEvents] = useState<AtlasEvent[]>([]);
   const [researchItems, setResearchItems] = useState<ResearchItem[]>([]);
   const [world, setWorld] = useState<WorldData>({ nodes: [], edges: [] });
+  const [observations, setObservations] = useState<Array<ApiRecord<WorldObservation>>>([]);
   const [metrics, setMetrics] = useState<Record<string, unknown> | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -151,16 +171,18 @@ function App() {
       const data = await atlasFetch<Status>("/status");
       setStatus(data);
       setConnected(true);
-      const [eventData, researchData, worldData, metricsData] = await Promise.allSettled([
+      const [eventData, researchData, worldData, metricsData, observationData] = await Promise.allSettled([
         atlasFetch<AtlasEvent[]>("/events"),
         atlasFetch<Array<{ data: ResearchItem }>>("/records/research"),
         atlasFetch<WorldData>("/world"),
         atlasFetch<Record<string, unknown>>("/metrics"),
+        atlasFetch<Array<ApiRecord<WorldObservation>>>("/records/world_observation"),
       ]);
       if (eventData.status === "fulfilled") setEvents(eventData.value);
       if (researchData.status === "fulfilled") setResearchItems(researchData.value.map((record) => record.data));
       if (worldData.status === "fulfilled") setWorld(worldData.value);
       if (metricsData.status === "fulfilled") setMetrics(metricsData.value);
+      if (observationData.status === "fulfilled") setObservations(observationData.value);
     } catch {
       setConnected(false);
     }
@@ -235,9 +257,36 @@ function App() {
     const priority = String(event.priority).toLowerCase();
     return (Number(priority) >= 30) || priority === "high" || priority === "critical";
   });
+  const newestEvent = [...events].sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))[0];
+  const newestObservation = observations[0];
+  const observationProgram = newestObservation && worldPrograms.find((program) => program.program_id === newestObservation.data.program_id);
+  const largestWorldShift = observationProgram && newestObservation
+    ? observationProgram.worlds
+      .map((possibleWorld) => ({
+        title: possibleWorld.title,
+        delta: (newestObservation.data.posterior.probabilities[possibleWorld.world_id] ?? possibleWorld.prior) - possibleWorld.prior,
+      }))
+      .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))[0]
+    : undefined;
+  const recommendedProgram = worldPrograms.find((program) => program.next_experiment);
+  const newestCritical = criticalEvents[0];
+  const highestPriorityIsCritical = criticalEvents.some((event) => Number(event.priority) >= 40 || String(event.priority).toLowerCase() === "critical");
+  const homeSignal: HomeSignal = !connected
+    ? { eyebrow: "Aguardando conexão", title: "Conecte o ATLAS para começar.", description: "Depois do pareamento, esta página resume eventos, pesquisas e observações realmente registradas no sistema.", action: "Talk", actionLabel: "Abrir Talk", tone: "calm" }
+    : newestCritical
+      ? { eyebrow: "Atenção prioritária", title: `${criticalEvents.length} evento${criticalEvents.length === 1 ? "" : "s"} de alta prioridade no Radar.`, description: `${newestCritical.event_type} · origem ${newestCritical.source}. A classificação vem da prioridade registrada pela API.`, action: "Urgente", actionLabel: "Ver eventos", tone: highestPriorityIsCritical ? "critical" : "alert", evidence: newestCritical.created_at ? `Registro: ${new Date(newestCritical.created_at).toLocaleString("pt-BR")}` : newestCritical.event_id }
+      : newestObservation && observationProgram && largestWorldShift && Math.abs(largestWorldShift.delta) >= 0.01
+        ? { eyebrow: "Possible Worlds · observação registrada", title: `O peso estimado de “${largestWorldShift.title}” mudou.`, description: `A observação “${newestObservation.data.outcome}” no programa ${newestObservation.data.program_id} alterou a estimativa em ${Math.abs(largestWorldShift.delta * 100).toFixed(1)} pontos percentuais. Isso atualiza o modelo; não confirma, por si só, uma explicação.`, action: "Mundos", actionLabel: "Examinar mundos", tone: "research", evidence: `Experimento: ${newestObservation.data.experiment_id}${newestObservation.created_at ? ` · ${new Date(newestObservation.created_at).toLocaleString("pt-BR")}` : ""}` }
+        : (status?.research?.blocked ?? 0) > 0
+          ? { eyebrow: "Pesquisa · bloqueio registrado", title: `${status?.research?.blocked} item${status?.research?.blocked === 1 ? "" : "s"} de pesquisa bloqueado${status?.research?.blocked === 1 ? "" : "s"}.`, description: "O backlog contém pesquisa marcada como bloqueada. Consulte as perguntas registradas para decidir o próximo passo.", action: "Pesquisa", actionLabel: "Abrir Pesquisa", tone: "alert" }
+          : newestEvent
+            ? { eyebrow: "Radar · último registro", title: newestEvent.event_type, description: `O registro mais recente veio de ${newestEvent.source}. A prioridade foi classificada como ${newestEvent.priority}.`, action: "Radar", actionLabel: "Abrir Radar", tone: "research", evidence: newestEvent.created_at ? `Atualizado em ${new Date(newestEvent.created_at).toLocaleString("pt-BR")}` : newestEvent.event_id }
+            : recommendedProgram
+              ? { eyebrow: "Laboratório · próximo experimento", title: recommendedProgram.next_experiment!.experiment_id, description: `O programa ${recommendedProgram.program_id} selecionou este experimento. Ganho de informação esperado: ${recommendedProgram.next_experiment!.expected_information_gain.toFixed(3)} bits.`, action: "Laboratório", actionLabel: "Ver recomendação", tone: "research" }
+              : { eyebrow: "Estado operacional", title: "Nenhum alerta prioritário registrado.", description: worldError ? "A API está conectada, mas ainda não forneceu os dados de Possible Worlds 1.9. A Home está usando os registros operacionais disponíveis." : "Os dados carregados não indicam alertas prioritários ou observações recentes. Abra o Radar ou a Pesquisa para explorar os registros.", action: "Radar", actionLabel: "Abrir Radar", tone: "calm" };
 
   useEffect(() => {
-    if (active === "Mundos" || active === "Laboratório" || active === "Pesquisa") void loadWorlds();
+    if (active === "Agora" || active === "Mundos" || active === "Laboratório" || active === "Pesquisa") void loadWorlds();
   }, [active, connected]);
 
   async function pair() {
@@ -356,10 +405,17 @@ function App() {
   }
 
   function VoiceCore({ compact = false }: { compact?: boolean }) {
+    const contextualState = voiceState !== "ready"
+      ? voiceState
+      : active === "Agora"
+        ? homeSignal.tone === "calm" ? "ready" : homeSignal.tone === "research" ? "researching" : homeSignal.tone
+        : active === "Pesquisa" || active === "Mundos" || active === "Laboratório" || active === "Ciência"
+          ? "researching"
+          : "ready";
     return (
       <button
         className={`atlas-core voice-core ${compact ? "compact" : ""}`}
-        data-state={voiceState}
+        data-state={contextualState}
         aria-label={liveVoice ? "Encerrar conversa por voz com ATLAS" : "Conversar com ATLAS por voz"}
         aria-pressed={liveVoice}
         onClick={toggleRealtime}
@@ -379,15 +435,13 @@ function App() {
               title="O que merece sua atenção agora."
               description="Situação do sistema, contexto e prioridades em uma única visão."
             />
-            <div className="hero-command atlas-surface">
+            <div className={`hero-command atlas-surface home-signal signal-${homeSignal.tone}`}>
               <div className="hero-copy">
-                <span className="eyebrow">ATLAS 1.9</span>
-                <h3>{connected ? "Sistema conectado." : "Aguardando pareamento."}</h3>
-                <p>
-                  {connected
-                    ? "A arquitetura está pronta para pesquisa, mundos possíveis, ministérios e execução."
-                    : "Pareie este dispositivo para ativar os dados operacionais."}
-                </p>
+                <span className="eyebrow">{homeSignal.eyebrow}</span>
+                <h3>{homeSignal.title}</h3>
+                <p>{homeSignal.description}</p>
+                {homeSignal.evidence && <small className="signal-evidence">{homeSignal.evidence}</small>}
+                <button className="secondary signal-action" onClick={() => goTo(homeSignal.action)}>{homeSignal.actionLabel} <span aria-hidden="true">→</span></button>
               </div>
               <VoiceCore />
             </div>

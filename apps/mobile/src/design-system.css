@@ -80,6 +80,21 @@
   border-top-color: var(--atlas-cyan);
 }
 
+.atlas-core[data-state="researching"]::before {
+  animation: atlas-orbit 6s linear infinite;
+  border-color: rgba(77,163,255,.32);
+  border-top-color: var(--atlas-blue);
+}
+
+.atlas-core[data-state="researching"]::after {
+  animation: atlas-orbit 12s linear infinite reverse;
+  border-left-color: rgba(87,230,217,.38);
+}
+
+.atlas-core[data-state="speaking"] {
+  animation: atlas-speak 1.6s ease-in-out infinite;
+}
+
 .atlas-core[data-state="alert"] {
   box-shadow: 0 0 110px rgba(224,163,74,.26);
   border-color: rgba(224,163,74,.55);
@@ -97,6 +112,11 @@
 
 @keyframes atlas-orbit {
   to { transform: rotate(360deg); }
+}
+
+@keyframes atlas-speak {
+  0%,100% { filter: brightness(1); box-shadow: var(--atlas-shadow-core); }
+  50% { filter: brightness(1.18); box-shadow: 0 0 105px rgba(87,230,217,.23), 0 0 170px rgba(77,163,255,.18); }
 }
 
 @media (prefers-reduced-motion: reduce) {

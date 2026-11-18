@@ -128,6 +128,19 @@ future action registry + approval endpoint.
 
 ## Implementation sequence
 
+### Home dinâmica — ATLAS 1.9
+
+The Command Center prioritizes only persisted, API-backed state:
+
+1. high/critical events;
+2. posterior shifts from recorded Possible Worlds observations;
+3. blocked research;
+4. the latest recorded event;
+5. the next experiment selected by the research program;
+6. a calm empty state when no signal is present.
+
+Each insight links to its source module and shows provenance where available. A posterior shift is described as a model update, not as confirmation of an explanation. The voice core mirrors the active listening, thinking, speaking, research, alert, and critical state with restrained motion.
+
 ### Phase A — Foundation
 - design tokens;
 - logo;
