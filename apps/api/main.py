@@ -20,6 +20,7 @@ from .services import (
     orchestrator,
     registry,
     save_artifact_bytes,
+    create_realtime_client_secret,
 )
 from .settings import settings
 
@@ -97,8 +98,17 @@ def health() -> dict[str, object]:
         "environment": settings.environment,
         "mode": mode_controller.mode.value,
         "cloud_language_model": bool(settings.openai_api_key),
+        "local_language_model": bool(settings.ollama_url),
         "database": "postgres" if settings.database_url.startswith("postgres") else "sqlite",
     }
+
+
+@app.post("/voice/realtime-token", dependencies=[Depends(require_token)])
+async def realtime_token() -> dict[str, object]:
+    try:
+        return await create_realtime_client_secret()
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @app.get("/status", dependencies=[Depends(require_token)])
