@@ -14,6 +14,9 @@ from atlas.modes import GlobalMode
 from atlas.events import EventPriority, EventRecord
 from atlas.governance import GovernanceNetwork, GovernanceRequest
 from atlas.support import SupportCell, SupportRequest, SupportService
+from atlas.worlds import PossibleWorldsLab
+from atlas.worlds.programs import default_world_programs
+from atlas.worlds.synthesis import WorldTechnologySynthesizer
 from atlas.opportunities import Opportunity
 from atlas.research import ResearchStatus
 
@@ -34,8 +37,8 @@ from .settings import settings
 
 app = FastAPI(
     title="ATLAS API",
-    version="1.8.0",
-    description="ATLAS Fractal Cognitive Network API",
+    version="1.9.0",
+    description="ATLAS Possible Worlds & Experimental Intelligence API",
 )
 app.add_middleware(
     CORSMiddleware,
@@ -55,6 +58,11 @@ def require_token(authorization: str | None = Header(default=None)) -> None:
     if verify_session_token(token):
         return
     raise HTTPException(status_code=401, detail="Invalid or expired ATLAS session.")
+
+
+class WorldObservationRequest(BaseModel):
+    experiment_id: str
+    outcome: str
 
 
 class OwnerLoginRequest(BaseModel):
@@ -139,7 +147,7 @@ def startup() -> None:
 def health() -> dict[str, object]:
     return {
         "status": "ok",
-        "version": "1.8.0",
+        "version": "1.9.0",
         "environment": settings.environment,
         "mode": mode_controller.mode.value,
         "cloud_language_model": bool(settings.openai_api_key),
@@ -452,6 +460,112 @@ def backup_write() -> dict[str, object]:
     path = write_backup_file()
     save_record("backup", f"backup:{uuid4().hex[:12]}", title="logical-backup", data={"path": path})
     return {"path": path}
+
+
+def _program_by_id(program_id: str):
+    for program in default_world_programs():
+        if program.program_id == program_id:
+            return program
+    raise HTTPException(status_code=404, detail="Possible-world program not found.")
+
+
+@app.get("/possible-worlds/programs", dependencies=[Depends(require_token)])
+def list_possible_world_programs() -> list[dict[str, object]]:
+    synthesizer = WorldTechnologySynthesizer()
+    output: list[dict[str, object]] = []
+    for program in default_world_programs():
+        decision = synthesizer.evaluate(program)
+        output.append({
+            "program_id": program.program_id,
+            "worlds": [
+                {
+                    "world_id": world.world_id,
+                    "title": world.title,
+                    "prior": world.prior,
+                    "epistemic_label": world.epistemic_label,
+                }
+                for world in program.worlds
+            ],
+            "experiments": [
+                {
+                    "experiment_id": experiment.experiment_id,
+                    "title": experiment.title,
+                    "cost": experiment.cost,
+                    "time": experiment.time,
+                    "risk": experiment.risk,
+                    "requires_human_approval": experiment.requires_human_approval,
+                }
+                for experiment in program.experiments
+            ],
+            "next_experiment": (
+                decision.next_experiment.__dict__
+                if decision.next_experiment
+                else None
+            ),
+            "unresolved_world_pairs": decision.unresolved_world_pairs,
+        })
+    return output
+
+
+@app.get("/possible-worlds/programs/{program_id}", dependencies=[Depends(require_token)])
+def possible_world_program(program_id: str) -> dict[str, object]:
+    program = _program_by_id(program_id)
+    decision = WorldTechnologySynthesizer().evaluate(program)
+    return {
+        "program_id": program.program_id,
+        "worlds": [
+            {
+                "world_id": world.world_id,
+                "title": world.title,
+                "prior": world.prior,
+                "assumptions": world.assumptions,
+                "source_refs": world.source_refs,
+                "epistemic_label": world.epistemic_label,
+            }
+            for world in program.worlds
+        ],
+        "experiments": [experiment.__dict__ for experiment in program.experiments],
+        "next_experiment": (
+            decision.next_experiment.__dict__
+            if decision.next_experiment
+            else None
+        ),
+        "technology_results": [result.__dict__ for result in decision.technology_results],
+        "unresolved_world_pairs": decision.unresolved_world_pairs,
+    }
+
+
+@app.post(
+    "/possible-worlds/programs/{program_id}/observe",
+    dependencies=[Depends(require_token)],
+)
+def observe_possible_world(
+    program_id: str,
+    request: WorldObservationRequest,
+) -> dict[str, object]:
+    program = _program_by_id(program_id)
+    experiment_ids = {x.experiment_id for x in program.experiments}
+    if request.experiment_id not in experiment_ids:
+        raise HTTPException(status_code=404, detail="Experiment not found in program.")
+
+    lab = PossibleWorldsLab()
+    posterior = lab.posterior(program.worlds, request.experiment_id, request.outcome)
+    gaps = lab.reality_gaps(program.worlds, request.experiment_id, request.outcome)
+    observation_id = f"world-observation:{uuid4().hex[:12]}"
+    payload = {
+        "program_id": program_id,
+        "experiment_id": request.experiment_id,
+        "outcome": request.outcome,
+        "posterior": posterior.__dict__,
+        "reality_gaps": [gap.__dict__ for gap in gaps],
+    }
+    save_record(
+        "world_observation",
+        observation_id,
+        title=f"{program_id}:{request.experiment_id}",
+        data=payload,
+    )
+    return payload
 
 
 @app.get("/records/{kind}", dependencies=[Depends(require_token)])
