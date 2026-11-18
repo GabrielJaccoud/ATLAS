@@ -40,3 +40,80 @@ def test_artifact_upload_accepts_text_file():
     )
     assert response.status_code == 200
     assert response.json()["kind"] == "document"
+
+
+def test_research_and_world_are_persistent_api_resources():
+    research = client.post(
+        "/research",
+        headers=HEADERS,
+        json={"ministry_id": "science_frontiers", "question": "What changed?", "priority": 0.8},
+    )
+    assert research.status_code == 200
+    listed = client.get("/research/science_frontiers", headers=HEADERS)
+    assert listed.status_code == 200
+    assert any(item["question"] == "What changed?" for item in listed.json())
+
+    node = client.post(
+        "/world/nodes",
+        headers=HEADERS,
+        json={
+            "kind": "project",
+            "name": "ATLAS",
+            "attributes": {"domains": ["ai"], "capabilities": ["research"]},
+        },
+    )
+    assert node.status_code == 200
+    world = client.get("/world", headers=HEADERS)
+    assert world.status_code == 200
+    assert any(item["name"] == "ATLAS" for item in world.json()["nodes"])
+
+
+def test_event_governance_and_support_endpoints():
+    event = client.post(
+        "/events",
+        headers=HEADERS,
+        json={
+            "event_type": "health.alert",
+            "source": "test",
+            "payload": {"metric": "latency"},
+            "priority": 30,
+            "tags": ["health"],
+        },
+    )
+    assert event.status_code == 200
+
+    governance = client.post(
+        "/governance/route",
+        headers=HEADERS,
+        json={
+            "source": "science_frontiers",
+            "purpose": "Need a new tool",
+            "categories": ["tooling", "capability_gap"],
+        },
+    )
+    assert governance.status_code == 200
+    assert "support_cell" in governance.json()["routed_to"]
+
+    support = client.post(
+        "/support/plan",
+        headers=HEADERS,
+        json={
+            "requester": "science_frontiers",
+            "symptom": "Missing capability",
+            "desired_outcome": "Build a safe tool",
+            "requested_services": ["capability_build"],
+            "requires_code_change": True,
+        },
+    )
+    assert support.status_code == 200
+    assert support.json()["route_to_codex"] is True
+
+
+def test_metrics_and_backup_are_available():
+    metrics = client.get("/metrics", headers=HEADERS)
+    assert metrics.status_code == 200
+    assert "records_by_kind" in metrics.json()
+
+    backup = client.get("/backup", headers=HEADERS)
+    assert backup.status_code == 200
+    assert backup.json()["schema"] == "atlas.logical-backup.v1"
