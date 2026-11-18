@@ -128,7 +128,7 @@ future action registry + approval endpoint.
 
 ## Implementation sequence
 
-### Home dinâmica — ATLAS 1.9
+### Home dinâmica — ATLAS 2.0
 
 The Command Center prioritizes only persisted, API-backed state:
 
@@ -140,6 +140,10 @@ The Command Center prioritizes only persisted, API-backed state:
 6. a calm empty state when no signal is present.
 
 Each insight links to its source module and shows provenance where available. A posterior shift is described as a model update, not as confirmation of an explanation. The voice core mirrors the active listening, thinking, speaking, research, alert, and critical state with restrained motion.
+
+### Web 3D 3.0 layer
+
+The visual layer uses three lightweight scene modes: the animated Atlas Core, a Possible Worlds constellation, and the My World knowledge graph. Scenes are lazy-loaded and rendered behind accessible HTML controls. Their motion follows the current system/voice state; they do not replace numeric probabilities, names, evidence, or text navigation. On constrained or unsupported devices, the interface keeps its CSS core and readable 2D data view.
 
 ### Phase A — Foundation
 - design tokens;

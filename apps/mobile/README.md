@@ -1,16 +1,17 @@
-# ATLAS Web Premium
+# ATLAS Web 2.0
 
-Responsive web command center for ATLAS 1.9, packaged for browser, installable PWA, and Android through Capacitor.
+Luxury Intelligence Command Center with a responsive WebGL 3D layer. The browser experience is the primary product; the PWA and Capacitor Android package use the same interface.
 
-## Current experience
+## Experience
 
-- Command Center with system status and global voice state.
-- Searchable module navigation with `Ctrl/⌘ + K` and a complete mobile module drawer.
-- Text chat, file upload, browser speech output, and Realtime voice session.
-- Live event radar and high-priority event view.
-- Research backlog creation, possible-world program summaries, and experiment scoring.
-- Ministry overview, council-session preparation, API awareness metrics, My World node creation, hypothesis intake, and mission routing.
-- Service worker caches the same-origin app shell and assets for offline reopening; authenticated API data is never cached.
+- **Atlas Core:** interactive three dimensional nucleus with restrained gold, blue, and cyan light; responds to voice, research, alert, and critical states.
+- **Possible Worlds:** spatial model constellation paired with explicit probability values and experiment recommendations.
+- **My World:** three dimensional view of the saved knowledge graph, alongside its readable node and relationship records.
+- **Operations:** dynamic Home, Radar, Urgent, Science, Research, Ministries, Council, Awareness, Innovation, and Actions.
+- **Talk:** text, file upload, speech output, and Realtime voice session.
+- **Navigation:** responsive desktop rail, complete mobile drawer, and module search with `Ctrl/⌘ + K`.
+- **PWA:** shell and same-origin assets may reopen offline. Authenticated API responses are not cached.
+- **Accessibility/performance:** reduced-motion support, API fallback visuals when WebGL is unavailable, render resolution capped for mobile GPUs, and animation pauses while the document is hidden.
 
 ## Local development
 
@@ -19,9 +20,9 @@ npm install
 npm run dev
 ```
 
-Set `VITE_ATLAS_API_URL` when the API is hosted at a non-default URL. The user must pair the browser or app with an owner code before authenticated features can load.
+Set `VITE_ATLAS_API_URL` to the API endpoint. The API remains version 1.9 while the web product is version 2.0; pair the browser with an owner code to load private data.
 
-## Android
+## Android package
 
 ```bash
 npm run build
@@ -30,4 +31,4 @@ npx cap sync android
 cd android && ./gradlew assembleDebug
 ```
 
-Android microphone permission is added in the APK workflow. Debug APKs are for testing; a release build still needs the project's release-signing policy.
+The Android workflow adds microphone permission for Realtime voice. Debug APKs are for testing; release distribution requires the project's release-signing policy.

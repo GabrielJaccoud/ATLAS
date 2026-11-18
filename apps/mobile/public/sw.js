@@ -1,4 +1,4 @@
-const CACHE = "atlas-web-v3";
+const CACHE = "atlas-web-v4";
 const SHELL = ["/", "/manifest.webmanifest", "/atlas-icon.svg"];
 
 self.addEventListener("install", (event) => {

@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { atlasFetch, loadConfig, pairOwner } from "./api";
 import { RealtimeHandle, startRealtimeVoice } from "./realtime";
 import "./design-system.css";
 import "./styles.css";
+
+const AtlasScene3D = React.lazy(() => import("./AtlasScene3D"));
 
 type Status = {
   version?: string;
@@ -412,9 +414,9 @@ function App() {
         : active === "Pesquisa" || active === "Mundos" || active === "Laboratório" || active === "Ciência"
           ? "researching"
           : "ready";
-    return (
+    const trigger = (
       <button
-        className={`atlas-core voice-core ${compact ? "compact" : ""}`}
+        className={`atlas-core voice-core ${compact ? "compact" : "core-trigger"}`}
         data-state={contextualState}
         aria-label={liveVoice ? "Encerrar conversa por voz com ATLAS" : "Conversar com ATLAS por voz"}
         aria-pressed={liveVoice}
@@ -422,6 +424,16 @@ function App() {
       >
         <span className="core-mark">A</span>
       </button>
+    );
+    if (compact) return trigger;
+    return (
+      <div className="atlas-core-stage">
+        <Suspense fallback={<div className="atlas-scene-loading" />}>
+          <AtlasScene3D state={contextualState} />
+        </Suspense>
+        {trigger}
+        <span className="core-state-label">{liveVoice ? "Realtime ativo" : voiceState === "ready" ? "Atlas Core" : voiceState}</span>
+      </div>
     );
   }
 
@@ -431,7 +443,7 @@ function App() {
         return (
           <>
             <SectionHeader
-              eyebrow="Command Center"
+              eyebrow="Web 3D 3.0 · Command Center"
               title="O que merece sua atenção agora."
               description="Situação do sistema, contexto e prioridades em uma única visão."
             />
@@ -540,6 +552,7 @@ function App() {
           <>
             <SectionHeader eyebrow="Possible Worlds" title="Mundos" description="Modelos concorrentes, probabilidades e o que pode distingui-los." />
             {worldError && <div className="notice atlas-surface">{worldError}</div>}
+            {worldPrograms.length > 0 && <div className="worlds-3d-panel atlas-surface"><div className="worlds-3d-copy"><span className="eyebrow">Possible Worlds · spatial view</span><h3>Modelos em relação.</h3><p>Uma leitura espacial dos modelos do programa selecionado. As probabilidades seguem discriminadas nos cartões abaixo.</p></div><Suspense fallback={<div className="atlas-scene-loading" />}><AtlasScene3D mode="worlds" state="researching" nodes={worldPrograms[0].worlds.map((possibleWorld) => ({ id: possibleWorld.world_id, label: possibleWorld.title, weight: possibleWorld.prior, tone: possibleWorld.epistemic_label.toLowerCase().includes("unknown") ? "cyan" : possibleWorld.epistemic_label.toLowerCase().includes("conventional") ? "blue" : "gold" }))} /></Suspense></div>}
             <div className="world-list">
               {worldPrograms.map((program) => (
                 <div className="world-program atlas-surface" key={program.program_id}>
@@ -617,7 +630,7 @@ function App() {
             <SectionHeader eyebrow="Personal Intelligence" title="My World" description="Projetos, pessoas, organizações, ativos e relações." />
             <div className="hero-command atlas-surface">
               <div className="hero-copy"><span className="eyebrow">Knowledge Graph</span><h3>{world.nodes.length} nós · {world.edges.length} relações</h3><p>Cadastre elementos do seu mundo e acompanhe os vínculos salvos na API.</p></div>
-              <div className="mini-orbit" />
+              <Suspense fallback={<div className="atlas-scene-loading" />}><AtlasScene3D mode="network" state="researching" nodes={world.nodes.map((node) => ({ id: node.node_id, label: node.name, tone: node.kind === "person" ? "gold" : node.kind === "organization" ? "blue" : "cyan" }))} edges={world.edges.map((edge) => ({ source: edge.source, target: edge.target, weight: edge.weight }))} className="my-world-scene" /></Suspense>
             </div>
             <div className="form-panel atlas-surface"><h3>Adicionar ao My World</h3><div className="form-row"><input value={worldNodeName} onChange={(event) => setWorldNodeName(event.target.value)} placeholder="Nome de projeto, pessoa, organização ou ativo" /><button className="primary" disabled={busy || !worldNodeName.trim()} onClick={() => void runAction<{ name: string }>("/world/nodes", { kind: "project", name: worldNodeName.trim(), attributes: {} }, (node) => `Adicionado ao My World: ${node.name}`)}>Adicionar nó</button></div></div>
             {world.nodes.length > 0 && <div className="cards-grid">{world.nodes.map((node) => <article className="feature-card atlas-surface" key={node.node_id}><span>{node.kind}</span><strong>{node.name}</strong><small>{node.node_id}</small></article>)}</div>}
@@ -649,7 +662,7 @@ function App() {
       <aside className="sidebar atlas-surface">
         <div className="brand">
           <div className="brand-symbol">A</div>
-          <div><strong>ATLAS</strong><span>1.9</span></div>
+          <div><strong>ATLAS</strong><span>2.0</span></div>
         </div>
         <nav className="side-nav">
           {navigation.map((item) => (
@@ -683,7 +696,7 @@ function App() {
         <section className="screen">{renderScreen()}</section>
       </main>
 
-      {menuOpen && <><button className="menu-backdrop" aria-label="Fechar menu" onClick={() => setMenuOpen(false)} /><aside className="module-drawer atlas-surface" aria-label="Todos os módulos"><div className="drawer-heading"><div><span className="eyebrow">ATLAS 1.9</span><h2>Módulos</h2></div><button className="secondary" onClick={() => setMenuOpen(false)}>Fechar</button></div><nav>{navigation.map((item) => <button key={item} className={active === item ? "active" : ""} onClick={() => goTo(item)}>{item}<span>›</span></button>)}</nav></aside></>}
+      {menuOpen && <><button className="menu-backdrop" aria-label="Fechar menu" onClick={() => setMenuOpen(false)} /><aside className="module-drawer atlas-surface" aria-label="Todos os módulos"><div className="drawer-heading"><div><span className="eyebrow">ATLAS 2.0</span><h2>Módulos</h2></div><button className="secondary" onClick={() => setMenuOpen(false)}>Fechar</button></div><nav>{navigation.map((item) => <button key={item} className={active === item ? "active" : ""} onClick={() => goTo(item)}>{item}<span>›</span></button>)}</nav></aside></>}
 
       {commandOpen && <div className="command-overlay" role="dialog" aria-modal="true" aria-label="Buscar módulo" onMouseDown={(event) => { if (event.target === event.currentTarget) setCommandOpen(false); }}><div className="command-dialog atlas-surface"><input autoFocus value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} placeholder="Buscar um módulo do ATLAS…" onKeyDown={(event) => { if (event.key === "Enter" && visibleCommands[0]) goTo(visibleCommands[0]); }} /><div className="command-results">{visibleCommands.map((item) => <button key={item} onClick={() => goTo(item)}>{item}<span>↵</span></button>)}{visibleCommands.length === 0 && <p>Nenhum módulo corresponde à busca.</p>}</div><small>Pressione Esc para fechar · Enter para abrir</small></div></div>}
 

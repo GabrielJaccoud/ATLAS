@@ -587,3 +587,19 @@ A interface precisa responder:
 **O que pode ser feito agora?**
 
 Se uma tela não responde a pelo menos uma dessas perguntas, provavelmente não precisa existir.
+
+---
+
+## 19. ATLAS Web 2.0 · Web 3D 3.0
+
+Web 3D is an interactive spatial layer inside the operational interface, not a replacement for readable data or navigation.
+
+- **Atlas Core:** central metallic/glass nucleus, orbital axes, network points, and restrained volumetric light.
+- **Possible Worlds:** hypotheses orbit a shared center; labels and probability values remain available as normal interface content.
+- **My World:** saved nodes and relations form a rotatable knowledge constellation.
+- **State language:** cyan/blue indicates research and computation; gold remains the product identity; amber/coral marks elevated risk.
+- **Input:** pointer movement gently changes the camera field; touch remains available to operate the surrounding controls.
+- **Performance:** lazy-load the 3D layer, cap device pixel ratio, pause when the tab is hidden, and use a clear CSS fallback when WebGL is unavailable.
+- **Motion:** support `prefers-reduced-motion`; reduced-motion mode renders one stable frame.
+
+The scene should deepen the sense of scale and activity while keeping the primary action, labels, evidence, and probabilities in the accessible HTML interface.
