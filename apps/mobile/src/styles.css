@@ -75,3 +75,17 @@ article span { color:#8f8f98; font-size:.85rem; }
   0%,100% { transform: scale(1); filter: brightness(1); }
   50% { transform: scale(1.04); filter: brightness(1.2); }
 }
+
+
+.top-actions { display:flex; gap:10px; align-items:center; }
+.install { padding:8px 12px; font-size:.75rem; }
+.connection h3 { margin:8px 0 0; font-weight:500; }
+.pair-row { display:grid; grid-template-columns:1fr auto; gap:10px; margin-top:14px; }
+.pair-row input { letter-spacing:.16em; font-size:1.05rem; }
+
+@media (max-width:760px) {
+  .top-actions { gap:6px; }
+  .install { padding:7px 10px; }
+  .pair-row { grid-template-columns:1fr; }
+  .actions { align-items:stretch; flex-wrap:wrap; }
+}
