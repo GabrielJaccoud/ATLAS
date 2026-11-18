@@ -32,6 +32,17 @@ def _route_payload(route) -> dict[str, object]:
     }
 
 
+def _fallback_text(message: str, route_data: dict[str, object], reason: str) -> str:
+    ministries = ", ".join(route_data.get("primary_ministries", ()) or ()) or "geral"
+    return (
+        "Recebi sua mensagem e ela foi registrada no ATLAS. "
+        f"Neste momento o provedor de IA está indisponível ({reason}), então não vou fingir "
+        "uma resposta generativa que não foi produzida. "
+        f"A solicitação foi roteada para: {ministries}. "
+        "Tente novamente em instantes ou use o modo local quando ele estiver configurado."
+    )
+
+
 async def _ollama_chat(message: str, instructions: str) -> str:
     if not settings.ollama_url:
         raise RuntimeError("Ollama is not configured.")
@@ -100,15 +111,22 @@ async def atlas_chat(message: str, context: dict[str, object] | None = None) -> 
         f"Primary ministries for this request: {', '.join(route.primary_ministries) or 'general'}."
     )
 
+    openai_error: str | None = None
+
     if settings.openai_api_key:
-        text, response_id = await _openai_chat(message, instructions)
-        return {
-            "mode": "cloud",
-            "provider": "openai",
-            "text": text,
-            "response_id": response_id,
-            "route": route_data,
-        }
+        try:
+            text, response_id = await _openai_chat(message, instructions)
+            return {
+                "mode": "cloud",
+                "provider": "openai",
+                "text": text,
+                "response_id": response_id,
+                "route": route_data,
+            }
+        except httpx.HTTPStatusError as exc:
+            openai_error = f"OpenAI HTTP {exc.response.status_code}"
+        except httpx.HTTPError:
+            openai_error = "OpenAI network error"
 
     if settings.ollama_url:
         try:
@@ -118,19 +136,18 @@ async def atlas_chat(message: str, context: dict[str, object] | None = None) -> 
                 "provider": "ollama",
                 "text": text,
                 "route": route_data,
+                "fallback_from": openai_error,
             }
         except (httpx.HTTPError, RuntimeError):
             pass
 
+    reason = openai_error or "nenhum modelo generativo configurado"
     return {
         "mode": "local",
         "provider": "deterministic",
-        "text": (
-            "ATLAS está operacional, mas nenhum modelo de linguagem foi configurado. "
-            "A missão foi registrada e roteada internamente. Configure OpenAI no servidor "
-            "ou Ollama em uma instalação local para conversação generativa."
-        ),
+        "text": _fallback_text(message, route_data, reason),
         "route": route_data,
+        "provider_error": openai_error,
     }
 
 
