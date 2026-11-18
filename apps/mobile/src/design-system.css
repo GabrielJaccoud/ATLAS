@@ -1,0 +1,108 @@
+:root {
+  --atlas-obsidian-950: #07080a;
+  --atlas-graphite-900: #0e1116;
+  --atlas-graphite-800: #151922;
+  --atlas-graphite-700: #1d2430;
+  --atlas-ivory: #f2eee6;
+  --atlas-silver: #9ca3af;
+  --atlas-gold: #c9a96a;
+  --atlas-blue: #4da3ff;
+  --atlas-cyan: #57e6d9;
+  --atlas-amber: #e0a34a;
+  --atlas-critical: #e46f61;
+  --atlas-jade: #68c99a;
+
+  --atlas-radius-sm: 12px;
+  --atlas-radius-md: 18px;
+  --atlas-radius-lg: 26px;
+  --atlas-radius-xl: 34px;
+
+  --atlas-border: rgba(255,255,255,.08);
+  --atlas-border-strong: rgba(255,255,255,.14);
+  --atlas-surface: rgba(21,25,34,.72);
+  --atlas-surface-strong: rgba(14,17,22,.92);
+
+  --atlas-shadow-soft: 0 28px 80px rgba(0,0,0,.28);
+  --atlas-shadow-core: 0 0 90px rgba(77,163,255,.16), 0 0 160px rgba(87,230,217,.08);
+
+  --atlas-fast: 160ms;
+  --atlas-medium: 320ms;
+  --atlas-slow: 720ms;
+
+  color: var(--atlas-ivory);
+  background: var(--atlas-obsidian-950);
+}
+
+.atlas-surface {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.008)),
+    var(--atlas-surface);
+  border: 1px solid var(--atlas-border);
+  border-radius: var(--atlas-radius-lg);
+  box-shadow: var(--atlas-shadow-soft);
+  backdrop-filter: blur(22px) saturate(120%);
+}
+
+.atlas-core {
+  position: relative;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 32%, rgba(242,238,230,.95) 0 2%, transparent 7%),
+    radial-gradient(circle at 44% 40%, rgba(87,230,217,.48), transparent 26%),
+    radial-gradient(circle at 50% 54%, rgba(77,163,255,.30), transparent 48%),
+    radial-gradient(circle at 50% 50%, #121721 0 45%, #080a0e 72%, #050608 100%);
+  border: 1px solid rgba(201,169,106,.34);
+  box-shadow: var(--atlas-shadow-core);
+}
+
+.atlas-core::before,
+.atlas-core::after {
+  content: "";
+  position: absolute;
+  inset: -14%;
+  border-radius: 50%;
+  border: 1px solid rgba(77,163,255,.18);
+  pointer-events: none;
+}
+
+.atlas-core::after {
+  inset: -29%;
+  border-color: rgba(87,230,217,.10);
+}
+
+.atlas-core[data-state="listening"] {
+  animation: atlas-breathe 1.2s ease-in-out infinite;
+  box-shadow: 0 0 110px rgba(87,230,217,.30), 0 0 190px rgba(77,163,255,.14);
+}
+
+.atlas-core[data-state="thinking"]::before {
+  animation: atlas-orbit 2.8s linear infinite;
+  border-top-color: var(--atlas-cyan);
+}
+
+.atlas-core[data-state="alert"] {
+  box-shadow: 0 0 110px rgba(224,163,74,.26);
+  border-color: rgba(224,163,74,.55);
+}
+
+.atlas-core[data-state="critical"] {
+  box-shadow: 0 0 120px rgba(228,111,97,.30);
+  border-color: rgba(228,111,97,.62);
+}
+
+@keyframes atlas-breathe {
+  0%,100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.035); filter: brightness(1.12); }
+}
+
+@keyframes atlas-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
