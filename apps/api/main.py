@@ -9,10 +9,14 @@ from pydantic import BaseModel, Field
 from atlas.councils import CouncilCadence, CouncilScheduler
 from atlas.executive import Mission
 from atlas.modes import GlobalMode
+from atlas.events import EventPriority, EventRecord
+from atlas.governance import GovernanceNetwork, GovernanceRequest
+from atlas.support import SupportCell, SupportRequest, SupportService
 from atlas.opportunities import Opportunity
 from atlas.research import ResearchStatus
 
 from .db import get_record, init_db, list_record_dicts, save_record
+from .ops import export_backup, metrics_snapshot, write_backup_file
 from .services import (
     atlas_chat,
     mode_controller,
@@ -83,6 +87,35 @@ class OpportunityRequest(BaseModel):
     requirements: list[str]
     value_score: float
     deadline_urgency: float = 0.0
+
+
+class EventRequest(BaseModel):
+    event_type: str
+    source: str
+    payload: dict[str, object] = Field(default_factory=dict)
+    priority: EventPriority = EventPriority.NORMAL
+    tags: list[str] = Field(default_factory=list)
+
+
+class GovernanceRouteRequest(BaseModel):
+    source: str
+    purpose: str
+    categories: list[str]
+    risk: float = 0.0
+    external_action: bool = False
+    irreversible: bool = False
+
+
+class SupportPlanRequest(BaseModel):
+    requester: str
+    symptom: str
+    desired_outcome: str
+    requested_services: list[SupportService]
+    severity: float = 0.0
+    requires_code_change: bool = False
+    requires_new_tool: bool = False
+    touches_constitution: bool = False
+    external_effect: bool = False
 
 
 @app.on_event("startup")
@@ -300,6 +333,101 @@ async def upload_artifact(file: UploadFile = File(...)) -> dict[str, object]:
         data=result,
     )
     return result
+
+
+
+@app.post("/events", dependencies=[Depends(require_token)])
+def publish_event(request: EventRequest) -> dict[str, object]:
+    event = EventRecord(
+        event_id=f"event:{uuid4().hex[:12]}",
+        event_type=request.event_type,
+        source=request.source,
+        payload=request.payload,
+        priority=request.priority,
+        tags=tuple(request.tags),
+    )
+    data = {
+        "event_id": event.event_id,
+        "event_type": event.event_type,
+        "source": event.source,
+        "payload": event.payload,
+        "priority": int(event.priority),
+        "tags": list(event.tags),
+        "created_at": event.created_at,
+    }
+    save_record("event", event.event_id, title=event.event_type, data=data)
+    return data
+
+
+@app.get("/events", dependencies=[Depends(require_token)])
+def list_events() -> list[dict[str, object]]:
+    return [x["data"] for x in list_record_dicts("event")]
+
+
+@app.post("/governance/route", dependencies=[Depends(require_token)])
+def governance_route(request: GovernanceRouteRequest) -> dict[str, object]:
+    response = GovernanceNetwork().route(GovernanceRequest(
+        request_id=f"governance:{uuid4().hex[:12]}",
+        source=request.source,
+        purpose=request.purpose,
+        categories=tuple(request.categories),
+        risk=request.risk,
+        external_action=request.external_action,
+        irreversible=request.irreversible,
+    ))
+    data = {
+        "request_id": response.request_id,
+        "routed_to": [x.value for x in response.routed_to],
+        "human_approval_required": response.human_approval_required,
+        "rationale": list(response.rationale),
+    }
+    save_record("governance", response.request_id, title=request.purpose, data=data)
+    return data
+
+
+@app.post("/support/plan", dependencies=[Depends(require_token)])
+def support_plan(request: SupportPlanRequest) -> dict[str, object]:
+    result = SupportCell().plan(SupportRequest(
+        request_id=f"support:{uuid4().hex[:12]}",
+        requester=request.requester,
+        symptom=request.symptom,
+        desired_outcome=request.desired_outcome,
+        requested_services=tuple(request.requested_services),
+        severity=request.severity,
+        requires_code_change=request.requires_code_change,
+        requires_new_tool=request.requires_new_tool,
+        touches_constitution=request.touches_constitution,
+        external_effect=request.external_effect,
+    ))
+    data = {
+        "request_id": result.request_id,
+        "services": [x.value for x in result.services],
+        "route_to_codex": result.route_to_codex,
+        "route_to_guardian": result.route_to_guardian,
+        "route_to_ria": result.route_to_ria,
+        "sandbox_required": result.sandbox_required,
+        "human_approval_required": result.human_approval_required,
+        "steps": list(result.steps),
+    }
+    save_record("support_request", result.request_id, title=request.symptom, data=data)
+    return data
+
+
+@app.get("/metrics", dependencies=[Depends(require_token)])
+def metrics() -> dict[str, object]:
+    return metrics_snapshot()
+
+
+@app.get("/backup", dependencies=[Depends(require_token)])
+def backup() -> dict[str, object]:
+    return export_backup()
+
+
+@app.post("/backup/write", dependencies=[Depends(require_token)])
+def backup_write() -> dict[str, object]:
+    path = write_backup_file()
+    save_record("backup", f"backup:{uuid4().hex[:12]}", title="logical-backup", data={"path": path})
+    return {"path": path}
 
 
 @app.get("/records/{kind}", dependencies=[Depends(require_token)])
