@@ -204,7 +204,7 @@ async def _anthropic_review_chat(instructions: str, message: str) -> str:
     ]
     if not text_parts:
         raise RuntimeError("Claude returned an unexpected response.")
-    return "\\n".join(text_parts).strip()
+    return "\n".join(text_parts).strip()
 
 async def _compatible_review_chat(
     *, provider: str, base_url: str, api_key: str, model: str, instructions: str, message: str,
