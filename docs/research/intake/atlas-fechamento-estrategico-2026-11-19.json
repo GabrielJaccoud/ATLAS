@@ -1,0 +1,77 @@
+{
+  "batch_id": "atlas-fechamento-estrategico-2026-11-19",
+  "producer": "ATLAS Fechamento Estratégico",
+  "generated_at": "2026-11-19T18:57:17-03:00",
+  "findings": [
+    {
+      "source_id": "https://marine.weather.gov/product.php?format=TXT&glossary=1&issuedby=TDF&product=DAY&site=PPG&version=1",
+      "title": "NOAA registra Kp 5 e condição G1",
+      "summary": "Boletim NOAA/NWS de 19/11 12h30 UTC registra Kp máximo observado de 5 nas 24 horas anteriores, frente ao valor 3 do boletim anterior. Os períodos de observação se sobrepõem. Não demonstra efeitos locais nem conexões causais extraordinárias.",
+      "source_url": "https://marine.weather.gov/product.php?format=TXT&glossary=1&issuedby=TDF&product=DAY&site=PPG&version=1",
+      "published_at": "2026-11-19T12:30:00Z",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": ["space_weather", "NOAA", "Kp", "G1", "instrumental"],
+      "confidence": 0.96,
+      "priority": 0.75,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "https://en.yna.co.kr/view/AEN20261119003951320",
+      "title": "Exportações sul-coreanas ultrapassam US$ 1 trilhão",
+      "summary": "Yonhap reporta anúncio do ministério sul-coreano. Semicondutores representam cerca de 43% das exportações de janeiro a outubro. Confirma concentração comercial, não crise futura inevitável. Dados administrativos não foram auditados independentemente nesta execução.",
+      "source_url": "https://en.yna.co.kr/view/AEN20261119003951320",
+      "published_at": "2026-11-19T15:39:00+09:00",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": ["ARO-03"],
+      "tags": ["semiconductors", "AI", "exports", "South_Korea", "concentration"],
+      "confidence": 0.93,
+      "priority": 0.88,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.reuters.com/business/energy/drone-attacks-nearly-halve-russias-november-oil-refining-sources-say-2026-11-18/",
+      "title": "Queda pontual no processamento de refinarias russas",
+      "summary": "Reuters consultou duas fontes setoriais que estimam redução de cerca de 45% desde o fim de outubro. Média mensal teria caído apenas 5% a 10%. Sem confirmação por imagens SAR independentes ou auditoria operacional das unidades.",
+      "source_url": "https://www.reuters.com/business/energy/drone-attacks-nearly-halve-russias-november-oil-refining-sources-say-2026-11-18/",
+      "published_at": "2026-11-18",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": ["ARO-02"],
+      "tags": ["Russia", "refining", "drones", "energy", "supply"],
+      "confidence": 0.77,
+      "priority": 0.90,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.reuters.com/business/aerospace-defense/us-plans-announce-cause-outage-that-led-nationwide-ground-stop-faa-says-2026-11-19/",
+      "title": "FAA suspende instalação de roteadores durante investigação",
+      "summary": "Reuters relata suspensão de instalações e testes adicionais após paralisação aérea. Confirma medidas de contenção, mas causa raiz ainda pendente. Sabotagem não demonstrada.",
+      "source_url": "https://www.reuters.com/business/aerospace-defense/us-plans-announce-cause-outage-that-led-nationwide-ground-stop-faa-says-2026-11-19/",
+      "published_at": "2026-11-19",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": ["FAA", "infrastructure", "resilience", "routers", "failure_analysis"],
+      "confidence": 0.91,
+      "priority": 0.85,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.reuters.com/business/energy/asian-gasoline-margin-plunges-over-three-year-lows-ample-supplies-2026-11-19/",
+      "title": "Margens asiáticas de gasolina recuam com oferta abundante",
+      "summary": "Reuters informa margem de gasolina de aproximadamente US$ 2,67 por barril sobre Brent, mínima desde outubro de 2023. Evidência de pressão baixista regional, sem comprovar excedente uniforme em todos os combustíveis e mercados.",
+      "source_url": "https://www.reuters.com/business/energy/asian-gasoline-margin-plunges-over-three-year-lows-ample-supplies-2026-11-19/",
+      "published_at": "2026-11-19",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": ["ARO-01"],
+      "tags": ["gasoline", "refining_margins", "Asia", "oil", "supply"],
+      "confidence": 0.88,
+      "priority": 0.82,
+      "evidence_class": "secondary_source"
+    }
+  ]
+}
