@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     artifact_dir: str = "./data/artifacts"
     cors_origins: str = "*"
     publication_email: str = ""
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_use_tls: bool = True
 
     openai_api_key: str | None = None
     openai_model: str = "gpt-6-luna"

@@ -26,7 +26,7 @@ The export gate checks completeness and evidence classification. It does not cer
 
 Portuguese and English versions are separate, parallel manuscripts. Each carries the same evidence class and scope. The English text requires human review before external submission.
 
-The first web workflow uses the browser's print-to-PDF action. The e-mail button opens a user-controlled compose flow addressed to the private recipient configured in the API and reminds the author to attach the saved PDF. The current workflow does not transmit a file or send a message automatically; automated delivery requires a configured sender service.
+The API generates separate Portuguese and English PDFs for direct download. From an export-ready record, the owner can also send both attachments to the privately configured recipient from ATLAS. Direct sending requires SMTP sender credentials in the service's private environment; the interface keeps that action disabled until the sender is configured. Sending is a deliberate user action, not an automatic consequence of passing the publication gate.
 
 ## Record format
 

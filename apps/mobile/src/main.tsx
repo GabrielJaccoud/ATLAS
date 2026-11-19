@@ -82,7 +82,7 @@ type ScientificWork = {
   created_at: string;
 };
 
-type PublicationDeliverySettings = { email: string };
+type PublicationDeliverySettings = { email: string; can_send_email: boolean };
 
 type ScientificWorkForm = Omit<ScientificWork, "publication_id" | "export_ready" | "missing_requirements" | "claim_classification" | "review_required" | "created_at" | "references"> & { referencesText: string };
 
@@ -212,7 +212,7 @@ function App() {
   const [events, setEvents] = useState<AtlasEvent[]>([]);
   const [researchItems, setResearchItems] = useState<ResearchItem[]>([]);
   const [scientificWorks, setScientificWorks] = useState<ScientificWork[]>([]);
-  const [deliverySettings, setDeliverySettings] = useState<PublicationDeliverySettings>({ email: "" });
+  const [deliverySettings, setDeliverySettings] = useState<PublicationDeliverySettings>({ email: "", can_send_email: false });
   const [publicationForm, setPublicationForm] = useState<ScientificWorkForm>({
     author_name: "Gabriel Jaccoud",
     ministry_id: "research",
@@ -392,42 +392,38 @@ function App() {
     }
   }
 
-  function printScientificWork(work: ScientificWork, language: "pt" | "en") {
+  async function downloadScientificWork(work: ScientificWork, language: "pt" | "en") {
     if (!work.export_ready) return;
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      setReply("Permita a abertura da janela de impressão para salvar o PDF.");
-      return;
+    const config = loadConfig();
+    try {
+      const response = await fetch(`${config.baseUrl}/publications/${encodeURIComponent(work.publication_id)}/pdf?language=${language}`, {
+        headers: config.token ? { Authorization: `Bearer ${config.token}` } : {},
+      });
+      if (!response.ok) throw new Error("O ATLAS não conseguiu gerar o PDF.");
+      const pdf = await response.blob();
+      const objectUrl = URL.createObjectURL(pdf);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `ATLAS-${language}-${work.publication_id.replaceAll(":", "-")}.pdf`;
+      link.click();
+      URL.revokeObjectURL(objectUrl);
+      setReply(`PDF ${language.toUpperCase()} baixado pelo ATLAS.`);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "Falha ao baixar o PDF.");
     }
-    const english = language === "en";
-    const sections = english
-      ? [["Abstract", work.abstract_en], ["Research question", work.question_en], ["Assumptions and model", work.assumptions_en], ["Methodology", work.methodology_en], [work.work_type === "mathematical_result" ? "Theorem, proof and result" : "Results", work.results_en], ["Predictions", work.predictions_en], ["Uncertainty", work.uncertainty_en], ["Limitations", work.limitations_en]]
-      : [["Resumo", work.abstract_pt], ["Pergunta de pesquisa", work.question_pt], ["Premissas e modelo", work.assumptions_pt], ["Metodologia", work.methodology_pt], [work.work_type === "mathematical_result" ? "Teorema, demonstração e resultado" : "Resultados", work.results_pt], ["Previsões", work.predictions_pt], ["Incertezas", work.uncertainty_pt], ["Limitações", work.limitations_pt]];
-    const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => {
-      switch (char) {
-        case "&": return "&amp;";
-        case "<": return "&lt;";
-        case ">": return "&gt;";
-        case '"': return "&quot;";
-        case "'": return "&#39;";
-        default: return char;
-      }
-    });
-    const label = work.claim_classification.replaceAll("_", " ");
-    printWindow.document.open();
-    printWindow.document.write(`<!doctype html><html lang="${english ? "en" : "pt-BR"}"><head><meta charset="utf-8"><title>${escapeHtml(english ? work.title_en : work.title_pt)}</title><style>body{font:12pt/1.6 Georgia,serif;color:#17191d;max-width:760px;margin:48px auto;padding:0 24px}h1{font:700 25pt/1.2 Arial,sans-serif}h2{font:700 14pt Arial,sans-serif;margin:26px 0 6px}.meta{font:10pt Arial,sans-serif;color:#59616b;border-bottom:1px solid #c8ccd1;padding-bottom:14px}.status{display:inline-block;border:1px solid #9b7b42;border-radius:20px;padding:4px 10px;font:9pt Arial,sans-serif;text-transform:uppercase;letter-spacing:.08em}p{white-space:pre-wrap}.refs{font-size:10pt}@media print{body{margin:0 auto;padding:0}}</style></head><body><span class="status">${escapeHtml(label)}</span><h1>${escapeHtml(english ? work.title_en : work.title_pt)}</h1><div class="meta">${escapeHtml(work.author_name)} · ${escapeHtml(work.ministry_id)} · ${english ? "Evidence status" : "Nível de evidência"}: ${escapeHtml(label)}</div>${sections.map(([heading, body]) => `<section><h2>${escapeHtml(heading)}</h2><p>${escapeHtml(body || "—")}</p></section>`).join("")}<section><h2>${english ? "References" : "Referências"}</h2><ol class="refs">${work.references.map((reference) => `<li>${escapeHtml(reference)}</li>`).join("")}</ol></section><p class="meta">${english ? "AI-assisted drafting must be reviewed by the responsible author before external submission." : "O texto com apoio de IA deve ser revisado pelo autor responsável antes de submissão externa."}</p><script>window.onload=()=>window.print()</script></body></html>`);
-    printWindow.document.close();
   }
 
-  function shareScientificWork(work: ScientificWork) {
-    const subject = `ATLAS — ${work.title_pt}`;
-    const body = `Estou compartilhando o trabalho científico “${work.title_pt}” e anexarei os PDFs em português e inglês após salvá-los pelo ATLAS.`;
-    if (!deliverySettings.email) {
-      setReply("O destinatário de e-mail ainda não está configurado no ATLAS.");
-      return;
+  async function emailScientificWork(work: ScientificWork) {
+    if (!work.export_ready || !deliverySettings.can_send_email) return;
+    setBusy(true);
+    try {
+      await atlasFetch(`/publications/${encodeURIComponent(work.publication_id)}/email`, { method: "POST" });
+      setReply(`E-mail enviado para ${deliverySettings.email} com os PDFs em português e inglês anexados.`);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "O ATLAS não conseguiu enviar o e-mail.");
+    } finally {
+      setBusy(false);
     }
-    const url = `mailto:${encodeURIComponent(deliverySettings.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   function goTo(screen: ScreenId) {
@@ -785,7 +781,8 @@ function App() {
               <button className="primary" disabled={busy || !connected || publicationForm.title_pt.trim().length < 8} onClick={() => void saveScientificWork()}>Registrar e avaliar evidências</button>
             </div>
             <div className="section-row"><h3>Trabalhos registrados</h3><button className="secondary" onClick={() => void refresh()}>Atualizar</button></div>
-            {scientificWorks.length ? <div className="publication-list">{scientificWorks.map((work) => <article className="publication-entry atlas-surface" key={work.publication_id}><div className="publication-entry-heading"><div><span className="eyebrow">{work.ministry_id} · {work.work_type.replaceAll("_", " ")}</span><h3>{work.title_pt}</h3><p>{work.title_en || "English title pending"}</p></div><span className={`evidence-badge ${work.export_ready ? "ready" : "internal"}`}>{work.export_ready ? "Apto para revisão e PDF" : "Pesquisa interna"}</span></div><p>{work.claim_classification.replaceAll("_", " ")}{work.review_required ? " · revisão humana pendente" : ""}</p>{!work.export_ready && <details><summary>Requisitos pendentes ({work.missing_requirements.length})</summary><ul>{work.missing_requirements.map((item) => <li key={item}>{item.replaceAll("_", " ")}</li>)}</ul></details>}{work.export_ready && <div className="publication-actions"><button className="secondary" onClick={() => printScientificWork(work, "pt")}>Salvar PDF · Português</button><button className="secondary" onClick={() => printScientificWork(work, "en")}>Save PDF · English</button><button className="secondary" onClick={() => shareScientificWork(work)}>Preparar e-mail</button></div>}</article>)}</div> : <div className="empty-state atlas-surface">As submissões dos ministérios aparecerão aqui. Nenhuma hipótese será promovida automaticamente a artigo.</div>}
+            {!deliverySettings.can_send_email && <p className="publication-note">Os PDFs podem ser baixados pelo ATLAS. O envio direto com anexos será ativado quando o remetente de e-mail seguro estiver configurado.</p>}
+            {scientificWorks.length ? <div className="publication-list">{scientificWorks.map((work) => <article className="publication-entry atlas-surface" key={work.publication_id}><div className="publication-entry-heading"><div><span className="eyebrow">{work.ministry_id} · {work.work_type.replaceAll("_", " ")}</span><h3>{work.title_pt}</h3><p>{work.title_en || "English title pending"}</p></div><span className={`evidence-badge ${work.export_ready ? "ready" : "internal"}`}>{work.export_ready ? "Apto para revisão e PDF" : "Pesquisa interna"}</span></div><p>{work.claim_classification.replaceAll("_", " ")}{work.review_required ? " · revisão humana pendente" : ""}</p>{!work.export_ready && <details><summary>Requisitos pendentes ({work.missing_requirements.length})</summary><ul>{work.missing_requirements.map((item) => <li key={item}>{item.replaceAll("_", " ")}</li>)}</ul></details>}{work.export_ready && <div className="publication-actions"><button className="secondary" onClick={() => void downloadScientificWork(work, "pt")}>Baixar PDF · Português</button><button className="secondary" onClick={() => void downloadScientificWork(work, "en")}>Baixar PDF · English</button><button className="secondary" disabled={!deliverySettings.can_send_email || busy} onClick={() => void emailScientificWork(work)}>Enviar os dois PDFs por e-mail</button></div>}</article>)}</div> : <div className="empty-state atlas-surface">As submissões dos ministérios aparecerão aqui. Nenhuma hipótese será promovida automaticamente a artigo.</div>}
           </>
         );
       case "Pesquisa":

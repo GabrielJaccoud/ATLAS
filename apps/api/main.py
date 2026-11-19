@@ -1,14 +1,26 @@
 from __future__ import annotations
 
 import hmac
+import smtplib
+import ssl
+from email.message import EmailMessage
+from io import BytesIO
 from typing import Literal
 from datetime import datetime, timezone
+from xml.sax.saxutils import escape
 
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
 from atlas.councils import CouncilCadence, CouncilScheduler
 from atlas.executive import Mission
@@ -129,11 +141,101 @@ class ScientificWorkRequest(BaseModel):
 
 
 @app.get("/publication-delivery-settings", dependencies=[Depends(require_token)])
-def publication_delivery_settings() -> dict[str, str]:
+def publication_delivery_settings() -> dict[str, object]:
     """Return the owner's private, preconfigured destinations for sharing PDFs."""
     return {
         "email": settings.publication_email,
+        "can_send_email": bool(settings.publication_email and settings.smtp_host and settings.smtp_username and settings.smtp_password),
     }
+
+
+def build_scientific_work_pdf(work: dict[str, object], language: Literal["pt", "en"]) -> bytes:
+    english = language == "en"
+    get = lambda key: str(work.get(f"{key}_{language}") or "")
+    title = get("title")
+    evidence = str(work.get("claim_classification", "")).replace("_", " ")
+    sections = (
+        [("Abstract", get("abstract")), ("Research question and origin", get("question")),
+         ("Assumptions and model", get("assumptions")), ("Methodology and experiments", get("methodology")),
+         ("Theorem, proof and result" if work.get("work_type") == "mathematical_result" else "Results", get("results")),
+         ("Testable predictions", get("predictions")), ("Uncertainty", get("uncertainty")),
+         ("Limitations and alternatives", get("limitations"))]
+        if english else
+        [("Resumo", get("abstract")), ("Pergunta e origem da pesquisa", get("question")),
+         ("Premissas e modelo", get("assumptions")), ("Métodos e experimentos", get("methodology")),
+         ("Teorema, demonstração e resultado" if work.get("work_type") == "mathematical_result" else "Resultados", get("results")),
+         ("Previsões testáveis", get("predictions")), ("Incertezas", get("uncertainty")),
+         ("Limitações e explicações alternativas", get("limitations"))]
+    )
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name="AtlasTitle", parent=styles["Title"], fontName="Helvetica-Bold", fontSize=21, leading=26, textColor=colors.HexColor("#20252d"), alignment=TA_CENTER, spaceAfter=12))
+    styles.add(ParagraphStyle(name="AtlasMeta", parent=styles["Normal"], fontSize=9, leading=13, textColor=colors.HexColor("#586270"), spaceAfter=14))
+    styles.add(ParagraphStyle(name="AtlasSection", parent=styles["Heading2"], fontName="Helvetica-Bold", fontSize=13, leading=17, textColor=colors.HexColor("#293446"), spaceBefore=14, spaceAfter=5))
+    styles.add(ParagraphStyle(name="AtlasBody", parent=styles["BodyText"], fontName="Helvetica", fontSize=10.5, leading=15, spaceAfter=7, splitLongWords=1))
+    buffer = BytesIO()
+    document = SimpleDocTemplate(buffer, pagesize=A4, leftMargin=23*mm, rightMargin=23*mm, topMargin=20*mm, bottomMargin=20*mm, title=title, author=str(work.get("author_name", "Gabriel Jaccoud")))
+    story = [Paragraph(escape(evidence.upper()), styles["AtlasMeta"]), Paragraph(escape(title), styles["AtlasTitle"])]
+    author = escape(str(work.get("author_name", "Gabriel Jaccoud")))
+    ministry = escape(str(work.get("ministry_id", "")))
+    evidence_label = "Evidence classification" if english else "Classificação da evidência"
+    story += [Paragraph(f"{author} · {ministry} · {evidence_label}: {escape(evidence)}", styles["AtlasMeta"]), Spacer(1, 4)]
+    for heading, body in sections:
+        story.extend([Paragraph(escape(heading), styles["AtlasSection"]), Paragraph(escape(body).replace("\n", "<br/>"), styles["AtlasBody"])])
+    references = work.get("references", [])
+    story.append(Paragraph("References" if english else "Referências", styles["AtlasSection"]))
+    for index, reference in enumerate(references if isinstance(references, list) else [], start=1):
+        story.append(Paragraph(f"{index}. {escape(str(reference))}", styles["AtlasBody"]))
+    note = "AI-assisted content must be reviewed by the responsible author before external submission." if english else "O conteúdo elaborado com apoio de IA deve ser revisado pelo autor responsável antes de submissão externa."
+    story += [Spacer(1, 14), Paragraph(escape(note), styles["AtlasMeta"])]
+    document.build(story)
+    return buffer.getvalue()
+
+
+def get_exportable_scientific_work(publication_id: str) -> dict[str, object]:
+    record = get_record("scientific_work", publication_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Scientific work not found.")
+    work = record.get("data")
+    if not isinstance(work, dict) or not work.get("export_ready"):
+        raise HTTPException(status_code=409, detail="This work has not passed the export gate.")
+    return work
+
+
+@app.get("/publications/{publication_id}/pdf", dependencies=[Depends(require_token)])
+def download_scientific_work_pdf(publication_id: str, language: Literal["pt", "en"] = "pt") -> Response:
+    work = get_exportable_scientific_work(publication_id)
+    pdf = build_scientific_work_pdf(work, language)
+    return Response(content=pdf, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="ATLAS-{language}-{publication_id.replace(":", "-")}.pdf"'})
+
+
+@app.post("/publications/{publication_id}/email", dependencies=[Depends(require_token)])
+def email_scientific_work(publication_id: str) -> dict[str, object]:
+    work = get_exportable_scientific_work(publication_id)
+    if not settings.publication_email:
+        raise HTTPException(status_code=503, detail="No recipient e-mail is configured.")
+    if not all((settings.smtp_host, settings.smtp_username, settings.smtp_password)):
+        raise HTTPException(status_code=503, detail="Direct e-mail sending is not configured in ATLAS yet.")
+    title = str(work.get("title_pt", "Trabalho científico"))
+    message = EmailMessage()
+    message["Subject"] = f"ATLAS — PDFs para revisão e exportação: {title}"
+    message["From"] = settings.smtp_from or settings.smtp_username
+    message["To"] = settings.publication_email
+    message.set_content(f"Gabriel,\n\nSeguem anexos os PDFs do trabalho científico ‘{title}’, em português e inglês.\n\nRevise os documentos antes de qualquer submissão externa.\n\nATLAS")
+    attachments = []
+    for language in ("pt", "en"):
+        pdf = build_scientific_work_pdf(work, language)
+        filename = f"ATLAS-{language}-{publication_id.replace(':', '-')}.pdf"
+        message.add_attachment(pdf, maintype="application", subtype="pdf", filename=filename)
+        attachments.append(filename)
+    try:
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=25) as server:
+            if settings.smtp_use_tls:
+                server.starttls(context=ssl.create_default_context())
+            server.login(settings.smtp_username, settings.smtp_password)
+            server.send_message(message)
+    except (OSError, smtplib.SMTPException) as error:
+        raise HTTPException(status_code=502, detail="ATLAS could not send the e-mail. Check the private SMTP configuration.") from error
+    return {"sent": True, "to": settings.publication_email, "attachments": attachments}
 
 
 def evaluate_scientific_work(data: ScientificWorkRequest) -> dict[str, object]:
