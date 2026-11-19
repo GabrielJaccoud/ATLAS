@@ -15,20 +15,29 @@ Roles are assigned across configured providers in a stable order. If only one pr
 
 ## Providers
 
-The API can use its existing OpenAI and Ollama settings plus optional OpenAI-compatible providers.
+The API can use its existing OpenAI and Ollama settings plus optional OpenAI-compatible providers and Claude through Anthropic's Messages API.
 
 | Provider | Environment variables |
 | --- | --- |
+| Claude (Anthropic API) | `ATLAS_ANTHROPIC_API_KEY`, `ATLAS_ANTHROPIC_MODEL`; optional `ATLAS_ANTHROPIC_BASE_URL` (defaults to `https://api.anthropic.com/v1`) |
 | Kimi | `ATLAS_KIMI_API_KEY`, `ATLAS_KIMI_MODEL`; optional `ATLAS_KIMI_BASE_URL` (defaults to `https://api.moonshot.ai/v1`) |
 | Qwen / Model Studio | `ATLAS_QWEN_API_KEY`, `ATLAS_QWEN_BASE_URL`, `ATLAS_QWEN_MODEL` |
 
 Keep API keys in Render environment variables. A Qwen endpoint must match the region where its key was created. The OpenAI-compatible chat endpoint is used for Kimi and Qwen.
+
+Claude API access is separate from the Claude Code CLI/SDK. Claude Code is reserved for a later, isolated software-development agent with explicit workspace permissions; a coding subscription is not treated as an API key for this review adapter.
 
 ## Data and review boundaries
 
 The owner initiates each review from a scientific work record. The full submitted text and its references are sent to whichever configured model providers receive a reviewer assignment. Review output is stored as a separate `publication_review` record. It never overwrites the source work or its evidence classification.
 
 The first version reviews only supplied text and references. It does not perform live web search, DOI resolution, article retrieval, news triage or source verification. Such checks are explicitly marked as not performed. Website content and manuscript text are treated as material to analyze, not instructions to the agents.
+
+## Multi-intelligence council and creative connectors
+
+The review-provider list is the initial model council: configured models can receive separate reviewer roles, and reports retain the model identity for each opinion. The council does not treat outputs as votes or merge disagreement into a false consensus.
+
+Creative capabilities belong in a separate ATLAS studio connector layer. Suno is the first music candidate through its official MCP authorization flow; video generation and interactive-world creation should be added as provider-neutral connectors, with per-tool permissions, visible costs/credits, and an artifact record. No creative account or external tool is considered connected until its owner completes the provider's authorization flow.
 
 ## Future research phase
 
