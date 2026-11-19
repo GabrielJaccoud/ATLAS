@@ -168,6 +168,8 @@ def configured_review_providers() -> list[dict[str, str]]:
     providers: list[dict[str, str]] = []
     if settings.openai_api_key:
         providers.append({"id": "openai", "model": settings.openai_model})
+    if settings.anthropic_api_key and settings.anthropic_model:
+        providers.append({"id": "claude", "model": settings.anthropic_model})
     if settings.kimi_api_key and settings.kimi_model:
         providers.append({"id": "kimi", "model": settings.kimi_model})
     if settings.qwen_api_key and settings.qwen_model and settings.qwen_base_url:
@@ -176,6 +178,33 @@ def configured_review_providers() -> list[dict[str, str]]:
         providers.append({"id": "ollama", "model": settings.ollama_model})
     return providers
 
+
+async def _anthropic_review_chat(instructions: str, message: str) -> str:
+    async with httpx.AsyncClient(timeout=120) as client:
+        response = await client.post(
+            f"{settings.anthropic_base_url.rstrip('/')}/messages",
+            headers={
+                "x-api-key": settings.anthropic_api_key or "",
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": settings.anthropic_model,
+                "max_tokens": 4096,
+                "system": instructions,
+                "messages": [{"role": "user", "content": message}],
+            },
+        )
+        response.raise_for_status()
+        data = response.json()
+    text_parts = [
+        str(part["text"])
+        for part in data.get("content", [])
+        if part.get("type") == "text" and part.get("text")
+    ]
+    if not text_parts:
+        raise RuntimeError("Claude returned an unexpected response.")
+    return "\\n".join(text_parts).strip()
 
 async def _compatible_review_chat(
     *, provider: str, base_url: str, api_key: str, model: str, instructions: str, message: str,
@@ -206,6 +235,8 @@ async def _review_with_provider(
         return result
     if provider_id == "ollama":
         return await _ollama_chat(message, instructions, [])
+    if provider_id == "claude":
+        return await _anthropic_review_chat(instructions, message)
     if provider_id == "kimi":
         return await _compatible_review_chat(
             provider=provider_id, base_url=settings.kimi_base_url,
