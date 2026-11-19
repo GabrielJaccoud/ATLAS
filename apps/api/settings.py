@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     publication_email: str = ""
     research_automation_token: str = ""
     public_web_url: str = "https://atlas-18-mobile.onrender.com"
+    github_research_repo: str = "GabrielJaccoud/ATLAS"
+    github_research_ref: str = "refs/heads/atlas-1.9-possible-worlds"
+    github_research_workflow: str = ".github/workflows/research-intake.yml"
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_username: str = ""

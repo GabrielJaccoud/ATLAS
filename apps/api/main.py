@@ -7,7 +7,9 @@ import json
 import httpx
 import smtplib
 import ssl
+import time
 from email.message import EmailMessage
+from functools import lru_cache
 from io import BytesIO
 from typing import Literal
 from datetime import datetime, timezone
@@ -20,6 +22,9 @@ from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -121,7 +126,7 @@ class ResearchFinding(BaseModel):
     summary: str = Field(min_length=10, max_length=12000)
     source_url: str = Field(default="", max_length=2000)
     published_at: str = Field(default="", max_length=80)
-    source_type: Literal["scientific_paper", "news", "ministry_report", "internal_hypothesis", "other"] = "other"
+    source_type: Literal["scientific_paper", "technical_report", "official_report", "news_article", "news", "ministry_report", "internal_hypothesis", "other"] = "other"
     ministry_id: str = Field(default="research_evolution", max_length=120)
     hypothesis_ids: list[str] = Field(default_factory=list, max_length=30)
     tags: list[str] = Field(default_factory=list, max_length=40)
@@ -642,6 +647,49 @@ def store_research_intake(request: ResearchIntakeRequest) -> dict[str, object]:
     return {"received": len(request.findings), "inserted": len(inserted), "duplicates": duplicates, "findings": [item["data"] for item in inserted]}
 
 
+@lru_cache(maxsize=1)
+def github_oidc_jwks() -> dict[str, object]:
+    response = httpx.get("https://token.actions.githubusercontent.com/.well-known/jwks", timeout=8)
+    response.raise_for_status()
+    return response.json()
+
+
+def verify_github_actions_token(authorization: str | None) -> bool:
+    if not authorization or not authorization.startswith("Bearer "):
+        return False
+    token = authorization.removeprefix("Bearer ").strip()
+    try:
+        encoded_header, encoded_claims, encoded_signature = token.split(".")
+        def decode(part: str) -> bytes:
+            return base64.urlsafe_b64decode(part + "=" * (-len(part) % 4))
+
+        header = json.loads(decode(encoded_header))
+        claims = json.loads(decode(encoded_claims))
+        if header.get("alg") != "RS256" or claims.get("iss") != "https://token.actions.githubusercontent.com":
+            return False
+        if claims.get("aud") != "atlas-research-intake":
+            return False
+        if int(claims.get("exp", 0)) < int(time.time()) or int(claims.get("nbf", 0)) > int(time.time()) + 60:
+            return False
+        expected_workflow = f"{settings.github_research_repo}/{settings.github_research_workflow}@{settings.github_research_ref}"
+        if claims.get("repository") != settings.github_research_repo:
+            return False
+        if claims.get("ref") != settings.github_research_ref or claims.get("workflow_ref") != expected_workflow:
+            return False
+        keys = github_oidc_jwks().get("keys", [])
+        jwk = next((key for key in keys if key.get("kid") == header.get("kid")), None)
+        if not jwk or jwk.get("kty") != "RSA":
+            return False
+        public_key = rsa.RSAPublicNumbers(
+            int.from_bytes(decode(str(jwk["e"])), "big"),
+            int.from_bytes(decode(str(jwk["n"])), "big"),
+        ).public_key()
+        public_key.verify(decode(encoded_signature), f"{encoded_header}.{encoded_claims}".encode(), padding.PKCS1v15(), hashes.SHA256())
+        return True
+    except (httpx.HTTPError, InvalidSignature, KeyError, TypeError, ValueError, json.JSONDecodeError):
+        return False
+
+
 async def search_research_sources(question: str, ministry_id: str, hypothesis_ids: list[str], producer: str) -> dict[str, object]:
     if not settings.openai_api_key:
         raise HTTPException(status_code=503, detail="A pesquisa web automática precisa de uma chave OpenAI configurada no serviço API do ATLAS.")
@@ -664,7 +712,7 @@ Hipóteses registradas: {json.dumps(hypothesis_context, ensure_ascii=False)}
 Backlog de pesquisa: {json.dumps(backlog_context, ensure_ascii=False)}
 Ministérios disponíveis: {json.dumps(ministry_names, ensure_ascii=False)}
 
-Retorne somente um objeto JSON válido com as chaves `report` e `findings`. `report` deve resumir as mudanças, separar fato/inferência/hipótese e sugerir o próximo passo. `findings` deve conter até seis itens, cada um com: source_id (estável; DOI ou URL quando houver), title, summary (alegação + dado/método + limite), source_url, published_at (ISO quando disponível), source_type (scientific_paper, news, ministry_report, internal_hypothesis ou other), ministry_id (id da lista ou research_evolution), hypothesis_ids (apenas IDs listados acima), tags (lista), confidence (0 a 1, refletindo a qualidade da evidência), priority (0 a 1), evidence_class (ex.: primary_source, peer_reviewed, official_report, unverified_report, contrary_evidence). Se não houver achado novo e útil, retorne findings vazio e explique no report. Responda em português. Não gere diagnósticos médicos nem confirme fenômenos extraordinários sem evidência independente."""
+ Retorne somente um objeto JSON válido com as chaves `report` e `findings`. `report` deve resumir as mudanças, separar fato/inferência/hipótese e sugerir o próximo passo. `findings` deve conter até seis itens, cada um com: source_id (estável; DOI ou URL quando houver), title, summary (alegação + dado/método + limite), source_url, published_at (ISO quando disponível), source_type (scientific_paper, technical_report, official_report, news_article, news, ministry_report, internal_hypothesis ou other), ministry_id (id da lista ou research_evolution), hypothesis_ids (apenas IDs listados acima), tags (lista), confidence (0 a 1, refletindo a qualidade da evidência), priority (0 a 1), evidence_class (ex.: primary_source, peer_reviewed, official_report, unverified_report, contrary_evidence). Se não houver achado novo e útil, retorne findings vazio e explique no report. Responda em português. Não gere diagnósticos médicos nem confirme fenômenos extraordinários sem evidência independente."""
     payload = {
         "model": settings.openai_model,
         "tools": [{"type": "web_search"}],
@@ -755,6 +803,16 @@ def research_automation_intake(
         raise HTTPException(status_code=503, detail="A chave privada da ponte de automação ainda não foi configurada.")
     if not research_intake_allowed(authorization, x_atlas_automation_key):
         raise HTTPException(status_code=401, detail="Credencial de ingestão inválida.")
+    return store_research_intake(request)
+
+
+@app.post("/research/github-intake")
+def research_github_intake(
+    request: ResearchIntakeRequest,
+    authorization: str | None = Header(default=None),
+) -> dict[str, object]:
+    if not verify_github_actions_token(authorization):
+        raise HTTPException(status_code=401, detail="Token GitHub Actions inválido ou fora do escopo autorizado.")
     return store_research_intake(request)
 
 

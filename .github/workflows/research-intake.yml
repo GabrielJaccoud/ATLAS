@@ -1,0 +1,45 @@
+name: ATLAS Research Intake
+
+on:
+  push:
+    branches:
+      - atlas-1.9-possible-worlds
+    paths:
+      - docs/research/intake/*.json
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        env:
+          ATLAS_API_URL: https://atlas-18-api.onrender.com
+        with:
+          script: |
+            const fs = require('fs');
+            const paths = [...new Set((context.payload.commits || [])
+              .flatMap((commit) => [...(commit.added || []), ...(commit.modified || [])]))]
+              .filter((path) => path.startsWith('docs/research/intake/') && path.endsWith('.json'));
+            for (const path of paths) {
+              const payload = JSON.parse(fs.readFileSync(path, 'utf8'));
+              const token = await core.getIDToken('atlas-research-intake');
+              const response = await fetch(`${process.env.ATLAS_API_URL}/research/github-intake`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+              });
+              if (!response.ok) {
+                const body = await response.text();
+                throw new Error(`ATLAS intake failed for ${path}: HTTP ${response.status} ${body}`);
+              }
+              const result = await response.json();
+              core.info(`${payload.batch_id}: inserted=${result.inserted}, duplicates=${result.duplicates}`);
+            }
