@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     openai_realtime_model: str = "gpt-realtime-2.1-mini"
     openai_base_url: str = "https://api.openai.com/v1"
 
+    anthropic_api_key: str | None = None
+    anthropic_model: str = ""
+    anthropic_base_url: str = "https://api.anthropic.com/v1"
+
     ollama_url: str | None = None
     ollama_model: str = "llama3.2"
 
