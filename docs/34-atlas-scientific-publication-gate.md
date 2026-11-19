@@ -26,7 +26,7 @@ The export gate checks completeness and evidence classification. It does not cer
 
 Portuguese and English versions are separate, parallel manuscripts. Each carries the same evidence class and scope. The English text requires human review before external submission.
 
-The first web workflow uses the browser's print-to-PDF action. E-mail and WhatsApp buttons open a user-controlled compose/share flow and remind the author to attach the saved PDF. They do not transmit a file or send a message automatically. Automated e-mail delivery requires a configured sender service. Automated WhatsApp delivery requires an approved WhatsApp Business integration and recipient-consent workflow.
+The first web workflow uses the browser's print-to-PDF action. The e-mail button opens a user-controlled compose flow addressed to the private recipient configured in the API and reminds the author to attach the saved PDF. The current workflow does not transmit a file or send a message automatically; automated delivery requires a configured sender service.
 
 ## Record format
 

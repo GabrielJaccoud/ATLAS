@@ -128,6 +128,14 @@ class ScientificWorkRequest(BaseModel):
     references: list[str] = Field(default_factory=list, max_length=100)
 
 
+@app.get("/publication-delivery-settings", dependencies=[Depends(require_token)])
+def publication_delivery_settings() -> dict[str, str]:
+    """Return the owner's private, preconfigured destinations for sharing PDFs."""
+    return {
+        "email": settings.publication_email,
+    }
+
+
 def evaluate_scientific_work(data: ScientificWorkRequest) -> dict[str, object]:
     common_missing = [
         label for label, value in (

@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./atlas.db"
     artifact_dir: str = "./data/artifacts"
     cors_origins: str = "*"
+    publication_email: str = ""
 
     openai_api_key: str | None = None
     openai_model: str = "gpt-6-luna"

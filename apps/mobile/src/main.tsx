@@ -82,6 +82,8 @@ type ScientificWork = {
   created_at: string;
 };
 
+type PublicationDeliverySettings = { email: string };
+
 type ScientificWorkForm = Omit<ScientificWork, "publication_id" | "export_ready" | "missing_requirements" | "claim_classification" | "review_required" | "created_at" | "references"> & { referencesText: string };
 
 type WorldData = {
@@ -210,6 +212,7 @@ function App() {
   const [events, setEvents] = useState<AtlasEvent[]>([]);
   const [researchItems, setResearchItems] = useState<ResearchItem[]>([]);
   const [scientificWorks, setScientificWorks] = useState<ScientificWork[]>([]);
+  const [deliverySettings, setDeliverySettings] = useState<PublicationDeliverySettings>({ email: "" });
   const [publicationForm, setPublicationForm] = useState<ScientificWorkForm>({
     author_name: "Gabriel Jaccoud",
     ministry_id: "research",
@@ -280,13 +283,14 @@ function App() {
       const data = await atlasFetch<Status>("/status");
       setStatus(data);
       setConnected(true);
-      const [eventData, researchData, worldData, metricsData, observationData, publicationData] = await Promise.allSettled([
+      const [eventData, researchData, worldData, metricsData, observationData, publicationData, deliveryData] = await Promise.allSettled([
         atlasFetch<AtlasEvent[]>("/events"),
         atlasFetch<Array<{ data: ResearchItem }>>("/records/research"),
         atlasFetch<WorldData>("/world"),
         atlasFetch<Record<string, unknown>>("/metrics"),
         atlasFetch<Array<ApiRecord<WorldObservation>>>("/records/world_observation"),
         atlasFetch<ScientificWork[]>("/publications"),
+        atlasFetch<PublicationDeliverySettings>("/publication-delivery-settings"),
       ]);
       if (eventData.status === "fulfilled") setEvents(eventData.value);
       if (researchData.status === "fulfilled") setResearchItems(researchData.value.map((record) => record.data));
@@ -294,6 +298,7 @@ function App() {
       if (metricsData.status === "fulfilled") setMetrics(metricsData.value);
       if (observationData.status === "fulfilled") setObservations(observationData.value);
       if (publicationData.status === "fulfilled") setScientificWorks(publicationData.value);
+      if (deliveryData.status === "fulfilled") setDeliverySettings(deliveryData.value);
     } catch {
       setConnected(false);
     }
@@ -414,12 +419,14 @@ function App() {
     printWindow.document.close();
   }
 
-  function shareScientificWork(work: ScientificWork, channel: "email" | "whatsapp") {
+  function shareScientificWork(work: ScientificWork) {
     const subject = `ATLAS — ${work.title_pt}`;
     const body = `Estou compartilhando o trabalho científico “${work.title_pt}” e anexarei os PDFs em português e inglês após salvá-los pelo ATLAS.`;
-    const url = channel === "email"
-      ? `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-      : `https://wa.me/?text=${encodeURIComponent(`${body}\n${subject}`)}`;
+    if (!deliverySettings.email) {
+      setReply("O destinatário de e-mail ainda não está configurado no ATLAS.");
+      return;
+    }
+    const url = `mailto:${encodeURIComponent(deliverySettings.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
@@ -778,7 +785,7 @@ function App() {
               <button className="primary" disabled={busy || !connected || publicationForm.title_pt.trim().length < 8} onClick={() => void saveScientificWork()}>Registrar e avaliar evidências</button>
             </div>
             <div className="section-row"><h3>Trabalhos registrados</h3><button className="secondary" onClick={() => void refresh()}>Atualizar</button></div>
-            {scientificWorks.length ? <div className="publication-list">{scientificWorks.map((work) => <article className="publication-entry atlas-surface" key={work.publication_id}><div className="publication-entry-heading"><div><span className="eyebrow">{work.ministry_id} · {work.work_type.replaceAll("_", " ")}</span><h3>{work.title_pt}</h3><p>{work.title_en || "English title pending"}</p></div><span className={`evidence-badge ${work.export_ready ? "ready" : "internal"}`}>{work.export_ready ? "Apto para revisão e PDF" : "Pesquisa interna"}</span></div><p>{work.claim_classification.replaceAll("_", " ")}{work.review_required ? " · revisão humana pendente" : ""}</p>{!work.export_ready && <details><summary>Requisitos pendentes ({work.missing_requirements.length})</summary><ul>{work.missing_requirements.map((item) => <li key={item}>{item.replaceAll("_", " ")}</li>)}</ul></details>}{work.export_ready && <div className="publication-actions"><button className="secondary" onClick={() => printScientificWork(work, "pt")}>Salvar PDF · Português</button><button className="secondary" onClick={() => printScientificWork(work, "en")}>Save PDF · English</button><button className="secondary" onClick={() => shareScientificWork(work, "email")}>Preparar e-mail</button><button className="secondary" onClick={() => shareScientificWork(work, "whatsapp")}>Compartilhar no WhatsApp</button></div>}</article>)}</div> : <div className="empty-state atlas-surface">As submissões dos ministérios aparecerão aqui. Nenhuma hipótese será promovida automaticamente a artigo.</div>}
+            {scientificWorks.length ? <div className="publication-list">{scientificWorks.map((work) => <article className="publication-entry atlas-surface" key={work.publication_id}><div className="publication-entry-heading"><div><span className="eyebrow">{work.ministry_id} · {work.work_type.replaceAll("_", " ")}</span><h3>{work.title_pt}</h3><p>{work.title_en || "English title pending"}</p></div><span className={`evidence-badge ${work.export_ready ? "ready" : "internal"}`}>{work.export_ready ? "Apto para revisão e PDF" : "Pesquisa interna"}</span></div><p>{work.claim_classification.replaceAll("_", " ")}{work.review_required ? " · revisão humana pendente" : ""}</p>{!work.export_ready && <details><summary>Requisitos pendentes ({work.missing_requirements.length})</summary><ul>{work.missing_requirements.map((item) => <li key={item}>{item.replaceAll("_", " ")}</li>)}</ul></details>}{work.export_ready && <div className="publication-actions"><button className="secondary" onClick={() => printScientificWork(work, "pt")}>Salvar PDF · Português</button><button className="secondary" onClick={() => printScientificWork(work, "en")}>Save PDF · English</button><button className="secondary" onClick={() => shareScientificWork(work)}>Preparar e-mail</button></div>}</article>)}</div> : <div className="empty-state atlas-surface">As submissões dos ministérios aparecerão aqui. Nenhuma hipótese será promovida automaticamente a artigo.</div>}
           </>
         );
       case "Pesquisa":
