@@ -64,6 +64,27 @@ type WorldObservation = {
 
 type ApiRecord<T> = { data: T; created_at?: string };
 
+type ChatMessage = {
+  id: string;
+  role: "user" | "assistant" | "error";
+  content: string;
+  createdAt: number;
+};
+
+function readChatHistory(): ChatMessage[] {
+  try {
+    const saved = localStorage.getItem("atlas.chat.history");
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? parsed.filter((item) =>
+      item && typeof item.id === "string" &&
+      ["user", "assistant", "error"].includes(item.role) &&
+      typeof item.content === "string" && typeof item.createdAt === "number",
+    ).slice(-120) : [];
+  } catch {
+    return [];
+  }
+}
+
 type HomeSignal = {
   eyebrow: string;
   title: string;
@@ -143,6 +164,8 @@ function App() {
   const [connected, setConnected] = useState(false);
   const [ownerCode, setOwnerCode] = useState("");
   const [message, setMessage] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(readChatHistory);
+  const [realtimeDraft, setRealtimeDraft] = useState("");
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
   const [listening, setListening] = useState(false);
@@ -163,6 +186,30 @@ function App() {
   const [missionObjective, setMissionObjective] = useState("");
   const [councilCadence, setCouncilCadence] = useState("daily");
   const realtimeRef = useRef<RealtimeHandle | null>(null);
+  const realtimeTextRef = useRef("");
+  const transcriptEndRef = useRef<HTMLDivElement | null>(null);
+
+  function addChatMessage(role: ChatMessage["role"], content: string) {
+    if (!content.trim()) return;
+    setChatMessages((current) => [...current, {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      role,
+      content: content.trim(),
+      createdAt: Date.now(),
+    }].slice(-120));
+  }
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("atlas.chat.history", JSON.stringify(chatMessages.slice(-120)));
+    } catch {
+      setReply("Não foi possível salvar o histórico neste navegador.");
+    }
+  }, [chatMessages]);
+
+  useEffect(() => {
+    transcriptEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [chatMessages, realtimeDraft, busy, active]);
 
   async function refresh() {
     if (!loadConfig().token) {
@@ -326,20 +373,23 @@ function App() {
     setBusy(true);
     setVoiceState("thinking");
     setReply("");
+    addChatMessage("user", outgoing);
+    setMessage("");
     try {
       const data = await atlasFetch<{ text: string }>("/chat", {
         method: "POST",
         body: JSON.stringify({
           message: outgoing,
           context: { surface: "atlas-web", input: textOverride ? "voice" : "text" },
+          history: chatMessages.filter((item) => item.role === "user" || item.role === "assistant")
+            .slice(-20).map(({ role, content }) => ({ role, content })),
         }),
       });
-      setReply(data.text);
-      setMessage("");
+      addChatMessage("assistant", data.text);
       speak(data.text);
     } catch (error) {
       setVoiceState("degraded");
-      setReply(error instanceof Error ? error.message : String(error));
+      addChatMessage("error", error instanceof Error ? error.message : String(error));
     } finally {
       setBusy(false);
     }
@@ -366,14 +416,23 @@ function App() {
         if (event?.type === "input_audio_buffer.speech_started") {
           setVoiceState("listening");
         }
+        if (event?.type === "conversation.item.input_audio_transcription.completed" && event.transcript) {
+          addChatMessage("user", event.transcript);
+        }
         if (event?.type === "response.created") {
           setVoiceState("thinking");
+          realtimeTextRef.current = "";
+          setRealtimeDraft("");
         }
         if (event?.type === "response.output_audio_transcript.delta" && event.delta) {
           setVoiceState("speaking");
-          setReply((current) => current + event.delta);
+          realtimeTextRef.current += event.delta;
+          setRealtimeDraft(realtimeTextRef.current);
         }
         if (event?.type === "response.done") {
+          addChatMessage("assistant", realtimeTextRef.current);
+          realtimeTextRef.current = "";
+          setRealtimeDraft("");
           setVoiceState("ready");
         }
       });
@@ -398,9 +457,9 @@ function App() {
         method: "POST",
         body: form,
       });
-      setReply(`Arquivo recebido: ${data.filename} · ${data.kind}`);
+      addChatMessage("assistant", `Arquivo recebido: ${data.filename} · ${data.kind}`);
     } catch (error) {
-      setReply(error instanceof Error ? error.message : String(error));
+      addChatMessage("error", error instanceof Error ? error.message : String(error));
     } finally {
       setBusy(false);
     }
@@ -470,35 +529,62 @@ function App() {
           <>
             <SectionHeader
               eyebrow="Conversation"
-              title="Fale comigo."
-              description="Texto, arquivos e voz em uma única superfície."
+              title="Vamos conversar."
+              description="Uma conversa contínua com ATLAS, por texto, voz ou arquivos. O histórico fica salvo neste navegador."
             />
-            <div className="talk-stage atlas-surface">
-              <VoiceCore />
-              <div className="voice-state">{liveVoice ? "Realtime ativo" : voiceState}</div>
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    void send();
-                  }
-                }}
-                placeholder="Escreva uma mensagem ou ative o núcleo de voz…"
-                rows={4}
-              />
-              <div className="command-actions">
-                <button className="primary" onClick={() => send()} disabled={busy || !connected}>Enviar</button>
-                <button className="secondary" onClick={toggleRealtime} disabled={busy || !connected}>
-                  {liveVoice ? "Encerrar Realtime" : "Conversar por voz"}
-                </button>
-                <label className="secondary upload-action">
-                  Anexar
-                  <input type="file" onChange={(e) => upload(e.target.files?.[0] || null)} />
-                </label>
+            <div className="chat-shell atlas-surface">
+              <div className="chat-toolbar">
+                <div><span className={`connection-dot ${connected ? "online" : ""}`} /><span>{liveVoice ? "Voz em tempo real" : connected ? "ATLAS conectado" : "Aguardando pareamento"}</span></div>
+                <button className="secondary clear-chat" onClick={() => { setChatMessages([]); setRealtimeDraft(""); }} disabled={!chatMessages.length}>Limpar conversa</button>
               </div>
-              {reply && <div className="reply" aria-live="polite">{reply}</div>}
+              <div className="chat-transcript" aria-live="polite" aria-relevant="additions text">
+                {!chatMessages.length && !realtimeDraft && (
+                  <div className="chat-welcome">
+                    <VoiceCore />
+                    <span className="eyebrow">ATLAS · Talk</span>
+                    <h3>Por onde começamos?</h3>
+                    <p>Faça uma pergunta, organize uma ideia ou peça uma análise. A conversa mantém o contexto dos últimos turnos.</p>
+                  </div>
+                )}
+                {chatMessages.map((item) => (
+                  <article key={item.id} className={`chat-message ${item.role}`}>
+                    <span>{item.role === "user" ? "Você" : item.role === "error" ? "Conexão" : "ATLAS"}</span>
+                    <p>{item.content}</p>
+                    <time dateTime={new Date(item.createdAt).toISOString()}>{new Date(item.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</time>
+                  </article>
+                ))}
+                {busy && <div className="chat-thinking"><i /><i /><i /><span>ATLAS está pensando</span></div>}
+                {realtimeDraft && <article className="chat-message assistant draft"><span>ATLAS · falando</span><p>{realtimeDraft}</p></article>}
+                <div ref={transcriptEndRef} />
+              </div>
+              <div className="chat-composer">
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      void send();
+                    }
+                  }}
+                  placeholder="Escreva sua mensagem…"
+                  rows={2}
+                  aria-label="Mensagem para ATLAS"
+                />
+                <div className="chat-composer-actions">
+                  <div className="command-actions">
+                    <button className="secondary" onClick={toggleRealtime} disabled={busy || !connected} aria-pressed={liveVoice}>
+                      {liveVoice ? "Encerrar voz" : "Conversar por voz"}
+                    </button>
+                    <label className="secondary upload-action">
+                      Anexar arquivo
+                      <input type="file" onChange={(e) => upload(e.target.files?.[0] || null)} />
+                    </label>
+                  </div>
+                  <button className="primary send-button" onClick={() => void send()} disabled={busy || !connected || !message.trim()}>Enviar <span aria-hidden="true">↑</span></button>
+                </div>
+                <small>Enter envia · Shift + Enter quebra a linha</small>
+              </div>
             </div>
           </>
         );

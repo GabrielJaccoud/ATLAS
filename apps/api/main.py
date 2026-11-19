@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hmac
+from typing import Literal
 
 from uuid import uuid4
 
@@ -69,9 +70,15 @@ class OwnerLoginRequest(BaseModel):
     code: str
 
 
+class ChatTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=6000)
+
+
 class ChatRequest(BaseModel):
     message: str
     context: dict[str, object] = Field(default_factory=dict)
+    history: list[ChatTurn] = Field(default_factory=list, max_length=20)
 
 
 class MissionRequest(BaseModel):
@@ -210,7 +217,11 @@ async def chat(request: ChatRequest) -> dict[str, object]:
         body=request.message,
         data={"context": request.context},
     )
-    result = await atlas_chat(request.message, request.context)
+    result = await atlas_chat(
+        request.message,
+        request.context,
+        [turn.model_dump() for turn in request.history],
+    )
     save_record(
         "chat_output",
         interaction_id,

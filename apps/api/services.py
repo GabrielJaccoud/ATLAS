@@ -43,7 +43,7 @@ def _fallback_text(message: str, route_data: dict[str, object], reason: str) -> 
     )
 
 
-async def _ollama_chat(message: str, instructions: str) -> str:
+async def _ollama_chat(message: str, instructions: str, history: list[dict[str, str]]) -> str:
     if not settings.ollama_url:
         raise RuntimeError("Ollama is not configured.")
     async with httpx.AsyncClient(timeout=90) as client:
@@ -54,6 +54,7 @@ async def _ollama_chat(message: str, instructions: str) -> str:
                 "stream": False,
                 "messages": [
                     {"role": "system", "content": instructions},
+                    *history,
                     {"role": "user", "content": message},
                 ],
             },
@@ -63,13 +64,14 @@ async def _ollama_chat(message: str, instructions: str) -> str:
     return str(data.get("message", {}).get("content", "")).strip()
 
 
-async def _openai_chat(message: str, instructions: str) -> tuple[str, str | None]:
+async def _openai_chat(message: str, instructions: str, history: list[dict[str, str]]) -> tuple[str, str | None]:
     if not settings.openai_api_key:
         raise RuntimeError("OpenAI is not configured.")
     payload = {
         "model": settings.openai_model,
         "input": [
             {"role": "system", "content": instructions},
+            *history,
             {"role": "user", "content": message},
         ],
     }
@@ -94,7 +96,11 @@ async def _openai_chat(message: str, instructions: str) -> tuple[str, str | None
     return "\n".join(text_parts).strip(), data.get("id")
 
 
-async def atlas_chat(message: str, context: dict[str, object] | None = None) -> dict[str, object]:
+async def atlas_chat(
+    message: str,
+    context: dict[str, object] | None = None,
+    history: list[dict[str, str]] | None = None,
+) -> dict[str, object]:
     mission = Mission(
         mission_id=f"chat:{uuid4().hex[:12]}",
         objective=message,
@@ -103,6 +109,11 @@ async def atlas_chat(message: str, context: dict[str, object] | None = None) -> 
     )
     route = orchestrator.route(mission)
     route_data = _route_payload(route)
+    conversation = [
+        {"role": turn["role"], "content": turn["content"][:6000]}
+        for turn in (history or [])[-20:]
+        if turn.get("role") in {"user", "assistant"} and isinstance(turn.get("content"), str)
+    ]
 
     instructions = (
         "You are ATLAS, a governed multidisciplinary research and decision system. "
@@ -115,7 +126,7 @@ async def atlas_chat(message: str, context: dict[str, object] | None = None) -> 
 
     if settings.openai_api_key:
         try:
-            text, response_id = await _openai_chat(message, instructions)
+            text, response_id = await _openai_chat(message, instructions, conversation)
             return {
                 "mode": "cloud",
                 "provider": "openai",
@@ -130,7 +141,7 @@ async def atlas_chat(message: str, context: dict[str, object] | None = None) -> 
 
     if settings.ollama_url:
         try:
-            text = await _ollama_chat(message, instructions)
+            text = await _ollama_chat(message, instructions, conversation)
             return {
                 "mode": "local",
                 "provider": "ollama",
