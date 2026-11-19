@@ -27,4 +27,4 @@ Set `ATLAS_RESEARCH_AUTOMATION_TOKEN` only as a private Render service variable.
 
 The five ChatGPT research automations now end with an importable JSON envelope for the Pesquisa tab. They remain scheduled and continue delivering results in their ChatGPT threads. The ChatGPT automation runtime does not provide these tasks with a custom HTTP POST action, so their results are not silently claimed as API-ingested. The JSON import in Pesquisa is the current path; direct machine-to-machine delivery requires a supported custom connector.
 
-The ATLAS Render cron is a separate native daily run and uses `web_search` through the configured API provider. That run writes to the API directly and can email the result link.
+The API endpoint and runner for a native ATLAS daily run are implemented. The Render cron could not be provisioned because Render returned HTTP 402 and requires a payment method on the account. Until that requirement is resolved, there is no direct scheduled API run; ChatGPT task results enter through JSON import. When provisioned, the Render cron uses `web_search`, writes to the API, and can email the result link when SMTP is configured.
