@@ -50,6 +50,49 @@ type ResearchItem = {
   priority: number;
 };
 
+type ResearchFindingRecord = {
+  finding_id: string;
+  title: string;
+  summary: string;
+  source_url: string;
+  source_type: string;
+  ministry_id: string;
+  hypothesis_ids: string[];
+  confidence: number;
+  priority: number;
+  triage_status: string;
+  ingested_at: string;
+};
+type ResearchGoal = {
+  goal_id: string;
+  title: string;
+  action: string;
+  deliverable: string;
+  status: "planned" | "in_progress" | "blocked" | "completed" | "deferred";
+  source_ids: string[];
+  hypothesis_ids: string[];
+  ministries: string[];
+  done_criteria: string;
+};
+type DailyResearchPlan = {
+  plan_id: string;
+  date: string;
+  status: string;
+  summary: string;
+  findings: ResearchFindingRecord[];
+  goals: ResearchGoal[];
+  ria_candidates: Array<{ candidate_id: string; title: string; stage: string; status: string; steps: string[]; source_ids: string[] }>;
+};
+type ResearchCentralData = {
+  findings: ResearchFindingRecord[];
+  hypotheses: Array<Record<string, unknown>>;
+  backlog: ResearchItem[];
+  latest_plan: DailyResearchPlan | null;
+  latest_run: Record<string, unknown> | null;
+  automation_bridge: { endpoint: string; authentication: string; configured: boolean; web_search_configured: boolean; smtp_configured: boolean; scheduled_chat_tasks_connected: boolean };
+  publication_email: { configured: boolean; recipient: string };
+};
+
 type ScientificWork = {
   publication_id: string;
   author_name: string;
@@ -213,7 +256,10 @@ function SectionHeader({
 }
 
 function App() {
-  const [active, setActive] = useState<ScreenId>("Agora");
+  const [active, setActive] = useState<ScreenId>(() => {
+    const requested = new URLSearchParams(window.location.search).get("screen") as ScreenId | null;
+    return requested && navigation.includes(requested) ? requested : "Agora";
+  });
   const [status, setStatus] = useState<Status | null>(null);
   const [connected, setConnected] = useState(false);
   const [ownerCode, setOwnerCode] = useState("");
@@ -229,6 +275,16 @@ function App() {
   const [worldError, setWorldError] = useState("");
   const [events, setEvents] = useState<AtlasEvent[]>([]);
   const [researchItems, setResearchItems] = useState<ResearchItem[]>([]);
+  const [researchCentral, setResearchCentral] = useState<ResearchCentralData | null>(null);
+  const [researchTitle, setResearchTitle] = useState("");
+  const [researchUrl, setResearchUrl] = useState("");
+  const [researchSummary, setResearchSummary] = useState("");
+  const [researchSourceType, setResearchSourceType] = useState("scientific_paper");
+  const [researchMinistry, setResearchMinistry] = useState("research_evolution");
+  const [researchTags, setResearchTags] = useState("");
+  const [researchImportJson, setResearchImportJson] = useState("");
+  const [dailyPlanBusy, setDailyPlanBusy] = useState(false);
+  const [investigationReport, setInvestigationReport] = useState("");
   const [scientificWorks, setScientificWorks] = useState<ScientificWork[]>([]);
   const [deliverySettings, setDeliverySettings] = useState<PublicationDeliverySettings>({ email: "", can_send_email: false });
   const [reviewProviders, setReviewProviders] = useState<ReviewProvider[]>([]);
@@ -317,7 +373,7 @@ function App() {
       const data = await atlasFetch<Status>("/status");
       setStatus(data);
       setConnected(true);
-      const [eventData, researchData, worldData, metricsData, observationData, publicationData, deliveryData, reviewProviderData] = await Promise.allSettled([
+      const [eventData, researchData, worldData, metricsData, observationData, publicationData, deliveryData, reviewProviderData, researchCentralData] = await Promise.allSettled([
         atlasFetch<AtlasEvent[]>("/events"),
         atlasFetch<Array<{ data: ResearchItem }>>("/records/research"),
         atlasFetch<WorldData>("/world"),
@@ -326,6 +382,7 @@ function App() {
         atlasFetch<ScientificWork[]>("/publications"),
         atlasFetch<PublicationDeliverySettings>("/publication-delivery-settings"),
         atlasFetch<{ providers: ReviewProvider[] }>("/review/providers"),
+        atlasFetch<ResearchCentralData>("/research/central"),
       ]);
       if (eventData.status === "fulfilled") setEvents(eventData.value);
       if (researchData.status === "fulfilled") setResearchItems(researchData.value.map((record) => record.data));
@@ -335,6 +392,10 @@ function App() {
       if (publicationData.status === "fulfilled") setScientificWorks(publicationData.value);
       if (deliveryData.status === "fulfilled") setDeliverySettings(deliveryData.value);
       if (reviewProviderData.status === "fulfilled") setReviewProviders(reviewProviderData.value.providers);
+      if (researchCentralData.status === "fulfilled") {
+        setResearchCentral(researchCentralData.value);
+        setResearchItems(researchCentralData.value.backlog);
+      }
     } catch {
       setConnected(false);
     }
@@ -394,6 +455,94 @@ function App() {
       setReply(error instanceof Error ? error.message : String(error));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function ingestResearchFinding() {
+    if (!researchTitle.trim() || researchSummary.trim().length < 10) return;
+    setBusy(true);
+    try {
+      await atlasFetch("/research/intake", { method: "POST", body: JSON.stringify({
+        producer: "atlas-web-manual-intake",
+        findings: [{
+          title: researchTitle.trim(), summary: researchSummary.trim(), source_url: researchUrl.trim(),
+          source_type: researchSourceType, ministry_id: researchMinistry,
+          tags: researchTags.split(",").map((tag) => tag.trim()).filter(Boolean),
+          confidence: 0.5, priority: 0.5, evidence_class: "unverified_report",
+        }],
+      }) });
+      setResearchTitle(""); setResearchUrl(""); setResearchSummary(""); setResearchTags("");
+      await refresh();
+      setReply("Achado recebido na Central de Pesquisa. Ele permanece não verificado até apuração da fonte.");
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "Não foi possível registrar o achado.");
+    } finally { setBusy(false); }
+  }
+
+  async function importResearchPackage() {
+    try {
+      const parsed = JSON.parse(researchImportJson) as { findings?: unknown[]; batch_id?: string; producer?: string };
+      if (!Array.isArray(parsed.findings) || !parsed.findings.length) throw new Error("O JSON precisa conter uma lista 'findings'.");
+      await atlasFetch("/research/intake", { method: "POST", body: JSON.stringify({
+        batch_id: parsed.batch_id || `chat-import-${Date.now()}`,
+        producer: parsed.producer || "chatgpt-research-import",
+        findings: parsed.findings,
+      }) });
+      setResearchImportJson("");
+      await refresh();
+      setReply("Pacote de pesquisa importado. Os itens foram deduplicados por fonte e permanecem em triagem.");
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "JSON inválido ou pacote incompleto.");
+    }
+  }
+
+  async function generateDailyResearchPlan() {
+    setDailyPlanBusy(true);
+    try {
+      const plan = await atlasFetch<DailyResearchPlan>("/research/daily-plan?force=true", { method: "POST" });
+      setResearchCentral((current) => current ? { ...current, latest_plan: plan } : current);
+      setReply(`Plano diário atualizado: ${plan.summary}`);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "Não foi possível consolidar a pesquisa do dia.");
+    } finally { setDailyPlanBusy(false); }
+  }
+
+  async function investigateResearchTopic() {
+    if (!researchQuestion.trim()) return;
+    setDailyPlanBusy(true);
+    setInvestigationReport("");
+    try {
+      const result = await atlasFetch<{ report: string; intake: { inserted: number }; daily_plan: DailyResearchPlan | null }>("/research/investigate", {
+        method: "POST",
+        body: JSON.stringify({ question: researchQuestion.trim(), ministry_id: researchMinistry }),
+      });
+      setInvestigationReport(result.report);
+      if (result.daily_plan) setResearchCentral((current) => current ? { ...current, latest_plan: result.daily_plan } : current);
+      setReply(`Apuração concluída; ${result.intake.inserted} achado(s) novo(s) recebido(s) na Central.`);
+      await refresh();
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "A apuração web não foi concluída.");
+    } finally { setDailyPlanBusy(false); }
+  }
+
+  async function updateResearchGoal(goal: ResearchGoal, status: ResearchGoal["status"]) {
+    try {
+      await atlasFetch(`/research/goals/${encodeURIComponent(goal.goal_id)}`, { method: "PATCH", body: JSON.stringify({ status, note: "" }) });
+      await refresh();
+      setReply(`Meta marcada como ${status.replaceAll("_", " ")}.`);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "Não foi possível atualizar a meta.");
+    }
+  }
+
+  async function emailDailyResearchPlan() {
+    const plan = researchCentral?.latest_plan;
+    if (!plan) return;
+    try {
+      const result = await atlasFetch<{ sent: boolean; to: string; link: string }>(`/research/daily-plan/${encodeURIComponent(plan.plan_id)}/email`, { method: "POST" });
+      setReply(`Resumo enviado para ${result.to} com link para a Central de Pesquisa.`);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "Não foi possível enviar o resumo.");
     }
   }
 
@@ -649,24 +798,37 @@ function App() {
     addChatMessage("user", outgoing);
     setMessage("");
     try {
-      const data = await atlasFetch<{ text: string }>("/chat", {
-        method: "POST",
-        body: JSON.stringify({
-          message: outgoing,
-          context: {
-            surface: "atlas-web",
-            input: textOverride ? "voice" : "text",
-            current_screen: active,
-            available_surfaces: ["Talk", "Radar", "Pesquisa", "Ciência", "Conselho", "Apps", "Awareness", "Corpo", "Ações"],
-            posture_screen_available: true,
-            visual_model_configured: Boolean(status?.provider?.openai_configured),
-          },
-          history: chatMessages.filter((item) => item.role === "user" || item.role === "assistant")
-            .slice(-20).map(({ role, content }) => ({ role, content })),
-        }),
-      });
-      addChatMessage("assistant", data.text);
-      speak(data.text);
+      const shouldResearchWeb = /\b(pesquise|pesquisar|investigue|investigar|apure|averigue|averiguar|busque fontes|procure evidências|notícias recentes)\b/i.test(outgoing);
+      if (shouldResearchWeb) {
+        const data = await atlasFetch<{ report: string; intake: { inserted: number } }>("/research/investigate", {
+          method: "POST",
+          body: JSON.stringify({ question: outgoing, ministry_id: "research_evolution" }),
+        });
+        const responseText = `${data.report}\n\n${data.intake.inserted} novo(s) achado(s) foi/foram guardado(s) na Central de Pesquisa.`;
+        addChatMessage("assistant", responseText);
+        speak(responseText);
+        await refresh();
+      } else {
+        const data = await atlasFetch<{ text: string }>("/chat", {
+          method: "POST",
+          body: JSON.stringify({
+            message: outgoing,
+            context: {
+              surface: "atlas-web",
+              input: textOverride ? "voice" : "text",
+              current_screen: active,
+              available_surfaces: ["Talk", "Radar", "Pesquisa", "Ciência", "Conselho", "Apps", "Awareness", "Corpo", "Ações"],
+              posture_screen_available: true,
+              research_central_available: true,
+              visual_model_configured: Boolean(status?.provider?.openai_configured),
+            },
+            history: chatMessages.filter((item) => item.role === "user" || item.role === "assistant")
+              .slice(-20).map(({ role, content }) => ({ role, content })),
+          }),
+        });
+        addChatMessage("assistant", data.text);
+        speak(data.text);
+      }
     } catch (error) {
       setVoiceState("degraded");
       addChatMessage("error", error instanceof Error ? error.message : String(error));
@@ -963,14 +1125,48 @@ function App() {
       case "Pesquisa":
         return (
           <>
-            <SectionHeader eyebrow="Research" title="Pesquisa" description="Backlog, linhas em andamento, bloqueios e próximos experimentos." />
+            <SectionHeader eyebrow="Research & Production" title="Central de Pesquisa" description="Achados, hipóteses, apuração e metas do dia em um único fluxo. O ATLAS mantém notícia, hipótese e conclusão em classes separadas." />
             <div className="metric-grid">
-              <Metric label="Questões registradas" value={researchItems.length || 0} />
-              <Metric label="Bloqueios atuais" value={status?.research?.blocked ?? "—"} />
-              <Metric label="Mundos possíveis" value={worldPrograms.length || "—"} hint="programas carregados" />
-              <Metric label="Método" value="RIA" />
+              <Metric label="Achados recebidos" value={researchCentral?.findings.length ?? 0} hint="inclui rotina e entrada manual" />
+              <Metric label="Hipóteses registradas" value={researchCentral?.hypotheses.length ?? 0} />
+              <Metric label="Metas de hoje" value={researchCentral?.latest_plan?.goals.length ?? 0} hint={researchCentral?.latest_plan?.status || "plano ainda não consolidado"} />
+              <Metric label="Fila dos ministérios" value={researchItems.length} hint={`${status?.research?.blocked ?? 0} bloqueada(s)`} />
             </div>
-            <div className="form-panel atlas-surface"><h3>Registrar uma pergunta de pesquisa</h3><p>Ela entra no backlog do ATLAS com prioridade inicial média.</p><div className="form-row"><input value={researchQuestion} onChange={(event) => setResearchQuestion(event.target.value)} placeholder="Qual pergunta você quer investigar?" /><button className="primary" disabled={busy || !researchQuestion.trim()} onClick={() => void runAction<ResearchItem>("/research", { ministry_id: status?.ministries?.[0]?.id || "research", question: researchQuestion.trim(), priority: 0.5 }, (item) => `Pergunta registrada: ${item.question}`)}>Registrar</button></div></div>
+            <div className="hero-command atlas-surface">
+              <div className="hero-copy"><span className="eyebrow">Daily Research & Production</span><h3>{researchCentral?.latest_plan?.summary || "Ainda não há plano diário consolidado."}</h3><p>Recebe relatórios, relaciona evidências às hipóteses, encaminha questões aos ministérios e sugere entregas concretas. A RIA fica em triagem até haver mecanismo, teste e evidência.</p></div>
+              <button className="primary" disabled={!connected || dailyPlanBusy} onClick={() => void generateDailyResearchPlan()}>{dailyPlanBusy ? "Consolidando…" : "Consolidar pesquisa e gerar metas"}</button>
+            </div>
+            <div className="form-panel atlas-surface">
+              <div className="section-row"><div><span className="eyebrow">Research inbox</span><h3>Receber achado ou relatório</h3></div><span className="publication-scope">Não verificado até apuração</span></div>
+              <div className="publication-fields">
+                <label>Título<input value={researchTitle} onChange={(event) => setResearchTitle(event.target.value)} placeholder="Achado, notícia, artigo ou relatório ministerial" /></label>
+                <label>Fonte ou URL<input value={researchUrl} onChange={(event) => setResearchUrl(event.target.value)} placeholder="https://…" /></label>
+                <label>Tipo<select value={researchSourceType} onChange={(event) => setResearchSourceType(event.target.value)}><option value="scientific_paper">Artigo científico</option><option value="news">Notícia</option><option value="ministry_report">Relatório de ministério</option><option value="internal_hypothesis">Hipótese interna</option><option value="other">Outro</option></select></label>
+                <label>Ministério<select value={researchMinistry} onChange={(event) => setResearchMinistry(event.target.value)}>{(status?.ministries || []).map((ministry) => <option key={ministry.id} value={ministry.id}>{ministry.name}</option>)}<option value="research_evolution">Pesquisa e Evolução</option></select></label>
+                <label className="full-span">Resumo do achado<textarea rows={4} value={researchSummary} onChange={(event) => setResearchSummary(event.target.value)} placeholder="O que a fonte afirma? Quais dados ou métodos apresenta?" /></label>
+                <label className="full-span">Tags para relacionar com hipóteses e áreas<textarea rows={2} value={researchTags} onChange={(event) => setResearchTags(event.target.value)} placeholder="UAP, metrologia, biomecânica… separado por vírgulas" /></label>
+              </div>
+              <button className="primary" disabled={!connected || busy || researchTitle.trim().length < 4 || researchSummary.trim().length < 10} onClick={() => void ingestResearchFinding()}>Receber na Central de Pesquisa</button>
+            </div>
+            <div className="form-panel atlas-surface">
+              <div className="section-row"><div><span className="eyebrow">Automated intake bridge</span><h3>Ponte segura das rotinas</h3></div><span className={`evidence-badge ${researchCentral?.automation_bridge.configured ? "ready" : "internal"}`}>{researchCentral?.automation_bridge.configured ? "chave configurada" : "aguardando chave privada"}</span></div>
+              <p>Endpoint de ingestão: <code>{loadConfig().baseUrl}{researchCentral?.automation_bridge.endpoint || "/research/automation/intake"}</code></p>
+              <p className="publication-note">Autenticação: cabeçalho <code>{researchCentral?.automation_bridge.authentication || "X-Atlas-Automation-Key"}</code>. A chave fica apenas como variável privada do serviço; nunca aparece nesta tela. As tarefas agendadas do ChatGPT ainda não têm ação HTTP de saída, então elas precisam de um conector compatível para enviar os resultados automaticamente.</p>
+              <p className="publication-note">Última execução automática: {researchCentral?.latest_run?.completed_at ? `${new Date(String(researchCentral.latest_run.completed_at)).toLocaleString("pt-BR")} · ${researchCentral.latest_run.status} · ${String(researchCentral.latest_run.finding_count ?? 0)} achado(s)` : "nenhuma execução registrada"}. Rota diária: <code>/research/automation/daily-run</code>.</p>
+              <label>Importar pacote JSON de uma rotina ou do Chat<textarea rows={5} value={researchImportJson} onChange={(event) => setResearchImportJson(event.target.value)} placeholder={'{"batch_id":"radar-2026-11-20","producer":"atlas-radar","findings":[{"title":"…","summary":"…","source_url":"https://…","source_type":"news","ministry_id":"science_frontiers","tags":["…"],"confidence":0.7,"priority":0.8}]}'} /></label>
+              <button className="secondary" disabled={!connected || !researchImportJson.trim() || busy} onClick={() => void importResearchPackage()}>Importar pacote na Central</button>
+              <div className="form-row"><button className="secondary" onClick={() => void refresh()}>Atualizar estado da ponte</button><button className="secondary" onClick={() => goTo("Conselho")}>Ver rotinas e provedores</button></div>
+            </div>
+            <div className="section-row"><h3>Metas e produção de hoje</h3><div className="form-row"><button className="secondary" disabled={!researchCentral?.latest_plan || !researchCentral.publication_email.configured} onClick={() => void emailDailyResearchPlan()}>Enviar link por e-mail</button><button className="secondary" onClick={() => void refresh()}>Atualizar</button></div></div>
+            {researchCentral?.latest_plan?.goals.length ? <div className="cards-grid">{researchCentral.latest_plan.goals.map((goal) => <article className="feature-card atlas-surface research-goal" key={goal.goal_id}><span>{goal.ministries.join(" · ")} · {goal.status.replaceAll("_", " ")}</span><strong>{goal.title}</strong><p>{goal.action}</p><small><b>Entrega:</b> {goal.deliverable}</small><small><b>Concluída quando:</b> {goal.done_criteria}</small><div className="form-row"><select value={goal.status} onChange={(event) => void updateResearchGoal(goal, event.target.value as ResearchGoal["status"])}><option value="planned">Planejada</option><option value="in_progress">Em andamento</option><option value="blocked">Bloqueada</option><option value="completed">Concluída</option><option value="deferred">Adiada</option></select><button className="secondary" onClick={() => goTo("Ciência")}>Preparar artigo / relatório</button></div></article>)}</div> : <div className="empty-state atlas-surface">Quando novos achados ou hipóteses entrarem, o ATLAS poderá propor metas. Para não inventar produção, o plano vazio é identificado como tal.</div>}
+            {researchCentral?.latest_plan?.ria_candidates?.length ? <><div className="section-row"><h3>RIA e engenharia reversa em triagem</h3><span className="eyebrow">Sem promoção automática de hipótese</span></div><div className="cards-grid">{researchCentral.latest_plan.ria_candidates.map((candidate) => <article className="feature-card atlas-surface" key={candidate.candidate_id}><span>{candidate.stage} · {candidate.status}</span><strong>{candidate.title}</strong><p>Sequência: {candidate.steps.join(" → ")}</p></article>)}</div></> : null}
+            <div className="section-row"><h3>Achados recebidos</h3><span className="eyebrow">Registros recentes da API</span></div>
+            {researchCentral?.findings.length ? <div className="event-list">{researchCentral.findings.map((finding) => <article className="event-card atlas-surface" key={finding.finding_id}><div><span className="eyebrow">{finding.source_type.replaceAll("_", " ")} · {finding.ministry_id} · {finding.triage_status}</span><strong>{finding.title}</strong><p>{finding.summary}</p>{finding.source_url && <a href={finding.source_url} target="_blank" rel="noreferrer">Abrir fonte ↗</a>}</div><small>{finding.ingested_at ? new Date(finding.ingested_at).toLocaleString("pt-BR") : ""}</small></article>)}</div> : <div className="empty-state atlas-surface">Nenhum achado recebido pela API ainda.</div>}
+            <div className="section-row"><h3>Backlog dos ministérios</h3><button className="secondary" onClick={() => void runAction<ResearchItem>("/research", { ministry_id: status?.ministries?.[0]?.id || "research_evolution", question: researchQuestion.trim(), priority: 0.5 }, (item) => `Pergunta registrada: ${item.question}`)} disabled={!researchQuestion.trim() || busy}>Registrar pergunta</button></div>
+            <div className="form-row"><input value={researchQuestion} onChange={(event) => setResearchQuestion(event.target.value)} placeholder="Nova pergunta ou hipótese para o backlog" /></div>
+            <button className="secondary" disabled={!connected || !researchQuestion.trim() || dailyPlanBusy || !status?.provider?.openai_configured} onClick={() => void investigateResearchTopic()}>{dailyPlanBusy ? "Pesquisando…" : "Investigar agora na web"}</button>
+            {!status?.provider?.openai_configured && <p className="publication-note">A pesquisa web do ATLAS precisa de uma chave OpenAI API configurada no serviço. A rotina agendada do ChatGPT pode ser importada acima enquanto esse provedor não estiver conectado.</p>}
+            {investigationReport && <article className="review-report atlas-surface"><span className="eyebrow">Apuração Web · ATLAS</span><div className="posture-report">{investigationReport.split("\n").map((line, index) => <p key={index}>{line}</p>)}</div></article>}
             {researchItems.length > 0 && <div className="event-list">{researchItems.map((item) => <article className="event-card atlas-surface" key={item.item_id}><div><span className="eyebrow">{item.ministry_id} · {item.status}</span><strong>{item.question}</strong></div><small>Prioridade {item.priority.toFixed(1)}</small></article>)}</div>}
           </>
         );

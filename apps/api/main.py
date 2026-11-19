@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import hmac
 import base64
+import hashlib
+import json
+import httpx
 import smtplib
 import ssl
 from email.message import EmailMessage
 from io import BytesIO
 from typing import Literal
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from xml.sax.saxutils import escape
 
 from uuid import uuid4
@@ -109,6 +113,39 @@ class ResearchRequest(BaseModel):
     ministry_id: str
     question: str
     priority: float = 0.5
+
+
+class ResearchFinding(BaseModel):
+    source_id: str = Field(default="", max_length=300)
+    title: str = Field(min_length=4, max_length=500)
+    summary: str = Field(min_length=10, max_length=12000)
+    source_url: str = Field(default="", max_length=2000)
+    published_at: str = Field(default="", max_length=80)
+    source_type: Literal["scientific_paper", "news", "ministry_report", "internal_hypothesis", "other"] = "other"
+    ministry_id: str = Field(default="research_evolution", max_length=120)
+    hypothesis_ids: list[str] = Field(default_factory=list, max_length=30)
+    tags: list[str] = Field(default_factory=list, max_length=40)
+    confidence: float = Field(default=0.5, ge=0, le=1)
+    priority: float = Field(default=0.5, ge=0, le=1)
+    evidence_class: str = Field(default="unverified_report", max_length=100)
+
+
+class ResearchIntakeRequest(BaseModel):
+    batch_id: str = Field(default="", max_length=200)
+    producer: str = Field(default="external_research_routine", max_length=200)
+    generated_at: str = Field(default="", max_length=80)
+    findings: list[ResearchFinding] = Field(min_length=1, max_length=100)
+
+
+class ResearchInvestigationRequest(BaseModel):
+    question: str = Field(min_length=8, max_length=4000)
+    ministry_id: str = Field(default="research_evolution", max_length=120)
+    hypothesis_ids: list[str] = Field(default_factory=list, max_length=30)
+
+
+class ResearchGoalUpdate(BaseModel):
+    status: Literal["planned", "in_progress", "blocked", "completed", "deferred"]
+    note: str = Field(default="", max_length=3000)
 
 
 class ScientificWorkRequest(BaseModel):
@@ -487,6 +524,10 @@ def status() -> dict[str, object]:
             "total": len(research),
             "blocked": sum(1 for x in research if x["data"].get("status") == "blocked"),
         },
+        "provider": {
+            "openai_configured": bool(settings.openai_api_key),
+            "ollama_configured": bool(settings.ollama_url),
+        },
         "my_world": {"nodes": len(nodes), "edges": len(edges)},
         "artifacts": len(list_record_dicts("artifact")),
     }
@@ -557,6 +598,346 @@ def add_research(request: ResearchRequest) -> dict[str, object]:
     }
     save_record("research", item_id, title=request.question, data=data)
     return data
+
+
+def research_intake_allowed(authorization: str | None, automation_key: str | None) -> bool:
+    if automation_key and settings.research_automation_token and hmac.compare_digest(automation_key, settings.research_automation_token):
+        return True
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.removeprefix("Bearer ").strip()
+        return token == settings.api_token or verify_session_token(token)
+    return False
+
+
+def latest_records(kind: str) -> list[dict[str, object]]:
+    latest: dict[str, dict[str, object]] = {}
+    for record in list_record_dicts(kind):
+        latest.setdefault(str(record["external_id"]), record)
+    return list(latest.values())
+
+
+def store_research_intake(request: ResearchIntakeRequest) -> dict[str, object]:
+    inserted: list[dict[str, object]] = []
+    duplicates = 0
+    now = datetime.now(timezone.utc).isoformat()
+    for finding in request.findings:
+        source_identity = finding.source_id.strip() or finding.source_url.strip() or f"{finding.title}|{finding.summary[:300]}"
+        fingerprint = hashlib.sha256(source_identity.encode("utf-8")).hexdigest()[:20]
+        external_id = f"research_finding:{fingerprint}"
+        existing = get_record("research_finding", external_id)
+        if existing:
+            duplicates += 1
+            continue
+        data = {
+            **finding.model_dump(),
+            "finding_id": external_id,
+            "producer": request.producer,
+            "batch_id": request.batch_id,
+            "generated_at": request.generated_at,
+            "ingested_at": now,
+            "triage_status": "unverified",
+            "source_verification": "pending",
+        }
+        inserted.append(save_record("research_finding", external_id, title=finding.title, body=finding.summary, data=data))
+    return {"received": len(request.findings), "inserted": len(inserted), "duplicates": duplicates, "findings": [item["data"] for item in inserted]}
+
+
+async def search_research_sources(question: str, ministry_id: str, hypothesis_ids: list[str], producer: str) -> dict[str, object]:
+    if not settings.openai_api_key:
+        raise HTTPException(status_code=503, detail="A pesquisa web automática precisa de uma chave OpenAI configurada no serviço API do ATLAS.")
+    hypotheses = latest_records("research_hypothesis") + latest_records("hypothesis")
+    backlog = latest_records("research")
+    hypothesis_context = [
+        {"id": row["external_id"], "claim": row["data"].get("title", row["data"].get("question", row.get("title", "")))}
+        for row in hypotheses[:40]
+    ]
+    backlog_context = [
+        {"ministry": row["data"].get("ministry_id"), "question": row["data"].get("question"), "status": row["data"].get("status")}
+        for row in backlog[:40]
+    ]
+    ministry_names = [{"id": ministry.ministry_id, "name": ministry.name, "skills": list(ministry.skills)} for ministry in registry.values()]
+    research_prompt = f"""Pesquise na web por fontes novas e relevantes ao objetivo abaixo. Use busca web, priorize artigos científicos, dados primários, órgãos oficiais e documentos de ministérios. Distinga data do evento e data de publicação; evite duplicatas e inclua URL direta. Não trate alegação como fato sem evidência. Hipóteses especulativas, tradições e relatos devem ser classificados como tais, incluindo contraevidências quando encontradas.
+
+Objetivo/tema: {question}
+Ministério de entrada: {ministry_id}
+Hipóteses registradas: {json.dumps(hypothesis_context, ensure_ascii=False)}
+Backlog de pesquisa: {json.dumps(backlog_context, ensure_ascii=False)}
+Ministérios disponíveis: {json.dumps(ministry_names, ensure_ascii=False)}
+
+Retorne somente um objeto JSON válido com as chaves `report` e `findings`. `report` deve resumir as mudanças, separar fato/inferência/hipótese e sugerir o próximo passo. `findings` deve conter até seis itens, cada um com: source_id (estável; DOI ou URL quando houver), title, summary (alegação + dado/método + limite), source_url, published_at (ISO quando disponível), source_type (scientific_paper, news, ministry_report, internal_hypothesis ou other), ministry_id (id da lista ou research_evolution), hypothesis_ids (apenas IDs listados acima), tags (lista), confidence (0 a 1, refletindo a qualidade da evidência), priority (0 a 1), evidence_class (ex.: primary_source, peer_reviewed, official_report, unverified_report, contrary_evidence). Se não houver achado novo e útil, retorne findings vazio e explique no report. Responda em português. Não gere diagnósticos médicos nem confirme fenômenos extraordinários sem evidência independente."""
+    payload = {
+        "model": settings.openai_model,
+        "tools": [{"type": "web_search"}],
+        "input": [
+            {"role": "system", "content": "Você é o pesquisador do ATLAS. Apure fontes, retenha proveniência e declare incerteza; não invente referências nem resultados."},
+            {"role": "user", "content": research_prompt},
+        ],
+    }
+    try:
+        async with httpx.AsyncClient(timeout=150) as client:
+            response = await client.post(
+                f"{settings.openai_base_url.rstrip('/')}/responses",
+                headers={"Authorization": f"Bearer {settings.openai_api_key}", "Content-Type": "application/json"},
+                json=payload,
+            )
+            response.raise_for_status()
+            result = response.json()
+    except httpx.HTTPStatusError as error:
+        raise HTTPException(status_code=502, detail="O provedor de pesquisa web não aceitou a solicitação. Verifique modelo e acesso à ferramenta web_search.") from error
+    except httpx.HTTPError as error:
+        raise HTTPException(status_code=502, detail="Não foi possível conectar ao provedor de pesquisa web.") from error
+    output_text = "\n".join(
+        part["text"] for item in result.get("output", []) if item.get("type") == "message"
+        for part in item.get("content", []) if part.get("type") in {"output_text", "text"} and part.get("text")
+    ).strip()
+    if not output_text:
+        raise HTTPException(status_code=502, detail="A pesquisa web não retornou conteúdo legível.")
+    cleaned = output_text.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.strip("`").removeprefix("json").strip()
+    try:
+        parsed = json.loads(cleaned)
+        report = str(parsed.get("report", "")).strip()
+        findings = parsed.get("findings", [])
+        intake = ResearchIntakeRequest(
+            batch_id=f"{producer}:{datetime.now(ZoneInfo('America/Sao_Paulo')).date().isoformat()}:{uuid4().hex[:8]}",
+            producer=producer,
+            generated_at=datetime.now(timezone.utc).isoformat(),
+            findings=findings,
+        ) if findings else None
+    except (json.JSONDecodeError, AttributeError, TypeError, ValueError) as error:
+        raise HTTPException(status_code=502, detail="O relatório recebido não seguiu o formato de pesquisa do ATLAS; nenhum item foi gravado.") from error
+    intake_result = store_research_intake(intake) if intake else {"received": 0, "inserted": 0, "duplicates": 0, "findings": []}
+    if intake_result["inserted"]:
+        plan = make_daily_research_plan(force=True)
+    else:
+        plan = None
+    return {"report": report, "intake": intake_result, "daily_plan": plan, "provider": "openai", "model": settings.openai_model, "response_id": result.get("id")}
+
+
+@app.get("/research/central", dependencies=[Depends(require_token)])
+def research_central() -> dict[str, object]:
+    findings = latest_records("research_finding")
+    plans = latest_records("research_daily_plan")
+    hypotheses = latest_records("research_hypothesis") + latest_records("hypothesis")
+    backlog = latest_records("research")
+    runs = latest_records("research_run")
+    return {
+        "findings": [row["data"] for row in findings[:100]],
+        "hypotheses": [row["data"] for row in hypotheses[:100]],
+        "backlog": [row["data"] for row in backlog[:100]],
+        "latest_plan": plans[0]["data"] if plans else None,
+        "latest_run": runs[0]["data"] if runs else None,
+        "automation_bridge": {
+            "endpoint": "/research/automation/intake",
+            "authentication": "X-Atlas-Automation-Key",
+            "configured": bool(settings.research_automation_token),
+            "web_search_configured": bool(settings.openai_api_key),
+            "smtp_configured": bool(settings.publication_email and settings.smtp_host and settings.smtp_username and settings.smtp_password),
+            "scheduled_chat_tasks_connected": False,
+        },
+        "publication_email": {"configured": bool(settings.publication_email and settings.smtp_host and settings.smtp_username and settings.smtp_password), "recipient": settings.publication_email},
+    }
+
+
+@app.post("/research/intake", dependencies=[Depends(require_token)])
+def research_intake(request: ResearchIntakeRequest) -> dict[str, object]:
+    return store_research_intake(request)
+
+
+@app.post("/research/automation/intake")
+def research_automation_intake(
+    request: ResearchIntakeRequest,
+    authorization: str | None = Header(default=None),
+    x_atlas_automation_key: str | None = Header(default=None),
+) -> dict[str, object]:
+    if not settings.research_automation_token:
+        raise HTTPException(status_code=503, detail="A chave privada da ponte de automação ainda não foi configurada.")
+    if not research_intake_allowed(authorization, x_atlas_automation_key):
+        raise HTTPException(status_code=401, detail="Credencial de ingestão inválida.")
+    return store_research_intake(request)
+
+
+@app.post("/research/investigate", dependencies=[Depends(require_token)])
+async def investigate_research_topic(request: ResearchInvestigationRequest) -> dict[str, object]:
+    result = await search_research_sources(request.question, request.ministry_id, request.hypothesis_ids, "atlas-web-investigation")
+    run_id = f"research-run:{uuid4().hex[:12]}"
+    run = {"run_id": run_id, "trigger": "user_request", "question": request.question, "ministry_id": request.ministry_id, "status": "completed", "finding_count": result["intake"]["inserted"], "provider": result["provider"], "model": result["model"], "completed_at": datetime.now(timezone.utc).isoformat()}
+    save_record("research_run", run_id, title=request.question, body=result["report"], data=run)
+    return {**result, "run": run}
+
+
+@app.post("/research/automation/daily-run")
+async def daily_automated_research(
+    authorization: str | None = Header(default=None),
+    x_atlas_automation_key: str | None = Header(default=None),
+) -> dict[str, object]:
+    if not settings.research_automation_token:
+        raise HTTPException(status_code=503, detail="A chave privada da ponte de automação ainda não foi configurada.")
+    if not research_intake_allowed(authorization, x_atlas_automation_key):
+        raise HTTPException(status_code=401, detail="Credencial de automação inválida.")
+    questions = [str(row["data"].get("question", "")) for row in latest_records("research")[:8] if row["data"].get("question")]
+    hypothesis_titles = [str(row["data"].get("title", row["data"].get("question", ""))) for row in (latest_records("research_hypothesis") + latest_records("hypothesis"))[:12]]
+    focus = "\n".join([f"Backlog: {item}" for item in questions] + [f"Hipótese: {item}" for item in hypothesis_titles])
+    question = "Faça a varredura diária das mudanças científicas, notícias verificáveis e fontes primárias relevantes aos ministérios do ATLAS nas últimas 24 horas. Relacione os achados ao backlog e hipóteses abaixo, priorize novidade, relevância, força da evidência, contraevidência e possibilidade de produzir um teste ou entrega hoje. Se não houver mudança confiável, informe isso e não fabrique achados.\n" + (focus or "Não há hipóteses estruturadas suficientes ainda; faça uma triagem transversal por especialidade ministerial e registre lacunas de conhecimento.")
+    try:
+        result = await search_research_sources(question, "research_evolution", [], "atlas-daily-research")
+    except HTTPException as error:
+        run_id = f"research-run:{uuid4().hex[:12]}"
+        save_record("research_run", run_id, title="ATLAS Daily Research", data={"run_id": run_id, "trigger": "daily_schedule", "status": "failed", "error": error.detail, "completed_at": datetime.now(timezone.utc).isoformat()})
+        raise
+    plan = result["daily_plan"] or make_daily_research_plan(force=True)
+    email = None
+    if int(result["intake"]["inserted"]) > 0 and settings.publication_email and all((settings.smtp_host, settings.smtp_username, settings.smtp_password)):
+        email = email_research_daily_plan(str(plan["plan_id"]))
+    run_id = f"research-run:{uuid4().hex[:12]}"
+    run = {"run_id": run_id, "trigger": "daily_schedule", "status": "completed", "finding_count": result["intake"]["inserted"], "email_sent": bool(email), "completed_at": datetime.now(timezone.utc).isoformat()}
+    save_record("research_run", run_id, title="ATLAS Daily Research", body=result["report"], data=run)
+    return {"report": result["report"], "daily_plan": plan, "run": run, "email": email}
+
+
+@app.get("/research/automation/health")
+def research_automation_health(
+    authorization: str | None = Header(default=None),
+    x_atlas_automation_key: str | None = Header(default=None),
+) -> dict[str, object]:
+    if not settings.research_automation_token:
+        raise HTTPException(status_code=503, detail="A chave privada da ponte ainda não está configurada.")
+    if not research_intake_allowed(authorization, x_atlas_automation_key):
+        raise HTTPException(status_code=401, detail="Credencial de automação inválida.")
+    return {
+        "automation_bridge_configured": True,
+        "web_search_configured": bool(settings.openai_api_key),
+        "web_search_model": settings.openai_model if settings.openai_api_key else None,
+        "email_configured": bool(settings.publication_email and settings.smtp_host and settings.smtp_username and settings.smtp_password),
+        "scheduled_chat_tasks_connected": False,
+    }
+
+
+def make_daily_research_plan(force: bool = False) -> dict[str, object]:
+    today = datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
+    plan_id = f"research-daily:{today}"
+    existing = get_record("research_daily_plan", plan_id)
+    if existing and not force:
+        return existing["data"]
+    cutoff = datetime.now(timezone.utc).timestamp() - 36 * 60 * 60
+    findings = []
+    for row in latest_records("research_finding"):
+        data = row["data"]
+        try:
+            ingested = datetime.fromisoformat(str(data.get("ingested_at", "")).replace("Z", "+00:00")).timestamp()
+        except (ValueError, TypeError):
+            ingested = 0
+        if ingested >= cutoff:
+            findings.append(data)
+    backlog = [row["data"] for row in latest_records("research") if str(row["data"].get("status", "idea")) not in {"complete", "completed", "done", "deferred"}]
+    findings.sort(key=lambda item: (float(item.get("priority", 0.5)) * 0.65 + float(item.get("confidence", 0.5)) * 0.35, str(item.get("ingested_at", ""))), reverse=True)
+    selected = findings[:10]
+    goals: list[dict[str, object]] = []
+    ria_candidates: list[dict[str, object]] = []
+    all_hypotheses = latest_records("research_hypothesis") + latest_records("hypothesis")
+    hypotheses_by_id = {str(row["external_id"]): row["data"] for row in all_hypotheses}
+    for index, finding in enumerate(selected[:3], start=1):
+        explicit_ids = [str(value) for value in finding.get("hypothesis_ids", []) if str(value) in hypotheses_by_id]
+        haystack = f"{finding.get('title', '')} {finding.get('summary', '')} {' '.join(finding.get('tags', []))}".casefold()
+        if not explicit_ids:
+            for hypothesis_id, hypothesis in hypotheses_by_id.items():
+                title = str(hypothesis.get("title", hypothesis.get("question", "")))
+                terms = [term for term in title.casefold().split() if len(term) > 4]
+                if terms and sum(term in haystack for term in terms) >= max(1, min(2, len(terms))):
+                    explicit_ids.append(hypothesis_id)
+        ministry_id = str(finding.get("ministry_id", "research_evolution"))
+        objective = f"Verificar e comparar: {finding.get('title', 'achado de pesquisa')}"
+        route = orchestrator.route(Mission(mission_id=f"research-route:{uuid4().hex[:8]}", objective=objective, required_skills=("research", "analysis")))
+        ministries = list(route.primary_ministries) or [ministry_id]
+        finding_id = str(finding.get("finding_id", ""))
+        if finding.get("source_url"):
+            goals.append({"goal_id": f"goal:{today}:{index}:source", "title": f"Apurar a fonte: {finding.get('title', '')}", "action": "Conferir publicação, data, método, contexto e fonte primária; registrar evidências contrárias.", "deliverable": "Ficha de apuração com URL primária, data e classificação de evidência.", "status": "planned", "source_ids": [finding_id], "hypothesis_ids": explicit_ids, "ministries": ministries, "done_criteria": "Fonte primária aberta e alegação classificada; divergências registradas."})
+        if explicit_ids:
+            goals.append({"goal_id": f"goal:{today}:{index}:hypothesis", "title": f"Atualizar hipótese relacionada a {finding.get('title', 'novo achado')}", "action": "Comparar o achado com a hipótese, buscar suporte e contraevidência e atualizar a incerteza sem promover a conclusão automaticamente.", "deliverable": "Nota de atualização vinculada à hipótese e ao achado.", "status": "planned", "source_ids": [finding_id], "hypothesis_ids": explicit_ids, "ministries": ministries, "done_criteria": "Relação registrada como suporte, contradição ou inconclusiva, com justificativa."})
+        tags = [str(tag).lower() for tag in finding.get("tags", [])]
+        if finding.get("source_type") in {"scientific_paper", "ministry_report", "internal_hypothesis"} or tags:
+            candidate_id = f"ria-candidate:{hashlib.sha256(finding_id.encode()).hexdigest()[:16]}"
+            candidate = {"candidate_id": candidate_id, "source_ids": [finding_id], "title": str(finding.get("title", "")), "hypothesis_ids": explicit_ids, "stage": "source_triage", "status": "candidate_only", "method": "RIA + engenharia reversa", "steps": ["identificar função/efeito alegado", "separar mecanismo observado de interpretação", "mapear entradas, materiais, energia e controles conhecidos", "buscar análogos naturais/tecnológicos", "registrar lacunas e explicações alternativas", "propor teste mínimo discriminante e reversível"], "evidence_class": str(finding.get("evidence_class", "unverified_report")), "human_review_required": True, "created_at": datetime.now(timezone.utc).isoformat()}
+            if not get_record("ria_candidate", candidate_id):
+                save_record("ria_candidate", candidate_id, title=candidate["title"], data=candidate)
+            ria_candidates.append(candidate)
+            goals.append({"goal_id": f"goal:{today}:{index}:ria", "title": f"RIA e engenharia reversa: {finding.get('title', '')}", "action": "Decompor o efeito alegado em função, entradas, mecanismo possível, análogos, lacunas e um experimento mínimo discriminante.", "deliverable": "Ficha RIA em estágio de triagem, sem tratar hipótese como tecnologia demonstrada.", "status": "planned", "source_ids": [finding_id], "hypothesis_ids": explicit_ids, "ministries": ministries, "done_criteria": "Mecanismo e desconhecidos descritos; teste mínimo e riscos identificados."})
+    if not goals and backlog:
+        item = backlog[0]
+        objective = str(item.get("question", "Pesquisa pendente"))
+        route = orchestrator.route(Mission(mission_id=f"research-route:{uuid4().hex[:8]}", objective=objective, required_skills=("research", "analysis")))
+        goals.append({"goal_id": f"goal:{today}:backlog", "title": f"Avançar pesquisa pendente: {objective}", "action": "Definir a fonte primária necessária e o menor passo de investigação que reduza a incerteza.", "deliverable": "Plano curto de apuração com evidência esperada e critério de encerramento.", "status": "planned", "source_ids": [], "hypothesis_ids": [], "ministries": list(route.primary_ministries), "done_criteria": "Próxima evidência ou teste documentado; sem alegar descoberta sem suporte."})
+    goals = goals[:8]
+    plan = {"plan_id": plan_id, "date": today, "created_at": datetime.now(timezone.utc).isoformat(), "status": "ready" if selected else ("backlog_only" if goals else "no_inputs"), "input_count": len(selected), "summary": f"{len(selected)} achado(s) recebido(s), {len(goals)} meta(s) proposta(s), {len(ria_candidates)} candidato(s) RIA em triagem.", "findings": selected, "goals": goals, "ria_candidates": ria_candidates, "epistemic_rule": "Achados não confirmados permanecem em triagem; nenhuma hipótese é promovida automaticamente a conclusão ou artigo."}
+    save_record("research_daily_plan", plan_id, title=f"Plano diário de pesquisa · {today}", body=plan["summary"], data=plan)
+    return plan
+
+
+@app.post("/research/daily-plan", dependencies=[Depends(require_token)])
+def create_research_daily_plan(force: bool = False) -> dict[str, object]:
+    return make_daily_research_plan(force=force)
+
+
+@app.post("/research/automation/plan")
+def automation_research_plan(
+    force: bool = False,
+    authorization: str | None = Header(default=None),
+    x_atlas_automation_key: str | None = Header(default=None),
+) -> dict[str, object]:
+    if not settings.research_automation_token:
+        raise HTTPException(status_code=503, detail="A chave privada da ponte de automação ainda não foi configurada.")
+    if not research_intake_allowed(authorization, x_atlas_automation_key):
+        raise HTTPException(status_code=401, detail="Credencial de automação inválida.")
+    plan = make_daily_research_plan(force=force)
+    email = None
+    if int(plan.get("input_count", 0)) > 0 and settings.publication_email and all((settings.smtp_host, settings.smtp_username, settings.smtp_password)):
+        email = email_research_daily_plan(str(plan["plan_id"]))
+    return {"plan": plan, "email": email, "ran_at": datetime.now(timezone.utc).isoformat()}
+
+
+@app.patch("/research/goals/{goal_id}", dependencies=[Depends(require_token)])
+def update_research_goal(goal_id: str, request: ResearchGoalUpdate) -> dict[str, object]:
+    plans = latest_records("research_daily_plan")
+    for row in plans:
+        plan = row["data"]
+        goals = plan.get("goals", [])
+        for goal in goals:
+            if goal.get("goal_id") == goal_id:
+                goal["status"] = request.status
+                goal["status_note"] = request.note
+                goal["updated_at"] = datetime.now(timezone.utc).isoformat()
+                if request.status == "completed":
+                    goal["completed_at"] = goal["updated_at"]
+                save_record("research_daily_plan", str(plan.get("plan_id", row["external_id"])), title=str(row.get("title", "Daily research plan")), body=str(plan.get("summary", "")), data=plan)
+                return goal
+    raise HTTPException(status_code=404, detail="Research goal not found.")
+
+
+@app.post("/research/daily-plan/{plan_id}/email", dependencies=[Depends(require_token)])
+def email_research_daily_plan(plan_id: str) -> dict[str, object]:
+    plan = get_record("research_daily_plan", plan_id)
+    if not plan:
+        raise HTTPException(status_code=404, detail="Daily research plan not found.")
+    if not settings.publication_email or not all((settings.smtp_host, settings.smtp_username, settings.smtp_password)):
+        raise HTTPException(status_code=503, detail="O envio de e-mail ainda não está configurado no ATLAS.")
+    data = plan["data"]
+    link = f"{settings.public_web_url.rstrip('/')}?screen=Pesquisa"
+    message = EmailMessage()
+    message["Subject"] = f"ATLAS · Central de Pesquisa · {data.get('date', '')}"
+    message["From"] = settings.smtp_from or settings.smtp_username
+    message["To"] = settings.publication_email
+    message.set_content(f"{data.get('summary', '')}\n\nPlano e fontes no ATLAS: {link}\n\nOs achados permanecem em triagem até verificação de fonte e evidência.")
+    message.add_alternative(f"<p>{escape(str(data.get('summary', '')))}</p><p><a href=\"{escape(link)}\">Abrir Central de Pesquisa do ATLAS</a></p><p>Os achados permanecem em triagem até verificação de fonte e evidência.</p>", subtype="html")
+    try:
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=25) as server:
+            if settings.smtp_use_tls:
+                server.starttls(context=ssl.create_default_context())
+            server.login(settings.smtp_username, settings.smtp_password)
+            server.send_message(message)
+    except (OSError, smtplib.SMTPException) as error:
+        raise HTTPException(status_code=502, detail="O ATLAS não conseguiu enviar o resumo por e-mail.") from error
+    return {"sent": True, "to": settings.publication_email, "link": link}
 
 
 @app.get("/publications", dependencies=[Depends(require_token)])

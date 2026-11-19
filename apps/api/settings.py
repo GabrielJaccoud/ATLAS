@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     artifact_dir: str = "./data/artifacts"
     cors_origins: str = "*"
     publication_email: str = ""
+    research_automation_token: str = ""
+    public_web_url: str = "https://atlas-18-mobile.onrender.com"
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_username: str = ""
