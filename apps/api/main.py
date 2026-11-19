@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hmac
 from typing import Literal
+from datetime import datetime, timezone
 
 from uuid import uuid4
 
@@ -93,6 +94,91 @@ class ResearchRequest(BaseModel):
     ministry_id: str
     question: str
     priority: float = 0.5
+
+
+class ScientificWorkRequest(BaseModel):
+    author_name: str = Field(default="Gabriel Jaccoud", min_length=3, max_length=200)
+    ministry_id: str = Field(min_length=1, max_length=120)
+    work_type: Literal["mathematical_result", "theoretical_physics", "empirical_result"]
+    evidence_level: Literal[
+        "internal_hypothesis",
+        "mathematical_proof",
+        "physical_viability",
+        "empirical_support",
+        "independent_replication",
+    ]
+    title_pt: str = Field(min_length=8, max_length=300)
+    title_en: str = Field(default="", max_length=300)
+    abstract_pt: str = Field(default="", max_length=5000)
+    abstract_en: str = Field(default="", max_length=5000)
+    question_pt: str = Field(default="", max_length=10000)
+    question_en: str = Field(default="", max_length=10000)
+    assumptions_pt: str = Field(default="", max_length=10000)
+    assumptions_en: str = Field(default="", max_length=10000)
+    methodology_pt: str = Field(default="", max_length=20000)
+    methodology_en: str = Field(default="", max_length=20000)
+    results_pt: str = Field(default="", max_length=20000)
+    results_en: str = Field(default="", max_length=20000)
+    predictions_pt: str = Field(default="", max_length=10000)
+    predictions_en: str = Field(default="", max_length=10000)
+    uncertainty_pt: str = Field(default="", max_length=10000)
+    uncertainty_en: str = Field(default="", max_length=10000)
+    limitations_pt: str = Field(default="", max_length=10000)
+    limitations_en: str = Field(default="", max_length=10000)
+    references: list[str] = Field(default_factory=list, max_length=100)
+
+
+def evaluate_scientific_work(data: ScientificWorkRequest) -> dict[str, object]:
+    common_missing = [
+        label for label, value in (
+            ("abstract_pt", data.abstract_pt), ("abstract_en", data.abstract_en),
+            ("question_pt", data.question_pt), ("question_en", data.question_en),
+            ("methodology_pt", data.methodology_pt), ("methodology_en", data.methodology_en),
+            ("limitations_pt", data.limitations_pt), ("limitations_en", data.limitations_en),
+            ("title_en", data.title_en),
+        ) if not value.strip()
+    ]
+    missing = list(common_missing)
+    if not data.references:
+        missing.append("references")
+
+    if data.work_type == "mathematical_result":
+        if data.evidence_level != "mathematical_proof":
+            missing.append("complete_mathematical_proof")
+        if not data.assumptions_pt.strip():
+            missing.append("assumptions_pt")
+        if not data.assumptions_en.strip():
+            missing.append("assumptions_en")
+        if not data.results_pt.strip() or not data.results_en.strip():
+            missing.append("proof_and_result_in_both_languages")
+        classification = "mathematically_proven_under_stated_assumptions"
+    elif data.work_type == "theoretical_physics":
+        if data.evidence_level not in {"physical_viability", "empirical_support", "independent_replication"}:
+            missing.append("physical_viability_review")
+        if not data.assumptions_pt.strip() or not data.assumptions_en.strip():
+            missing.append("explicit_assumptions_in_both_languages")
+        if not data.predictions_pt.strip() or not data.predictions_en.strip():
+            missing.append("testable_predictions_in_both_languages")
+        classification = (
+            "theoretical_not_experimentally_confirmed"
+            if data.evidence_level == "physical_viability"
+            else data.evidence_level
+        )
+    else:
+        if data.evidence_level not in {"empirical_support", "independent_replication"}:
+            missing.append("empirical_evidence")
+        if not data.results_pt.strip() or not data.results_en.strip():
+            missing.append("results_in_both_languages")
+        if not data.uncertainty_pt.strip() or not data.uncertainty_en.strip():
+            missing.append("uncertainty_in_both_languages")
+        classification = data.evidence_level
+
+    return {
+        "export_ready": not missing,
+        "missing_requirements": missing,
+        "claim_classification": classification,
+        "review_required": True,
+    }
 
 
 class WorldNodeRequest(BaseModel):
@@ -272,6 +358,36 @@ def add_research(request: ResearchRequest) -> dict[str, object]:
         "next_experiment": None,
     }
     save_record("research", item_id, title=request.question, data=data)
+    return data
+
+
+@app.get("/publications", dependencies=[Depends(require_token)])
+def list_scientific_works() -> list[dict[str, object]]:
+    latest: dict[str, dict[str, object]] = {}
+    for record in list_record_dicts("scientific_work"):
+        external_id = str(record["external_id"])
+        latest.setdefault(external_id, record["data"])
+    return list(latest.values())
+
+
+@app.post("/publications", dependencies=[Depends(require_token)])
+def register_scientific_work(request: ScientificWorkRequest) -> dict[str, object]:
+    publication_id = f"publication:{uuid4().hex[:12]}"
+    gate = evaluate_scientific_work(request)
+    data = {
+        "publication_id": publication_id,
+        "revision": 1,
+        **request.model_dump(),
+        **gate,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    save_record(
+        "scientific_work",
+        publication_id,
+        title=request.title_pt,
+        body=request.abstract_pt,
+        data=data,
+    )
     return data
 
 

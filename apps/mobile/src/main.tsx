@@ -50,6 +50,40 @@ type ResearchItem = {
   priority: number;
 };
 
+type ScientificWork = {
+  publication_id: string;
+  author_name: string;
+  ministry_id: string;
+  work_type: "mathematical_result" | "theoretical_physics" | "empirical_result";
+  evidence_level: "internal_hypothesis" | "mathematical_proof" | "physical_viability" | "empirical_support" | "independent_replication";
+  title_pt: string;
+  title_en: string;
+  abstract_pt: string;
+  abstract_en: string;
+  question_pt: string;
+  question_en: string;
+  assumptions_pt: string;
+  assumptions_en: string;
+  methodology_pt: string;
+  methodology_en: string;
+  results_pt: string;
+  results_en: string;
+  predictions_pt: string;
+  predictions_en: string;
+  uncertainty_pt: string;
+  uncertainty_en: string;
+  limitations_pt: string;
+  limitations_en: string;
+  references: string[];
+  export_ready: boolean;
+  missing_requirements: string[];
+  claim_classification: string;
+  review_required: boolean;
+  created_at: string;
+};
+
+type ScientificWorkForm = Omit<ScientificWork, "publication_id" | "export_ready" | "missing_requirements" | "claim_classification" | "review_required" | "created_at" | "references"> & { referencesText: string };
+
 type WorldData = {
   nodes: Array<{ node_id: string; kind: string; name: string; attributes?: Record<string, unknown> }>;
   edges: Array<{ edge_id: string; source: string; relation: string; target: string; weight: number }>;
@@ -175,6 +209,32 @@ function App() {
   const [worldError, setWorldError] = useState("");
   const [events, setEvents] = useState<AtlasEvent[]>([]);
   const [researchItems, setResearchItems] = useState<ResearchItem[]>([]);
+  const [scientificWorks, setScientificWorks] = useState<ScientificWork[]>([]);
+  const [publicationForm, setPublicationForm] = useState<ScientificWorkForm>({
+    author_name: "Gabriel Jaccoud",
+    ministry_id: "research",
+    work_type: "theoretical_physics",
+    evidence_level: "internal_hypothesis",
+    title_pt: "",
+    title_en: "",
+    abstract_pt: "",
+    abstract_en: "",
+    question_pt: "",
+    question_en: "",
+    assumptions_pt: "",
+    assumptions_en: "",
+    methodology_pt: "",
+    methodology_en: "",
+    results_pt: "",
+    results_en: "",
+    predictions_pt: "",
+    predictions_en: "",
+    uncertainty_pt: "",
+    uncertainty_en: "",
+    limitations_pt: "",
+    limitations_en: "",
+    referencesText: "",
+  });
   const [world, setWorld] = useState<WorldData>({ nodes: [], edges: [] });
   const [observations, setObservations] = useState<Array<ApiRecord<WorldObservation>>>([]);
   const [metrics, setMetrics] = useState<Record<string, unknown> | null>(null);
@@ -220,18 +280,20 @@ function App() {
       const data = await atlasFetch<Status>("/status");
       setStatus(data);
       setConnected(true);
-      const [eventData, researchData, worldData, metricsData, observationData] = await Promise.allSettled([
+      const [eventData, researchData, worldData, metricsData, observationData, publicationData] = await Promise.allSettled([
         atlasFetch<AtlasEvent[]>("/events"),
         atlasFetch<Array<{ data: ResearchItem }>>("/records/research"),
         atlasFetch<WorldData>("/world"),
         atlasFetch<Record<string, unknown>>("/metrics"),
         atlasFetch<Array<ApiRecord<WorldObservation>>>("/records/world_observation"),
+        atlasFetch<ScientificWork[]>("/publications"),
       ]);
       if (eventData.status === "fulfilled") setEvents(eventData.value);
       if (researchData.status === "fulfilled") setResearchItems(researchData.value.map((record) => record.data));
       if (worldData.status === "fulfilled") setWorld(worldData.value);
       if (metricsData.status === "fulfilled") setMetrics(metricsData.value);
       if (observationData.status === "fulfilled") setObservations(observationData.value);
+      if (publicationData.status === "fulfilled") setScientificWorks(publicationData.value);
     } catch {
       setConnected(false);
     }
@@ -292,6 +354,73 @@ function App() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function updatePublicationForm<K extends keyof ScientificWorkForm>(key: K, value: ScientificWorkForm[K]) {
+    setPublicationForm((current) => ({ ...current, [key]: value }));
+  }
+
+  async function saveScientificWork() {
+    if (!connected) {
+      setReply("Pareie este dispositivo para registrar um trabalho científico.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { referencesText, ...content } = publicationForm;
+      const record = await atlasFetch<ScientificWork>("/publications", {
+        method: "POST",
+        body: JSON.stringify({
+          ...content,
+          references: referencesText.split("\n").map((value) => value.trim()).filter(Boolean),
+        }),
+      });
+      setScientificWorks((current) => [record, ...current]);
+      setReply(record.export_ready
+        ? "Trabalho registrado e liberado para revisão final e exportação."
+        : `Trabalho guardado na trilha interna. Ainda faltam ${record.missing_requirements.length} requisito(s) para exportação.`);
+      setPublicationForm((current) => ({ ...current, title_pt: "", title_en: "" }));
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function printScientificWork(work: ScientificWork, language: "pt" | "en") {
+    if (!work.export_ready) return;
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      setReply("Permita a abertura da janela de impressão para salvar o PDF.");
+      return;
+    }
+    const english = language === "en";
+    const sections = english
+      ? [["Abstract", work.abstract_en], ["Research question", work.question_en], ["Assumptions and model", work.assumptions_en], ["Methodology", work.methodology_en], [work.work_type === "mathematical_result" ? "Theorem, proof and result" : "Results", work.results_en], ["Predictions", work.predictions_en], ["Uncertainty", work.uncertainty_en], ["Limitations", work.limitations_en]]
+      : [["Resumo", work.abstract_pt], ["Pergunta de pesquisa", work.question_pt], ["Premissas e modelo", work.assumptions_pt], ["Metodologia", work.methodology_pt], [work.work_type === "mathematical_result" ? "Teorema, demonstração e resultado" : "Resultados", work.results_pt], ["Previsões", work.predictions_pt], ["Incertezas", work.uncertainty_pt], ["Limitações", work.limitations_pt]];
+    const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => {
+      switch (char) {
+        case "&": return "&amp;";
+        case "<": return "&lt;";
+        case ">": return "&gt;";
+        case '"': return "&quot;";
+        case "'": return "&#39;";
+        default: return char;
+      }
+    });
+    const label = work.claim_classification.replaceAll("_", " ");
+    printWindow.document.open();
+    printWindow.document.write(`<!doctype html><html lang="${english ? "en" : "pt-BR"}"><head><meta charset="utf-8"><title>${escapeHtml(english ? work.title_en : work.title_pt)}</title><style>body{font:12pt/1.6 Georgia,serif;color:#17191d;max-width:760px;margin:48px auto;padding:0 24px}h1{font:700 25pt/1.2 Arial,sans-serif}h2{font:700 14pt Arial,sans-serif;margin:26px 0 6px}.meta{font:10pt Arial,sans-serif;color:#59616b;border-bottom:1px solid #c8ccd1;padding-bottom:14px}.status{display:inline-block;border:1px solid #9b7b42;border-radius:20px;padding:4px 10px;font:9pt Arial,sans-serif;text-transform:uppercase;letter-spacing:.08em}p{white-space:pre-wrap}.refs{font-size:10pt}@media print{body{margin:0 auto;padding:0}}</style></head><body><span class="status">${escapeHtml(label)}</span><h1>${escapeHtml(english ? work.title_en : work.title_pt)}</h1><div class="meta">${escapeHtml(work.author_name)} · ${escapeHtml(work.ministry_id)} · ${english ? "Evidence status" : "Nível de evidência"}: ${escapeHtml(label)}</div>${sections.map(([heading, body]) => `<section><h2>${escapeHtml(heading)}</h2><p>${escapeHtml(body || "—")}</p></section>`).join("")}<section><h2>${english ? "References" : "Referências"}</h2><ol class="refs">${work.references.map((reference) => `<li>${escapeHtml(reference)}</li>`).join("")}</ol></section><p class="meta">${english ? "AI-assisted drafting must be reviewed by the responsible author before external submission." : "O texto com apoio de IA deve ser revisado pelo autor responsável antes de submissão externa."}</p><script>window.onload=()=>window.print()</script></body></html>`);
+    printWindow.document.close();
+  }
+
+  function shareScientificWork(work: ScientificWork, channel: "email" | "whatsapp") {
+    const subject = `ATLAS — ${work.title_pt}`;
+    const body = `Estou compartilhando o trabalho científico “${work.title_pt}” e anexarei os PDFs em português e inglês após salvá-los pelo ATLAS.`;
+    const url = channel === "email"
+      ? `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+      : `https://wa.me/?text=${encodeURIComponent(`${body}\n${subject}`)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   function goTo(screen: ScreenId) {
@@ -611,12 +740,45 @@ function App() {
       case "Ciência":
         return (
           <>
-            <SectionHeader eyebrow="Epistemic Layer" title="Ciência" description="Evidência, mecanismos, hipóteses e fronteiras." />
-            <div className="cards-grid">
-              <div className="feature-card atlas-surface"><span>Ciência Interna</span><strong>Modelos próprios</strong><p>Hipóteses formais, mecanismos e previsões.</p></div>
-              <div className="feature-card atlas-surface"><span>Fronteira</span><strong>Conhecimento novo</strong><p>Linhas científicas e técnicas emergentes.</p></div>
-              <div className="feature-card atlas-surface"><span>Evidência</span><strong>Dossiês auditáveis</strong><p>Fonte → claim → evidência → interpretação.</p></div>
+            <SectionHeader eyebrow="Epistemic Layer · Publication Gate" title="Da pesquisa ao artigo." description="Qualquer ministério pode encaminhar um resultado. O ATLAS só libera a exportação quando o tipo de trabalho e a força da evidência atendem aos requisitos correspondentes." />
+            <div className="publication-principles atlas-surface">
+              <div><span className="eyebrow">Teorema</span><strong>Premissas e demonstração</strong><p>Prova formal, completa e verificável.</p></div>
+              <div><span className="eyebrow">Teoria física</span><strong>Viabilidade não é confirmação</strong><p>Modelos teóricos ficam identificados como não confirmados até haver evidência experimental.</p></div>
+              <div><span className="eyebrow">Resultado empírico</span><strong>Método, dados e incerteza</strong><p>A força da conclusão acompanha os resultados e a possibilidade de reprodução.</p></div>
             </div>
+            <div className="publication-form atlas-surface">
+              <div className="section-row"><div><span className="eyebrow">Entrada transversal</span><h3>Registrar trabalho científico</h3></div><span className="publication-scope">Todos os ministérios</span></div>
+              {!connected && <div className="notice">Pareie o dispositivo para registrar submissões no ATLAS.</div>}
+              <div className="publication-fields">
+                <label>Ministério de origem<select value={publicationForm.ministry_id} onChange={(event) => updatePublicationForm("ministry_id", event.target.value)}>{(status?.ministries || []).map((ministry) => <option key={ministry.id} value={ministry.id}>{ministry.name}</option>)}<option value="transversal">Transversal / múltiplos ministérios</option>{!status?.ministries?.length && <option value="research">Pesquisa</option>}</select></label>
+                <label>Natureza do trabalho<select value={publicationForm.work_type} onChange={(event) => updatePublicationForm("work_type", event.target.value as ScientificWorkForm["work_type"])}><option value="mathematical_result">Resultado matemático / teorema</option><option value="theoretical_physics">Teoria ou modelo físico</option><option value="empirical_result">Resultado empírico / experimental</option></select></label>
+                <label>Nível de evidência<select value={publicationForm.evidence_level} onChange={(event) => updatePublicationForm("evidence_level", event.target.value as ScientificWorkForm["evidence_level"])}><option value="internal_hypothesis">Hipótese interna</option><option value="mathematical_proof">Prova matemática concluída</option><option value="physical_viability">Viabilidade física teórica</option><option value="empirical_support">Apoio empírico</option><option value="independent_replication">Reprodução independente</option></select></label>
+                <label>Autor responsável<input value={publicationForm.author_name} onChange={(event) => updatePublicationForm("author_name", event.target.value)} /></label>
+                <label>Título · português<input value={publicationForm.title_pt} onChange={(event) => updatePublicationForm("title_pt", event.target.value)} placeholder="Título do trabalho" /></label>
+                <label>Title · English<input value={publicationForm.title_en} onChange={(event) => updatePublicationForm("title_en", event.target.value)} placeholder="Reviewed English title" /></label>
+                <label>Resumo · português<textarea rows={4} value={publicationForm.abstract_pt} onChange={(event) => updatePublicationForm("abstract_pt", event.target.value)} /></label>
+                <label>Abstract · English<textarea rows={4} value={publicationForm.abstract_en} onChange={(event) => updatePublicationForm("abstract_en", event.target.value)} /></label>
+                <label>Pergunta e origem da pesquisa · português<textarea rows={3} value={publicationForm.question_pt} onChange={(event) => updatePublicationForm("question_pt", event.target.value)} /></label>
+                <label>Research question and origin · English<textarea rows={3} value={publicationForm.question_en} onChange={(event) => updatePublicationForm("question_en", event.target.value)} /></label>
+                <label>Premissas / modelo · português<textarea rows={3} value={publicationForm.assumptions_pt} onChange={(event) => updatePublicationForm("assumptions_pt", event.target.value)} /></label>
+                <label>Assumptions / model · English<textarea rows={3} value={publicationForm.assumptions_en} onChange={(event) => updatePublicationForm("assumptions_en", event.target.value)} /></label>
+                <label>Métodos e experimentos · português<textarea rows={4} value={publicationForm.methodology_pt} onChange={(event) => updatePublicationForm("methodology_pt", event.target.value)} /></label>
+                <label>Methods and experiments · English<textarea rows={4} value={publicationForm.methodology_en} onChange={(event) => updatePublicationForm("methodology_en", event.target.value)} /></label>
+                <label>{publicationForm.work_type === "mathematical_result" ? "Teorema, prova e resultado · português" : "Resultados · português"}<textarea rows={4} value={publicationForm.results_pt} onChange={(event) => updatePublicationForm("results_pt", event.target.value)} /></label>
+                <label>{publicationForm.work_type === "mathematical_result" ? "Theorem, proof and result · English" : "Results · English"}<textarea rows={4} value={publicationForm.results_en} onChange={(event) => updatePublicationForm("results_en", event.target.value)} /></label>
+                <label>Previsões testáveis · português<textarea rows={3} value={publicationForm.predictions_pt} onChange={(event) => updatePublicationForm("predictions_pt", event.target.value)} /></label>
+                <label>Testable predictions · English<textarea rows={3} value={publicationForm.predictions_en} onChange={(event) => updatePublicationForm("predictions_en", event.target.value)} /></label>
+                <label>Incertezas · português<textarea rows={3} value={publicationForm.uncertainty_pt} onChange={(event) => updatePublicationForm("uncertainty_pt", event.target.value)} /></label>
+                <label>Uncertainty · English<textarea rows={3} value={publicationForm.uncertainty_en} onChange={(event) => updatePublicationForm("uncertainty_en", event.target.value)} /></label>
+                <label>Limitações e explicações alternativas · português<textarea rows={3} value={publicationForm.limitations_pt} onChange={(event) => updatePublicationForm("limitations_pt", event.target.value)} /></label>
+                <label>Limitations and alternatives · English<textarea rows={3} value={publicationForm.limitations_en} onChange={(event) => updatePublicationForm("limitations_en", event.target.value)} /></label>
+                <label className="full-span">Referências verificáveis · uma por linha<textarea rows={4} value={publicationForm.referencesText} onChange={(event) => updatePublicationForm("referencesText", event.target.value)} placeholder="Autor, título, publicação, ano, DOI ou URL" /></label>
+              </div>
+              <p className="publication-note">O ATLAS guarda hipóteses para pesquisa interna. A exportação só é liberada se a prova, a viabilidade teórica ou a evidência empírica forem compatíveis com o tipo de trabalho. A versão inglesa exige revisão humana.</p>
+              <button className="primary" disabled={busy || !connected || publicationForm.title_pt.trim().length < 8} onClick={() => void saveScientificWork()}>Registrar e avaliar evidências</button>
+            </div>
+            <div className="section-row"><h3>Trabalhos registrados</h3><button className="secondary" onClick={() => void refresh()}>Atualizar</button></div>
+            {scientificWorks.length ? <div className="publication-list">{scientificWorks.map((work) => <article className="publication-entry atlas-surface" key={work.publication_id}><div className="publication-entry-heading"><div><span className="eyebrow">{work.ministry_id} · {work.work_type.replaceAll("_", " ")}</span><h3>{work.title_pt}</h3><p>{work.title_en || "English title pending"}</p></div><span className={`evidence-badge ${work.export_ready ? "ready" : "internal"}`}>{work.export_ready ? "Apto para revisão e PDF" : "Pesquisa interna"}</span></div><p>{work.claim_classification.replaceAll("_", " ")}{work.review_required ? " · revisão humana pendente" : ""}</p>{!work.export_ready && <details><summary>Requisitos pendentes ({work.missing_requirements.length})</summary><ul>{work.missing_requirements.map((item) => <li key={item}>{item.replaceAll("_", " ")}</li>)}</ul></details>}{work.export_ready && <div className="publication-actions"><button className="secondary" onClick={() => printScientificWork(work, "pt")}>Salvar PDF · Português</button><button className="secondary" onClick={() => printScientificWork(work, "en")}>Save PDF · English</button><button className="secondary" onClick={() => shareScientificWork(work, "email")}>Preparar e-mail</button><button className="secondary" onClick={() => shareScientificWork(work, "whatsapp")}>Compartilhar no WhatsApp</button></div>}</article>)}</div> : <div className="empty-state atlas-surface">As submissões dos ministérios aparecerão aqui. Nenhuma hipótese será promovida automaticamente a artigo.</div>}
           </>
         );
       case "Pesquisa":
