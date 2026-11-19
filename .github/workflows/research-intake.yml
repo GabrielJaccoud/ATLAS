@@ -22,8 +22,15 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const paths = [...new Set((context.payload.commits || [])
-              .flatMap((commit) => [...(commit.added || []), ...(commit.modified || [])]))]
+            const commit = await github.rest.repos.getCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha
+            });
+            const paths = [...new Set([
+              ...(context.payload.commits || []).flatMap((item) => [...(item.added || []), ...(item.modified || [])]),
+              ...(commit.data.files || []).map((file) => file.filename)
+            ])]
               .filter((path) => path.startsWith('docs/research/intake/') && path.endsWith('.json'));
             for (const path of paths) {
               const payload = JSON.parse(fs.readFileSync(path, 'utf8'));
