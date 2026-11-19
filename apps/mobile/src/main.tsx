@@ -84,6 +84,19 @@ type ScientificWork = {
 
 type PublicationDeliverySettings = { email: string; can_send_email: boolean };
 
+type ReviewAgentResult = { role_id: string; title: string; provider: string; model: string; status: string; review: string };
+type ReviewReport = {
+  review_id: string;
+  publication_id: string;
+  generated_at: string;
+  status: string;
+  decision: string;
+  source_verification: string;
+  export_gate_changed: boolean;
+  reviewers: ReviewAgentResult[];
+};
+type ReviewProvider = { id: string; model: string };
+
 type ScientificWorkForm = Omit<ScientificWork, "publication_id" | "export_ready" | "missing_requirements" | "claim_classification" | "review_required" | "created_at" | "references"> & { referencesText: string };
 
 type WorldData = {
@@ -213,6 +226,9 @@ function App() {
   const [researchItems, setResearchItems] = useState<ResearchItem[]>([]);
   const [scientificWorks, setScientificWorks] = useState<ScientificWork[]>([]);
   const [deliverySettings, setDeliverySettings] = useState<PublicationDeliverySettings>({ email: "", can_send_email: false });
+  const [reviewProviders, setReviewProviders] = useState<ReviewProvider[]>([]);
+  const [reviewReports, setReviewReports] = useState<Record<string, ReviewReport[]>>({});
+  const [reviewingPublicationId, setReviewingPublicationId] = useState("");
   const [publicationForm, setPublicationForm] = useState<ScientificWorkForm>({
     author_name: "Gabriel Jaccoud",
     ministry_id: "research",
@@ -283,7 +299,7 @@ function App() {
       const data = await atlasFetch<Status>("/status");
       setStatus(data);
       setConnected(true);
-      const [eventData, researchData, worldData, metricsData, observationData, publicationData, deliveryData] = await Promise.allSettled([
+      const [eventData, researchData, worldData, metricsData, observationData, publicationData, deliveryData, reviewProviderData] = await Promise.allSettled([
         atlasFetch<AtlasEvent[]>("/events"),
         atlasFetch<Array<{ data: ResearchItem }>>("/records/research"),
         atlasFetch<WorldData>("/world"),
@@ -291,6 +307,7 @@ function App() {
         atlasFetch<Array<ApiRecord<WorldObservation>>>("/records/world_observation"),
         atlasFetch<ScientificWork[]>("/publications"),
         atlasFetch<PublicationDeliverySettings>("/publication-delivery-settings"),
+        atlasFetch<{ providers: ReviewProvider[] }>("/review/providers"),
       ]);
       if (eventData.status === "fulfilled") setEvents(eventData.value);
       if (researchData.status === "fulfilled") setResearchItems(researchData.value.map((record) => record.data));
@@ -299,6 +316,7 @@ function App() {
       if (observationData.status === "fulfilled") setObservations(observationData.value);
       if (publicationData.status === "fulfilled") setScientificWorks(publicationData.value);
       if (deliveryData.status === "fulfilled") setDeliverySettings(deliveryData.value);
+      if (reviewProviderData.status === "fulfilled") setReviewProviders(reviewProviderData.value.providers);
     } catch {
       setConnected(false);
     }
@@ -423,6 +441,37 @@ function App() {
       setReply(error instanceof Error ? error.message : "O ATLAS não conseguiu enviar o e-mail.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function runScientificReview(work: ScientificWork) {
+    if (!connected || reviewingPublicationId) return;
+    if (!reviewProviders.length) {
+      setReply("Configure pelo menos um provedor de revisão no Render (OpenAI, Ollama, Kimi ou Qwen).");
+      return;
+    }
+    setReviewingPublicationId(work.publication_id);
+    try {
+      const report = await atlasFetch<ReviewReport>(`/publications/${encodeURIComponent(work.publication_id)}/review`, { method: "POST" });
+      setReviewReports((current) => ({
+        ...current,
+        [work.publication_id]: [report, ...(current[work.publication_id] || [])],
+      }));
+      setReply(`Revisão concluída por ${report.reviewers.filter((reviewer) => reviewer.status === "completed").length} agente(s). A decisão final continua humana.`);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "Não foi possível concluir a revisão por agentes.");
+    } finally {
+      setReviewingPublicationId("");
+    }
+  }
+
+  async function loadScientificReviews(work: ScientificWork) {
+    try {
+      const reports = await atlasFetch<ReviewReport[]>(`/publications/${encodeURIComponent(work.publication_id)}/reviews`);
+      setReviewReports((current) => ({ ...current, [work.publication_id]: reports }));
+      setReply(`${reports.length} revisão(ões) carregada(s).`);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "Não foi possível carregar as revisões anteriores.");
     }
   }
 
@@ -781,8 +830,33 @@ function App() {
               <button className="primary" disabled={busy || !connected || publicationForm.title_pt.trim().length < 8} onClick={() => void saveScientificWork()}>Registrar e avaliar evidências</button>
             </div>
             <div className="section-row"><h3>Trabalhos registrados</h3><button className="secondary" onClick={() => void refresh()}>Atualizar</button></div>
+            <p className="publication-note">Ao iniciar, o ATLAS envia o texto completo e as referências do trabalho aos provedores configurados para até quatro avaliações, o que pode consumir créditos desses serviços. Os agentes não pesquisam a internet nesta etapa, não alteram o trabalho e não decidem sua aprovação. Provedores disponíveis: {reviewProviders.length ? reviewProviders.map((provider) => provider.id).join(", ") : "nenhum configurado"}.</p>
             {!deliverySettings.can_send_email && <p className="publication-note">Os PDFs podem ser baixados pelo ATLAS. O envio direto com anexos será ativado quando o remetente de e-mail seguro estiver configurado.</p>}
-            {scientificWorks.length ? <div className="publication-list">{scientificWorks.map((work) => <article className="publication-entry atlas-surface" key={work.publication_id}><div className="publication-entry-heading"><div><span className="eyebrow">{work.ministry_id} · {work.work_type.replaceAll("_", " ")}</span><h3>{work.title_pt}</h3><p>{work.title_en || "English title pending"}</p></div><span className={`evidence-badge ${work.export_ready ? "ready" : "internal"}`}>{work.export_ready ? "Apto para revisão e PDF" : "Pesquisa interna"}</span></div><p>{work.claim_classification.replaceAll("_", " ")}{work.review_required ? " · revisão humana pendente" : ""}</p>{!work.export_ready && <details><summary>Requisitos pendentes ({work.missing_requirements.length})</summary><ul>{work.missing_requirements.map((item) => <li key={item}>{item.replaceAll("_", " ")}</li>)}</ul></details>}{work.export_ready && <div className="publication-actions"><button className="secondary" onClick={() => void downloadScientificWork(work, "pt")}>Baixar PDF · Português</button><button className="secondary" onClick={() => void downloadScientificWork(work, "en")}>Baixar PDF · English</button><button className="secondary" disabled={!deliverySettings.can_send_email || busy} onClick={() => void emailScientificWork(work)}>Enviar os dois PDFs por e-mail</button></div>}</article>)}</div> : <div className="empty-state atlas-surface">As submissões dos ministérios aparecerão aqui. Nenhuma hipótese será promovida automaticamente a artigo.</div>}
+            {scientificWorks.length ? <div className="publication-list">{scientificWorks.map((work) => {
+              const reviews = reviewReports[work.publication_id] || [];
+              return <article className="publication-entry atlas-surface" key={work.publication_id}>
+                <div className="publication-entry-heading">
+                  <div><span className="eyebrow">{work.ministry_id} · {work.work_type.replaceAll("_", " ")}</span><h3>{work.title_pt}</h3><p>{work.title_en || "English title pending"}</p></div>
+                  <span className={`evidence-badge ${work.export_ready ? "ready" : "internal"}`}>{work.export_ready ? "Apto para revisão e PDF" : "Pesquisa interna"}</span>
+                </div>
+                <p>{work.claim_classification.replaceAll("_", " ")}{work.review_required ? " · revisão humana pendente" : ""}</p>
+                {!work.export_ready && <details><summary>Requisitos pendentes ({work.missing_requirements.length})</summary><ul>{work.missing_requirements.map((item) => <li key={item}>{item.replaceAll("_", " ")}</li>)}</ul></details>}
+                <div className="publication-actions">
+                  <button className="secondary" disabled={!connected || Boolean(reviewingPublicationId)} onClick={() => void runScientificReview(work)}>{reviewingPublicationId === work.publication_id ? "Agentes revisando…" : "Revisar com agentes"}</button>
+                  <button className="secondary" onClick={() => void loadScientificReviews(work)}>Carregar revisões anteriores</button>
+                  {work.export_ready && <>
+                    <button className="secondary" onClick={() => void downloadScientificWork(work, "pt")}>Baixar PDF · Português</button>
+                    <button className="secondary" onClick={() => void downloadScientificWork(work, "en")}>Baixar PDF · English</button>
+                    <button className="secondary" disabled={!deliverySettings.can_send_email || busy} onClick={() => void emailScientificWork(work)}>Enviar os dois PDFs por e-mail</button>
+                  </>}
+                </div>
+                {reviews.map((report) => <section className="review-report" key={report.review_id}>
+                  <div className="section-row"><strong>Revisão de {new Date(report.generated_at).toLocaleString("pt-BR")}</strong><span className="eyebrow">{report.status === "completed" ? "Completa" : "Parcial"} · decisão humana requerida</span></div>
+                  {report.reviewers.map((reviewer) => <details key={`${report.review_id}-${reviewer.role_id}`}><summary>{reviewer.title} · {reviewer.provider}/{reviewer.model} · {reviewer.status === "completed" ? "concluída" : "falhou"}</summary><p className="review-text">{reviewer.review}</p></details>)}
+                  <p className="publication-note">Conferência externa de fontes: não realizada. Esta revisão não alterou a classificação nem a liberação de exportação.</p>
+                </section>)}
+              </article>;
+            })}</div> : <div className="empty-state atlas-surface">As submissões dos ministérios aparecerão aqui. Nenhuma hipótese será promovida automaticamente a artigo.</div>}
           </>
         );
       case "Pesquisa":

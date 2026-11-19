@@ -30,6 +30,13 @@ class Settings(BaseSettings):
     ollama_url: str | None = None
     ollama_model: str = "llama3.2"
 
+    kimi_api_key: str | None = None
+    kimi_base_url: str = "https://api.moonshot.ai/v1"
+    kimi_model: str = ""
+    qwen_api_key: str | None = None
+    qwen_base_url: str = ""
+    qwen_model: str = ""
+
     def allowed_origins(self) -> list[str]:
         if self.cors_origins.strip() == "*":
             return ["*"]

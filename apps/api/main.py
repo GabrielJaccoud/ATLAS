@@ -39,9 +39,11 @@ from .db import get_record, init_db, list_record_dicts, save_record
 from .ops import export_backup, metrics_snapshot, write_backup_file
 from .services import (
     atlas_chat,
+    configured_review_providers,
     mode_controller,
     opportunity_engine,
     orchestrator,
+    review_scientific_work,
     registry,
     save_artifact_bytes,
     create_realtime_client_secret,
@@ -499,6 +501,45 @@ def register_scientific_work(request: ScientificWorkRequest) -> dict[str, object
         data=data,
     )
     return data
+
+
+@app.get("/review/providers", dependencies=[Depends(require_token)])
+def list_review_providers() -> dict[str, object]:
+    return {
+        "providers": configured_review_providers(),
+        "review_roles": ["language_editor", "structure_method", "evidence_red_team", "domain_reviewer"],
+        "internet_research": False,
+    }
+
+
+@app.get("/publications/{publication_id}/reviews", dependencies=[Depends(require_token)])
+def list_publication_reviews(publication_id: str) -> list[dict[str, object]]:
+    rows = list_record_dicts("publication_review")
+    reviews = [row["data"] for row in rows if row["data"].get("publication_id") == publication_id]
+    return sorted(reviews, key=lambda review: str(review.get("generated_at", "")), reverse=True)
+
+
+@app.post("/publications/{publication_id}/review", dependencies=[Depends(require_token)])
+async def run_publication_review(publication_id: str) -> dict[str, object]:
+    record = get_record("scientific_work", publication_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Scientific work not found.")
+    work = record.get("data")
+    if not isinstance(work, dict):
+        raise HTTPException(status_code=422, detail="Scientific work record is malformed.")
+    try:
+        review = await review_scientific_work(work)
+    except RuntimeError as error:
+        message = str(error)
+        status_code = 503 if "No AI review provider" in message else 502
+        raise HTTPException(status_code=status_code, detail=message) from error
+    save_record(
+        "publication_review",
+        str(review["review_id"]),
+        title=str(work.get("title_pt", "Publication review")),
+        data=review,
+    )
+    return review
 
 
 @app.get("/research/{ministry_id}", dependencies=[Depends(require_token)])
