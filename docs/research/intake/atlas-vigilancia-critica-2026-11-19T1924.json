@@ -1,7 +1,7 @@
 {
-  "batch_id": "atlas-vigilancia-critica-2026-11-19T1924",
-  "producer": "ATLAS Vigilância Crítica",
   "generated_at": "2026-11-19T19:24:09-03:00",
+  "producer": "ATLAS Vigilância Crítica",
+  "batch_id": "atlas-vigilancia-critica-2026-11-19T1924",
   "findings": [
     {
       "source_id": "NASA-CR-20260010060",
