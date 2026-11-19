@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hmac
+import base64
 import smtplib
 import ssl
 from email.message import EmailMessage
@@ -193,6 +194,38 @@ def build_scientific_work_pdf(work: dict[str, object], language: Literal["pt", "
     return buffer.getvalue()
 
 
+def build_scientific_work_html(work: dict[str, object], language: Literal["pt", "en"]) -> str:
+    english = language == "en"
+    get = lambda key: str(work.get(f"{key}_{language}") or "")
+    sections = (
+        [("Abstract", "abstract"), ("Research question and origin", "question"),
+         ("Assumptions and model", "assumptions"), ("Methodology and experiments", "methodology"),
+         ("Theorem, proof and result" if work.get("work_type") == "mathematical_result" else "Results", "results"),
+         ("Testable predictions", "predictions"), ("Uncertainty", "uncertainty"),
+         ("Limitations and alternatives", "limitations")]
+        if english else
+        [("Resumo", "abstract"), ("Pergunta e origem da pesquisa", "question"),
+         ("Premissas e modelo", "assumptions"), ("Métodos e experimentos", "methodology"),
+         ("Teorema, demonstração e resultado" if work.get("work_type") == "mathematical_result" else "Resultados", "results"),
+         ("Previsões testáveis", "predictions"), ("Incertezas", "uncertainty"),
+         ("Limitações e explicações alternativas", "limitations")]
+    )
+    title = escape(get("title"))
+    evidence = escape(str(work.get("claim_classification", "")).replace("_", " "))
+    author = escape(str(work.get("author_name", "Gabriel Jaccoud")))
+    ministry = escape(str(work.get("ministry_id", "")))
+    body = "\n".join(
+        f"<section><h2>{escape(heading)}</h2><p>{escape(get(key)).replace(chr(10), '<br>')}</p></section>"
+        for heading, key in sections
+    )
+    references = work.get("references", [])
+    refs = "".join(f"<li>{escape(str(reference))}</li>" for reference in references if isinstance(references, list))
+    refs_title = "References" if english else "Referências"
+    review_note = ("AI-assisted content must be reviewed by the responsible author before external submission."
+                   if english else "O conteúdo elaborado com apoio de IA deve ser revisado pelo autor responsável antes de submissão externa.")
+    return f"""<!doctype html><html lang="{'en' if english else 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>{title}</title><style>body{{font:17px/1.7 Georgia,serif;color:#222;background:#f4f1eb;margin:0}}main{{max-width:850px;margin:4rem auto;padding:3rem;background:white;box-shadow:0 12px 50px #14182118}}h1{{line-height:1.2}}h2{{font:600 1.2rem Arial,sans-serif;margin-top:2rem;color:#304254}}.meta,.note{{font:14px/1.6 Arial,sans-serif;color:#66717c}}@media(max-width:700px){{main{{margin:0;padding:1.5rem}}}}</style></head><body><main><p class="meta">ATLAS · {evidence}</p><h1>{title}</h1><p class="meta">{author} · {ministry}</p>{body}<section><h2>{refs_title}</h2><ol>{refs}</ol></section><p class="note">{escape(review_note)}</p></main></body></html>"""
+
+
 def get_exportable_scientific_work(publication_id: str) -> dict[str, object]:
     record = get_record("scientific_work", publication_id)
     if not record:
@@ -208,6 +241,59 @@ def download_scientific_work_pdf(publication_id: str, language: Literal["pt", "e
     work = get_exportable_scientific_work(publication_id)
     pdf = build_scientific_work_pdf(work, language)
     return Response(content=pdf, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="ATLAS-{language}-{publication_id.replace(":", "-")}.pdf"'})
+
+
+@app.get("/publications/{publication_id}/html", dependencies=[Depends(require_token)])
+def download_scientific_work_html(publication_id: str, language: Literal["pt", "en"] = "pt") -> Response:
+    work = get_exportable_scientific_work(publication_id)
+    document = build_scientific_work_html(work, language)
+    return Response(content=document, media_type="text/html; charset=utf-8", headers={"Content-Disposition": f'attachment; filename="ATLAS-{language}-{publication_id.replace(":", "-")}.html"'})
+
+
+@app.post("/vision/posture-assessment", dependencies=[Depends(require_token)])
+async def posture_assessment(images: list[UploadFile] = File(...), views: list[str] = File(...)) -> dict[str, object]:
+    """Return a visual screening report from user-supplied front/side photos without retaining the images."""
+    if not settings.openai_api_key:
+        raise HTTPException(status_code=503, detail="A análise visual precisa de um provedor multimodal configurado no ATLAS.")
+    if len(images) < 2 or len(images) > 4 or len(images) != len(views):
+        raise HTTPException(status_code=422, detail="Envie de 2 a 4 imagens, cada uma identificada como frontal, lateral ou posterior.")
+    accepted = {"image/jpeg", "image/png", "image/webp"}
+    image_parts = []
+    for image, view in zip(images, views):
+        if image.content_type not in accepted:
+            raise HTTPException(status_code=415, detail="Use imagens JPG, PNG ou WebP.")
+        content = await image.read()
+        if not content or len(content) > 8 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="Cada imagem deve ter até 8 MB.")
+        data_url = f"data:{image.content_type};base64,{base64.b64encode(content).decode('ascii')}"
+        image_parts.append({"type": "input_image", "image_url": data_url, "detail": "high"})
+        image_parts.append({"type": "input_text", "text": f"Vista indicada pelo usuário: {view}. Considere perspectiva, roupa, pose e qualidade da captura."})
+    prompt = (
+        "Faça uma triagem visual observacional de postura e alinhamento corporal a partir das fotos fornecidas. "
+        "Não diagnostique escoliose, lesão, doença ou causa. Informe primeiro se as imagens permitem avaliação e a qualidade/limitações. "
+        "Descreva apenas sinais diretamente visíveis (por exemplo, inclinação aparente dos ombros, alinhamento aproximado da cabeça, "
+        "simetria aparente, distribuição de peso apenas se inferível), diferencie observação de hipótese e dê nível de confiança baixo/médio/alto. "
+        "Não estime ângulos exatos sem referência calibrada. Sugira uma nova captura específica quando necessário e próximos passos proporcionais. "
+        "Se houver dor intensa, fraqueza, dormência ou piora rápida, recomende avaliação clínica. Responda em português, claro, com seções: "
+        "Qualidade da captura; Observações; O que não é possível concluir; Próximo passo. Não afirme que uma câmera mede temperatura ou faz ressonância."
+    )
+    payload = {"model": settings.openai_model, "input": [
+        {"role": "system", "content": "Você é um assistente de triagem visual cuidadoso. Relate observações, não diagnósticos."},
+        {"role": "user", "content": [{"type": "input_text", "text": prompt}, *image_parts]},
+    ]}
+    try:
+        async with httpx.AsyncClient(timeout=120) as client:
+            response = await client.post(f"{settings.openai_base_url}/responses", headers={"Authorization": f"Bearer {settings.openai_api_key}", "Content-Type": "application/json"}, json=payload)
+            response.raise_for_status()
+            data = response.json()
+    except httpx.HTTPStatusError as error:
+        raise HTTPException(status_code=502, detail="O provedor não aceitou a análise visual. Verifique o modelo configurado e tente novamente.") from error
+    except httpx.HTTPError as error:
+        raise HTTPException(status_code=502, detail="Não foi possível alcançar o provedor de análise visual.") from error
+    text_parts = [part["text"] for item in data.get("output", []) if item.get("type") == "message" for part in item.get("content", []) if part.get("type") in {"output_text", "text"} and part.get("text")]
+    if not text_parts:
+        raise HTTPException(status_code=502, detail="O provedor não retornou um relatório legível.")
+    return {"report": "\n".join(text_parts), "classification": "triagem_visual_observacional", "images_retained": False, "provider": "openai", "model": settings.openai_model}
 
 
 @app.post("/publications/{publication_id}/email", dependencies=[Depends(require_token)])

@@ -292,3 +292,4 @@ button:focus-visible { outline:2px solid rgba(87,230,217,.72); outline-offset:3p
   .mobile-nav button { border:0; background:transparent; color:#7f8996; padding:10px 4px; border-radius:12px; font-size:.68rem; }
   .mobile-nav button.active { color:var(--atlas-ivory); background:rgba(201,169,106,.11); }
 }
+.posture-camera-preview{display:block;width:min(100%,640px);max-height:68vh;aspect-ratio:4/3;object-fit:contain;background:#07090d;border:1px solid rgba(212,183,124,.3);border-radius:18px;margin:18px auto}.consent-line{display:flex;align-items:flex-start;gap:10px;color:var(--muted,#aab0b8);font-size:.9rem;margin:16px 0}.consent-line input{margin-top:4px;accent-color:#c8a969}.posture-panel .form-row{margin:16px 0}.posture-report{white-space:normal;line-height:1.7;margin:18px 0}.posture-report p{margin:.55rem 0}

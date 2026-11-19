@@ -96,6 +96,7 @@ type ReviewReport = {
   reviewers: ReviewAgentResult[];
 };
 type ReviewProvider = { id: string; model: string };
+type PostureCapture = { file: File; view: "frontal" | "lateral" | "posterior" };
 
 type ScientificWorkForm = Omit<ScientificWork, "publication_id" | "export_ready" | "missing_requirements" | "claim_classification" | "review_required" | "created_at" | "references"> & { referencesText: string };
 
@@ -155,7 +156,9 @@ type ScreenId =
   | "Laboratório"
   | "Ministérios"
   | "Conselho"
+  | "Apps"
   | "Awareness"
+  | "Corpo"
   | "My World"
   | "Inovação"
   | "Ações";
@@ -171,7 +174,9 @@ const navigation: ScreenId[] = [
   "Laboratório",
   "Ministérios",
   "Conselho",
+  "Apps",
   "Awareness",
+  "Corpo",
   "My World",
   "Inovação",
   "Ações",
@@ -264,6 +269,13 @@ function App() {
   const [worldNodeName, setWorldNodeName] = useState("");
   const [missionObjective, setMissionObjective] = useState("");
   const [councilCadence, setCouncilCadence] = useState("daily");
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [postureCaptures, setPostureCaptures] = useState<PostureCapture[]>([]);
+  const [postureReport, setPostureReport] = useState("");
+  const [postureConsent, setPostureConsent] = useState(false);
+  const [postureView, setPostureView] = useState<PostureCapture["view"]>("frontal");
+  const cameraVideoRef = useRef<HTMLVideoElement | null>(null);
+  const cameraCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const realtimeRef = useRef<RealtimeHandle | null>(null);
   const realtimeTextRef = useRef("");
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
@@ -285,6 +297,12 @@ function App() {
       setReply("Não foi possível salvar o histórico neste navegador.");
     }
   }, [chatMessages]);
+
+  useEffect(() => {
+    if (cameraVideoRef.current && cameraStream) cameraVideoRef.current.srcObject = cameraStream;
+  }, [cameraStream, active]);
+
+  useEffect(() => () => cameraStream?.getTracks().forEach((track) => track.stop()), [cameraStream]);
 
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -431,6 +449,27 @@ function App() {
     }
   }
 
+  async function downloadScientificHtml(work: ScientificWork, language: "pt" | "en") {
+    if (!work.export_ready) return;
+    const config = loadConfig();
+    try {
+      const response = await fetch(`${config.baseUrl}/publications/${encodeURIComponent(work.publication_id)}/html?language=${language}`, {
+        headers: config.token ? { Authorization: `Bearer ${config.token}` } : {},
+      });
+      if (!response.ok) throw new Error("O ATLAS não conseguiu gerar o HTML.");
+      const html = await response.blob();
+      const objectUrl = URL.createObjectURL(html);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `ATLAS-${language}-${work.publication_id.replaceAll(":", "-")}.html`;
+      link.click();
+      URL.revokeObjectURL(objectUrl);
+      setReply(`HTML ${language.toUpperCase()} baixado pelo ATLAS.`);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "Falha ao baixar o HTML.");
+    }
+  }
+
   async function emailScientificWork(work: ScientificWork) {
     if (!work.export_ready || !deliverySettings.can_send_email) return;
     setBusy(true);
@@ -472,6 +511,59 @@ function App() {
       setReply(`${reports.length} revisão(ões) carregada(s).`);
     } catch (error) {
       setReply(error instanceof Error ? error.message : "Não foi possível carregar as revisões anteriores.");
+    }
+  }
+
+  async function startPostureCamera() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setReply("Este navegador não disponibiliza câmera. Use as opções para anexar fotos.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+      setCameraStream(stream);
+      setReply("Câmera ativa neste dispositivo. Enquadre o corpo inteiro e mantenha a câmera na altura do quadril.");
+    } catch {
+      setReply("O acesso à câmera foi negado ou está indisponível. Você ainda pode anexar imagens já capturadas.");
+    }
+  }
+
+  function stopPostureCamera() {
+    cameraStream?.getTracks().forEach((track) => track.stop());
+    setCameraStream(null);
+  }
+
+  function capturePostureImage() {
+    const video = cameraVideoRef.current;
+    const canvas = cameraCanvasRef.current;
+    if (!video || !canvas || !video.videoWidth) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    context.drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const file = new File([blob], `atlas-postura-${postureView}-${Date.now()}.jpg`, { type: "image/jpeg" });
+      setPostureCaptures((current) => [...current.filter((capture) => capture.view !== postureView), { file, view: postureView }]);
+      setReply(`Vista ${postureView} capturada. Para comparar alinhamento, capture também uma vista lateral.`);
+    }, "image/jpeg", 0.88);
+  }
+
+  async function assessPosture() {
+    if (!connected || !postureConsent || postureCaptures.length < 2) return;
+    setBusy(true);
+    setPostureReport("");
+    const form = new FormData();
+    postureCaptures.forEach(({ file, view }) => { form.append("images", file); form.append("views", view); });
+    try {
+      const result = await atlasFetch<{ report: string; images_retained: boolean; model: string }>("/vision/posture-assessment", { method: "POST", body: form });
+      setPostureReport(result.report);
+      setReply(`Triagem visual concluída pelo modelo ${result.model}. As imagens não foram armazenadas pelo ATLAS.`);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "A análise visual não foi concluída.");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -561,7 +653,14 @@ function App() {
         method: "POST",
         body: JSON.stringify({
           message: outgoing,
-          context: { surface: "atlas-web", input: textOverride ? "voice" : "text" },
+          context: {
+            surface: "atlas-web",
+            input: textOverride ? "voice" : "text",
+            current_screen: active,
+            available_surfaces: ["Talk", "Radar", "Pesquisa", "Ciência", "Conselho", "Apps", "Awareness", "Corpo", "Ações"],
+            posture_screen_available: true,
+            visual_model_configured: Boolean(status?.provider?.openai_configured),
+          },
           history: chatMessages.filter((item) => item.role === "user" || item.role === "assistant")
             .slice(-20).map(({ role, content }) => ({ role, content })),
         }),
@@ -847,6 +946,8 @@ function App() {
                   {work.export_ready && <>
                     <button className="secondary" onClick={() => void downloadScientificWork(work, "pt")}>Baixar PDF · Português</button>
                     <button className="secondary" onClick={() => void downloadScientificWork(work, "en")}>Baixar PDF · English</button>
+                    <button className="secondary" onClick={() => void downloadScientificHtml(work, "pt")}>Baixar HTML · Português</button>
+                    <button className="secondary" onClick={() => void downloadScientificHtml(work, "en")}>Baixar HTML · English</button>
                     <button className="secondary" disabled={!deliverySettings.can_send_email || busy} onClick={() => void emailScientificWork(work)}>Enviar os dois PDFs por e-mail</button>
                   </>}
                 </div>
@@ -944,6 +1045,62 @@ function App() {
             <p className="publication-note">Conectar uma ferramenta não significa que ela já esteja autorizada. O ATLAS pedirá a conexão por serviço e mostrará quais dados, créditos ou arquivos serão usados.</p>
           </>
         );
+      case "Apps": {
+        const linked = new Set(reviewProviders.map((provider) => provider.id));
+        const appConnections = [
+          { id: "openai", name: "OpenAI", kind: "Modelos e análise visual", need: "Chave de API configurada no serviço seguro do ATLAS." },
+          { id: "claude", name: "Claude / Anthropic", kind: "Conselho de revisão", need: "Chave de API Anthropic configurada no serviço seguro." },
+          { id: "kimi", name: "Kimi", kind: "Conselho de revisão", need: "Chave de API e modelo configurados." },
+          { id: "qwen", name: "Qwen", kind: "Conselho de revisão", need: "Chave, endpoint e modelo configurados." },
+          { id: "ollama", name: "Ollama", kind: "Modelo local", need: "URL de um servidor Ollama acessível pelo ATLAS." },
+          { id: "suno", name: "Suno", kind: "Criação musical", need: "Conector oficial e autorização da conta; não conectado no ATLAS." },
+          { id: "runway", name: "Runway / vídeo", kind: "Imagem em movimento", need: "Conector e autorização da conta; não conectado no ATLAS." },
+          { id: "worlds", name: "ATLAS Web 3D", kind: "Mundos e visualização", need: "Motor 3D interno; disponível nas áreas Mundos e My World." },
+        ];
+        return (
+          <>
+            <SectionHeader eyebrow="Apps & Connections" title="Aplicativos e conexões" description="Um painel para saber o que o ATLAS consegue usar agora e o que ainda precisa de autorização ou credenciais." />
+            <div className="notice">As conexões de IA do ATLAS usam credenciais mantidas no servidor. Um login OAuth dentro do ATLAS só ficará ativo quando o serviço oferecer um fluxo autorizado e o conector estiver implementado; nenhum cartão abaixo finge que a conta já foi vinculada.</div>
+            <div className="cards-grid">
+              {appConnections.map((app) => {
+                const is3d = app.id === "worlds";
+                const isConnected = is3d || linked.has(app.id);
+                return <article className="feature-card atlas-surface" key={app.id}>
+                  <span>{isConnected ? "DISPONÍVEL" : "PRECISA CONECTAR"} · {app.kind}</span>
+                  <strong>{app.name}</strong>
+                  <p>{isConnected ? (is3d ? app.need : `Modelo ativo: ${reviewProviders.find((provider) => provider.id === app.id)?.model || "configurado"}.`) : app.need}</p>
+                  <button className="secondary" onClick={() => goTo(app.id === "suno" || app.id === "runway" ? "Conselho" : "Awareness")}>{isConnected ? "Ver estado" : "Ver configuração"} <span aria-hidden="true">→</span></button>
+                </article>;
+              })}
+            </div>
+            <p className="publication-note">Próximo passo para habilitar um provedor: configurar as credenciais como variáveis privadas do serviço API e atualizar o estado em Awareness. Não cole senhas ou chaves neste chat ou em páginas públicas.</p>
+          </>
+        );
+      }
+      case "Corpo":
+        return (
+          <>
+            <SectionHeader eyebrow="Visual screening" title="Avaliação visual de postura" description="Capture vistas padronizadas e receba observações visuais práticas, com limites e próximos passos explícitos." />
+            <div className="publication-principles atlas-surface">
+              <div><span className="eyebrow">Preparação</span><strong>Corpo inteiro, câmera estável</strong><p>Use roupa que permita ver o alinhamento, fundo simples e boa iluminação. Afaste a câmera e mantenha-a aproximadamente na altura do quadril.</p></div>
+              <div><span className="eyebrow">Vistas</span><strong>Frontal + lateral</strong><p>Fique em postura confortável e natural. Evite poses forçadas; uma vista posterior é opcional.</p></div>
+              <div><span className="eyebrow">Resultado</span><strong>Triagem observacional</strong><p>O ATLAS descreve sinais visíveis e incerteza. Foto não confirma escoliose, lesão, causa de dor, temperatura corporal nem substitui exame clínico.</p></div>
+            </div>
+            {!metrics?.openai_configured && <div className="notice">A análise visual depende de um modelo multimodal configurado no ATLAS. Quando indisponível, a captura continua local e o ATLAS informa o bloqueio sem inventar achados.</div>}
+            {!connected && <div className="notice">Pareie este dispositivo para usar a análise visual.</div>}
+            <div className="form-panel atlas-surface posture-panel">
+              <div className="section-row"><h3>Capturar ou anexar fotos</h3><span className="publication-scope">As imagens não ficam salvas pelo ATLAS</span></div>
+              <div className="form-row"><label>Vista<select value={postureView} onChange={(event) => setPostureView(event.target.value as PostureCapture["view"])}><option value="frontal">Frontal</option><option value="lateral">Lateral</option><option value="posterior">Posterior</option></select></label><button className="secondary" onClick={() => cameraStream ? stopPostureCamera() : void startPostureCamera()}>{cameraStream ? "Desligar câmera" : "Abrir câmera"}</button><button className="primary" disabled={!cameraStream} onClick={capturePostureImage}>Capturar vista selecionada</button></div>
+              {cameraStream && <video ref={cameraVideoRef} autoPlay playsInline muted className="posture-camera-preview" aria-label="Prévia local da câmera" />}
+              <canvas ref={cameraCanvasRef} hidden />
+              <div className="form-row"><label>Anexar uma imagem<select value={postureView} onChange={(event) => setPostureView(event.target.value as PostureCapture["view"])}><option value="frontal">Frontal</option><option value="lateral">Lateral</option><option value="posterior">Posterior</option></select></label><label className="secondary upload-action">Escolher imagem<input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={(event) => { const file = event.target.files?.[0]; if (file) setPostureCaptures((current) => [...current.filter((capture) => capture.view !== postureView), { file, view: postureView }]); event.currentTarget.value = ""; }} /></label></div>
+              <p className="publication-note">Vistas incluídas: {postureCaptures.map(({ view }) => view).join(" · ") || "nenhuma"}. Capture pelo menos uma vista frontal e uma lateral. A análise envia as imagens ao modelo visual configurado para gerar o relatório e não as armazena no ATLAS.</p>
+              <label className="consent-line"><input type="checkbox" checked={postureConsent} onChange={(event) => setPostureConsent(event.target.checked)} /> Entendo que as imagens serão processadas pelo provedor de IA configurado para produzir esta triagem visual.</label>
+              <button className="primary" disabled={!connected || !postureConsent || postureCaptures.length < 2 || busy} onClick={() => void assessPosture()}>{busy ? "Analisando…" : "Analisar postura"}</button>
+            </div>
+            {postureReport && <article className="review-report atlas-surface"><span className="eyebrow">Triagem visual · não diagnóstica</span><div className="posture-report">{postureReport.split("\n").map((line, index) => <p key={index}>{line}</p>)}</div><button className="secondary" onClick={() => setPostureReport("")}>Fechar relatório</button></article>}
+          </>
+        );
       case "Awareness":
         return (
           <>
@@ -953,6 +1110,13 @@ function App() {
               <Metric label="OpenAI" value={metrics?.openai_configured ? "Configurada" : "—"} />
               <Metric label="Modo" value={status?.mode?.mode || "—"} />
               <Metric label="Estado" value={voiceState} />
+            </div>
+            <div className="section-row"><h3>Resumo do funcionamento interno</h3><span className="eyebrow">Baseado em registros reais da API</span></div>
+            <div className="cards-grid">
+              <div className="feature-card atlas-surface"><span>RADAR</span><strong>{events.length} evento(s) carregado(s)</strong><p>{events[0] ? `Registro mais recente: ${events[0].event_type} · ${events[0].source}` : "Nenhum evento retornado pela API."}</p></div>
+              <div className="feature-card atlas-surface"><span>PESQUISA</span><strong>{researchItems.length} item(ns) registrado(s)</strong><p>{status?.research?.blocked ?? 0} marcado(s) como bloqueado(s) pelo sistema.</p></div>
+              <div className="feature-card atlas-surface"><span>CIÊNCIA</span><strong>{scientificWorks.length} trabalho(s)</strong><p>{scientificWorks.filter((work) => work.export_ready).length} liberado(s) para exportação conforme os requisitos atuais.</p></div>
+              <div className="feature-card atlas-surface"><span>MODELOS</span><strong>{reviewProviders.length} provedor(es) de revisão</strong><p>{reviewProviders.length ? reviewProviders.map((provider) => provider.id).join(" · ") : "Nenhum modelo de revisão está configurado."}</p></div>
             </div>
             <div className="section-row"><h3>Métricas da API</h3><button className="secondary" onClick={() => void refresh()}>Atualizar</button></div>
             <pre className="data-panel atlas-surface">{metrics ? JSON.stringify(metrics, null, 2) : "As métricas aparecerão após o pareamento."}</pre>
@@ -1000,7 +1164,7 @@ function App() {
         </div>
         <nav className="side-nav">
           {navigation.map((item) => (
-            <button key={item} title={item} aria-label={item} className={active === item ? "active" : ""} onClick={() => goTo(item)}><span className="nav-label">{item}</span><span className="nav-mark">{{ Agora: "AG", Talk: "TK", Radar: "RD", Urgente: "!", Ciência: "CI", Pesquisa: "PQ", Mundos: "MU", Laboratório: "LB", Ministérios: "MI", Conselho: "CO", Awareness: "AW", "My World": "MW", Inovação: "IN", Ações: "AC" }[item]}</span></button>
+            <button key={item} title={item} aria-label={item} className={active === item ? "active" : ""} onClick={() => goTo(item)}><span className="nav-label">{item}</span><span className="nav-mark">{{ Agora: "AG", Talk: "TK", Radar: "RD", Urgente: "!", Ciência: "CI", Pesquisa: "PQ", Mundos: "MU", Laboratório: "LB", Ministérios: "MI", Conselho: "CO", Apps: "AP", Awareness: "AW", Corpo: "CV", "My World": "MW", Inovação: "IN", Ações: "AC" }[item]}</span></button>
           ))}
         </nav>
         <div className={connected ? "system-pill online" : "system-pill"}>{connected ? "ONLINE" : "NÃO PAREADO"}</div>
