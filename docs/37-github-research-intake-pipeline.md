@@ -1,6 +1,6 @@
 # ATLAS GitHub Research Intake
 
-Research packages are kept under `docs/research/intake/` as JSON source records. A GitHub Actions workflow watches additions and updates on `atlas-1.9-possible-worlds`, obtains a short-lived GitHub OIDC identity token, and posts each package to `/research/github-intake`.
+Research packages are kept under `docs/research/intake/` as JSON source records on the dedicated `atlas-research-data` branch. A GitHub Actions workflow watches additions and updates, obtains a short-lived GitHub OIDC identity token, and posts each package to `/research/github-intake`.
 
 ## Trust boundary
 
@@ -11,9 +11,9 @@ Research packages are kept under `docs/research/intake/` as JSON source records.
 
 ## Data delivery
 
-The API database is the runtime source for the Pesquisa screen in the web and mobile clients. Once intake completes, the clients can show the records after refresh; research data does not require rebuilding the frontend. GitHub retains the JSON audit trail. Render deploys application code from the configured branch; it is not used as the research database.
+The API database is the runtime source for the Pesquisa screen in the web and mobile clients. Once intake completes, the clients can show the records after refresh; research data does not require rebuilding the frontend. GitHub retains the JSON audit trail. Render deploys application code from `atlas-1.9-possible-worlds`; commits to `atlas-research-data` do not rebuild the site or app.
 
-The GitHub Actions workflow requires `id-token: write` and is limited to the trusted workflow and branch. No third-party webhook secret is required. Scheduled ChatGPT tasks still need to publish their resulting JSON package into this repository; they cannot be assumed to have done so unless the GitHub commit succeeds. Until that path is available for each task, copy its JSON package to this folder and commit it; the workflow then imports it automatically.
+The GitHub Actions workflow requires `id-token: write` and is limited to the trusted workflow and branch. No third-party webhook secret is required. Scheduled ChatGPT tasks should publish their resulting JSON package to this branch; the workflow then imports it automatically. A successful GitHub commit is not by itself proof of API ingestion; check the Actions run before reporting completion.
 
 ## Current initial packages
 

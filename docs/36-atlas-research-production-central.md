@@ -25,6 +25,6 @@ Set `ATLAS_RESEARCH_AUTOMATION_TOKEN` only as a private Render service variable.
 
 ## ChatGPT scheduled reports
 
-The five ChatGPT research automations now end with an importable JSON envelope for the Pesquisa tab. They remain scheduled and continue delivering results in their ChatGPT threads. The ChatGPT automation runtime does not provide these tasks with a custom HTTP POST action, so their results are not silently claimed as API-ingested. The JSON import in Pesquisa is the current path; direct machine-to-machine delivery requires a supported custom connector.
+The five scheduled ChatGPT research automations retain their individual reports and append an importable JSON envelope. They are instructed to archive nonempty reports and packages in the dedicated GitHub data branch. GitHub Actions exchanges a short-lived OIDC identity for authenticated ingestion into the Atlas API; its run must succeed before an API import is claimed. If the GitHub connector is unavailable to a scheduled run, the JSON remains available for manual import in Pesquisa. This path does not use a paid Render cron.
 
 The API endpoint and runner for a native ATLAS daily run are implemented. The Render cron could not be provisioned because Render returned HTTP 402 and requires a payment method on the account. Until that requirement is resolved, there is no direct scheduled API run; ChatGPT task results enter through JSON import. When provisioned, the Render cron uses `web_search`, writes to the API, and can email the result link when SMTP is configured.

@@ -3,7 +3,7 @@ name: ATLAS Research Intake
 on:
   push:
     branches:
-      - atlas-1.9-possible-worlds
+      - atlas-research-data
     paths:
       - docs/research/intake/*.json
 

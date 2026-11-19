@@ -196,7 +196,9 @@ def publication_delivery_settings() -> dict[str, object]:
 
 def build_scientific_work_pdf(work: dict[str, object], language: Literal["pt", "en"]) -> bytes:
     english = language == "en"
-    get = lambda key: str(work.get(f"{key}_{language}") or "")
+    def get(key: str) -> str:
+        return str(work.get(f"{key}_{language}") or "")
+
     title = get("title")
     evidence = str(work.get("claim_classification", "")).replace("_", " ")
     sections = (
@@ -238,7 +240,9 @@ def build_scientific_work_pdf(work: dict[str, object], language: Literal["pt", "
 
 def build_scientific_work_html(work: dict[str, object], language: Literal["pt", "en"]) -> str:
     english = language == "en"
-    get = lambda key: str(work.get(f"{key}_{language}") or "")
+    def get(key: str) -> str:
+        return str(work.get(f"{key}_{language}") or "")
+
     sections = (
         [("Abstract", "abstract"), ("Research question and origin", "question"),
          ("Assumptions and model", "assumptions"), ("Methodology and experiments", "methodology"),
@@ -301,7 +305,7 @@ async def posture_assessment(images: list[UploadFile] = File(...), views: list[s
         raise HTTPException(status_code=422, detail="Envie de 2 a 4 imagens, cada uma identificada como frontal, lateral ou posterior.")
     accepted = {"image/jpeg", "image/png", "image/webp"}
     image_parts = []
-    for image, view in zip(images, views):
+    for image, view in zip(images, views, strict=False):
         if image.content_type not in accepted:
             raise HTTPException(status_code=415, detail="Use imagens JPG, PNG ou WebP.")
         content = await image.read()
