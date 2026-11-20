@@ -1,0 +1,31 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261120T005005Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-20T00:50:05Z",
+  "findings": [
+    {
+      "source_id": "DARPA-NOM4D-ASTRA-2026-11-05",
+      "title": "NOM4D/ASTRA: demonstração orbital de montagem robótica automatizada",
+      "summary": "DARPA e Caltech documentam em 05/11/2026 a montagem automatizada em órbita de um terceiro módulo de treliça com hastes e juntas compostas, além da implantação de malha refletora, por um manipulador cartesiano do experimento ASTRA lançado em 30/03/2026. Demonstração física orbital de escopo limitado, corroborada por relatos dos executores e imagens, mas não prova fabricação orbital em escala de centenas de metros, autonomia geral, durabilidade ou vantagem operacional do ATLAS. Pesquisa prévia inclui modelagem numérica DOI 10.1016/j.euromechsol.2025.105790. RIA-NOM4D-01: monitorar engenharia modular, sequenciamento de ações e verificação por estados; sem assimilação ou benchmark comparativo.",
+      "source_url": "https://www.darpa.mil/news/2026/nom4d-program-demonstrates-automated-in-space-assembly",
+      "published_at": "2026-11-05T00:00:00Z",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "NOM4D",
+        "ASTRA",
+        "Caltech",
+        "orbital-assembly",
+        "robotics",
+        "dual-use",
+        "RIA-NOM4D-01",
+        "demonstrated-prototype"
+      ],
+      "confidence": 0.94,
+      "priority": 0.73,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
