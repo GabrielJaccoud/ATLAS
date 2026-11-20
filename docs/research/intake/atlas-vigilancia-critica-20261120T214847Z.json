@@ -1,0 +1,31 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261120T214847Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-20T21:48:47Z",
+  "findings": [
+    {
+      "source_id": "DPA27BZ02-DV003",
+      "title": "DARPA Human Universal Remote: interface neuromuscular multimodal não invasiva para comando de sistemas",
+      "summary": "Edital SBIR DARPA publicado em 03/11/2026 propõe combinar eletromiografia de superfície (sEMG), ultrassom/PMUT e classificação por aprendizado de máquina para controlar sistemas por microgestos sem uso das mãos. Requer protótipo funcional dos proponentes; metas de avaliação futura incluem 92% de reconhecimento verdadeiro, 2% de acionamentos acidentais e calibração inferior a 30 minutos em ambientes controlados e adversos. Esses números são critérios desejados, não resultados demonstrados. A fonte não comprova leitura de pensamentos nem desempenho militar implantado. RIA: investigar testes de interface acessível e biossinais com consentimento, sem assimilação.",
+      "source_url": "https://www.darpa.mil/research/programs/human-universal-remote",
+      "published_at": "2026-11-03",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "SBIR",
+        "neurotechnology",
+        "sEMG",
+        "PMUT",
+        "human-machine-interface",
+        "dual-use",
+        "solicitation",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.96,
+      "priority": 0.76,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
