@@ -1,0 +1,31 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261120T034809Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-20T03:48:09Z",
+  "findings": [
+    {
+      "source_id": "DARPA-DTC-FINALS-2026-11-16",
+      "title": "DARPA Triage Challenge 2026 Finals: RoboScout e Disruptors vencem avaliações de triagem robótica e predição",
+      "summary": "Comunicado DARPA de 16/11/2026 documenta finais encerradas em 13/11 em Disaster City, Texas: RoboScout venceu Systems (US$1,5 milhão), Disruptors venceu Data (US$1 milhão). Avaliações envolveram localização de vítimas, sinais vitais, triagem rápida, trabalho humano-máquina, previsão de intervenções salvadoras e alocação de recursos em cenários simulados com fumaça e baixa iluminação. Regras publicadas incluem métricas ponderadas e gates; porém comunicado não apresenta matriz integral de scores, intervalos de confiança ou validação clínica prospectiva independente. Evidência de avaliação competitiva de protótipos, não superioridade clínica comprovada. RIA-DTC-01: candidato a benchmark sintético de decisão multimodal sob degradação e escassez, sem assimilação.",
+      "source_url": "https://www.darpa.mil/news/2026/triage-finals-winners",
+      "published_at": "2026-11-16T00:00:00Z",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "triage-challenge",
+        "robotics",
+        "multimodal-sensing",
+        "human-machine-teaming",
+        "medical-decision-support",
+        "RIA-DTC-01",
+        "demonstrated-competition",
+        "no-clinical-validation"
+      ],
+      "confidence": 0.96,
+      "priority": 0.76,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
