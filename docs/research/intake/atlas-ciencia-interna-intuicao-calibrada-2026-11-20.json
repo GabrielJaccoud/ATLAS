@@ -1,0 +1,98 @@
+{
+  "batch_id": "atlas-ciencia-interna-intuicao-calibrada-2026-11-20",
+  "producer": "ATLAS Ciência Interna — Intuição, interocepção e previsão",
+  "generated_at": "2026-11-20T16:52:44.308Z",
+  "findings": [
+    {
+      "source_id": "10.1073/pnas.1821032116",
+      "title": "An interoceptive illusion of effort induced by false heart-rate feedback",
+      "summary": "Estudo experimental em ciclismo manipulou acusticamente o feedback de frequência cardíaca. Feedback artificial mais rápido elevou a percepção relatada de esforço em comparação com feedback verídico sob intensidade física equivalente; feedback mais lento não reduziu o esforço percebido. Evidência de que contexto e sinal corporal participam da percepção subjetiva. Não testa precognição, percepção extrassensorial nem alteração da realidade externa; a generalização para decisões cotidianas é incerta.",
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/31235576/",
+      "published_at": "2019-07-09",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ATLAS-INTUITION-01"
+      ],
+      "tags": [
+        "interoception",
+        "body-signals",
+        "perceived-effort",
+        "predictive-processing",
+        "intuition",
+        "primary-study"
+      ],
+      "confidence": 0.97,
+      "priority": 0.82,
+      "evidence_class": "peer_reviewed_primary_study"
+    },
+    {
+      "source_id": "PMC8691949",
+      "title": "Interoception of breathing and its relationship with anxiety",
+      "summary": "Estudo experimental com tarefa de aprendizagem sobre resistência respiratória e fMRI reportou atividade da ínsula anterior associada, trial a trial, à certeza de previsões e a erros de previsão; também examinou diferenças relacionadas a ansiedade. Sustenta estudo computacional da percepção corporal e metacognição em uma tarefa delimitada. Não demonstra que intuição antecipe eventos externos; a tarefa respiratória e a amostra específica limitam a generalização.",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8691949/",
+      "published_at": "2022-01-01",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ATLAS-INTUITION-01"
+      ],
+      "tags": [
+        "interoception",
+        "breathing",
+        "prediction-error",
+        "metacognition",
+        "insula",
+        "fMRI"
+      ],
+      "confidence": 0.91,
+      "priority": 0.72,
+      "evidence_class": "peer_reviewed_primary_study"
+    },
+    {
+      "source_id": "10.1175/1520-0493(1950)078<0001:VOFEIT>2.0.CO;2",
+      "title": "Verification of Forecasts Expressed in Terms of Probability",
+      "summary": "Glenn W. Brier propôs um método para verificar previsões probabilísticas comparando probabilidades previstas a resultados observados. É uma base metodológica para testar se palpites com confiança explícita são calibrados e acrescentam informação além de taxas-base. Não fornece evidência sobre intuição; fornece uma métrica para avaliar previsões sem premiar apenas acertos ocasionais.",
+      "source_url": "https://doi.org/10.1175/1520-0493(1950)078%3C0001%3AVOFEIT%3E2.0.CO%3B2",
+      "published_at": "1950-01-01",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ATLAS-INTUITION-01"
+      ],
+      "tags": [
+        "forecasting",
+        "probability",
+        "Brier-score",
+        "calibration",
+        "methodology"
+      ],
+      "confidence": 0.98,
+      "priority": 0.75,
+      "evidence_class": "foundational_method"
+    },
+    {
+      "source_id": "ATLAS-INTUITION-01",
+      "title": "Hipótese: calibração da intuição e formação de futuros pessoais",
+      "summary": "Hipótese interna não testada: em domínios e horizontes definidos, palpites intuitivos registrados antes de uma análise estruturada podem conter informação preditiva mensurável além da taxa-base; confiança, expectativa e estado corporal podem influenciar a sensação de certeza sem necessariamente elevar a acurácia. Proposta tecnológica: registrar previsão, probabilidade, domínio, prazo, justificativa intuitiva, evidências disponíveis e estado corporal autorrelatado; comparar previsões intuitivas e deliberadas com resultados posteriormente verificados, taxa-base e Brier score. Hipótese separada de precognição ou criação mental de fatos externos.",
+      "source_url": "",
+      "published_at": "",
+      "source_type": "internal_hypothesis",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ATLAS-INTUITION-01"
+      ],
+      "tags": [
+        "ATLAS-INTUITION-01",
+        "intuition",
+        "metacognition",
+        "calibration",
+        "possible-futures",
+        "RIA-candidate"
+      ],
+      "confidence": 0.38,
+      "priority": 0.91,
+      "evidence_class": "internal_hypothesis_not_tested"
+    }
+  ]
+}
