@@ -1,0 +1,87 @@
+{
+  "batch_id": "atlas-fechamento-estrategico-2026-11-20",
+  "producer": "ATLAS Fechamento Estratégico",
+  "generated_at": "2026-11-20T19:00:58-03:00",
+  "findings": [
+    {
+      "source_id": "https://www.reuters.com/business/energy/oil-prices-edge-higher-houthi-attacks-riyadh-raise-supply-concerns-2026-11-20/",
+      "title": "Petróleo: prêmio geopolítico e queda semanal coexistem",
+      "summary": "Reuters reporta alta pontual por riscos regionais e cobertura de posições, mas queda semanal próxima de 4% no Brent. Evidência de preços publicados, não prova de normalização do tráfego.",
+      "source_url": "https://www.reuters.com/business/energy/oil-prices-edge-higher-houthi-attacks-riyadh-raise-supply-concerns-2026-11-20/",
+      "published_at": "2026-11-20",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ARO-01"
+      ],
+      "tags": [
+        "oil",
+        "Brent",
+        "Hormuz",
+        "geopolitical_risk"
+      ],
+      "confidence": 0.88,
+      "priority": 0.9,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.reuters.com/business/energy/more-russian-regions-limit-fuel-sales-ukrainian-drone-strikes-hit-refinery-2026-11-20/",
+      "title": "Rússia: restrições regionais de combustíveis ampliadas",
+      "summary": "Reuters relata mais regiões restringindo vendas após ataques a refinarias; consequência doméstica corroborada por cobertura jornalística, sem auditoria SAR de cada instalação ou prova de escassez nacional homogênea.",
+      "source_url": "https://www.reuters.com/business/energy/more-russian-regions-limit-fuel-sales-ukrainian-drone-strikes-hit-refinery-2026-11-20/",
+      "published_at": "2026-11-20",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ARO-02"
+      ],
+      "tags": [
+        "Russia",
+        "refining",
+        "fuel_rationing",
+        "Ukraine"
+      ],
+      "confidence": 0.85,
+      "priority": 0.92,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.reuters.com/business/energy/us-tightens-iran-blockade-with-curbs-oil-transfers-sea-advisory-shows-2026-11-18/",
+      "title": "Bloqueio marítimo: alcance a transferências entre navios",
+      "summary": "Reuters descreve aviso do comando militar americano que amplia risco de interdição a transferências navio-navio ligadas a carga iraniana. É evidência documental de política anunciada; não prova de interceptação efetiva de toda transferência.",
+      "source_url": "https://www.reuters.com/business/energy/us-tightens-iran-blockade-with-curbs-oil-transfers-sea-advisory-shows-2026-11-18/",
+      "published_at": "2026-11-18",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "sanctions",
+        "ship_to_ship",
+        "Iran",
+        "maritime"
+      ],
+      "confidence": 0.88,
+      "priority": 0.93,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.iranintl.com/en/202611204873",
+      "title": "Irã sinaliza tentativa de romper bloqueio naval",
+      "summary": "Veículo reporta preparativos e ameaças iranianas. Trata-se de relato sobre intenção e retórica, não confirmação de rompimento do bloqueio; requer AIS autorizado, registros portuários e observação independente.",
+      "source_url": "https://www.iranintl.com/en/202611204873",
+      "published_at": "2026-11-20",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "Iran",
+        "blockade",
+        "tanker",
+        "claims"
+      ],
+      "confidence": 0.65,
+      "priority": 0.85,
+      "evidence_class": "secondary_source"
+    }
+  ]
+}
