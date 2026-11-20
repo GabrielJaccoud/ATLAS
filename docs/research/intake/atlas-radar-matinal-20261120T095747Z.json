@@ -1,0 +1,65 @@
+{
+  "batch_id": "atlas-radar-matinal-2026-11-20",
+  "producer": "ATLAS Radar Matinal",
+  "generated_at": "2026-11-20T09:57:47Z",
+  "findings": [
+    {
+      "source_id": "NASA-FERMI-PULSAR-2026-11-19",
+      "title": "Busca de pulsares com algoritmos de reticulados acelera análise de dados Fermi",
+      "summary": "NASA relata descoberta do pulsar PSR J1622−7204 com método inspirado em reticulados criptográficos sobre 15 anos de dados Fermi. Comparação informada: cerca de 10 horas de CPU contra método anterior que não encontrou o sinal após esforço equivalente a 600 anos de CPU. Resultado publicado pela equipe, não reproduzido nesta execução; requer dados Fermi, código, parâmetros e benchmarks equivalentes.",
+      "source_url": "https://science.nasa.gov/open-science/fermi-data-pulsar-discovery/",
+      "published_at": "2026-11-19",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "fermi",
+        "pulsar",
+        "lattice",
+        "algorithm",
+        "open-data"
+      ],
+      "confidence": 0.91,
+      "priority": 0.92,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "NASA-WILDFIRE-3D-2026-11-18",
+      "title": "Mapas lidar 3D de 1 metro para risco de incêndio na Califórnia",
+      "summary": "NASA relata mapa estadual 3D de resolução espacial de 1 metro derivado de lidar aerotransportado USGS 3DEP, para análise de vegetação e incêndios. Existência do método e produto documentada; desempenho preditivo sobre incêndios não validado nesta execução. Teste requer mosaicos 3DEP, perímetros de incêndio, meteorologia e controles topográficos.",
+      "source_url": "https://science.nasa.gov/blogs/science-news/2026/11/18/california-wildfire-risk-3d-maps/",
+      "published_at": "2026-11-18",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "lidar",
+        "geospatial",
+        "wildfire",
+        "digital-twin"
+      ],
+      "confidence": 0.92,
+      "priority": 0.78,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "REUTERS-OIL-2026-11-20",
+      "title": "Petróleo cai apesar de riscos militares; recuperação de fluxos marítimos",
+      "summary": "Reuters reporta Brent a US$91,03 em 20/11, queda semanal projetada de cerca de 5%, associada à recuperação dos fluxos no estreito de Ormuz. Alegações de minas e ataques permanecem sem confirmação física independente nesta apuração. Causalidade não testada: faltam AIS, volumes de exportação, seguros, preços e controles de demanda.",
+      "source_url": "https://www.reuters.com/business/energy/oil-prices-edge-higher-houthi-attacks-riyadh-raise-supply-concerns-2026-11-20/",
+      "published_at": "2026-11-20",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "oil",
+        "geopolitics",
+        "supply",
+        "unverified-causality"
+      ],
+      "confidence": 0.72,
+      "priority": 0.88,
+      "evidence_class": "secondary_source"
+    }
+  ]
+}
