@@ -191,6 +191,7 @@ type HomeSignal = {
 type ScreenId =
   | "Agora"
   | "Talk"
+  | "Ouvir"
   | "Radar"
   | "Urgente"
   | "Ciência"
@@ -209,6 +210,7 @@ type ScreenId =
 const navigation: ScreenId[] = [
   "Agora",
   "Talk",
+  "Ouvir",
   "Radar",
   "Urgente",
   "Ciência",
@@ -266,6 +268,9 @@ function App() {
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(readChatHistory);
   const [realtimeDraft, setRealtimeDraft] = useState("");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaTranscript, setMediaTranscript] = useState("");
+  const [mediaBusy, setMediaBusy] = useState(false);
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
   const [listening, setListening] = useState(false);
@@ -907,6 +912,32 @@ function App() {
     }
   }
 
+  async function transcribeMedia() {
+    if (!mediaFile || !connected) return;
+    const form = new FormData();
+    form.append("file", mediaFile);
+    setMediaBusy(true);
+    setMediaTranscript("");
+    try {
+      const result = await atlasFetch<{ filename: string; transcript: string; model: string; media_retained: boolean }>("/media/transcribe", {
+        method: "POST",
+        body: form,
+      });
+      setMediaTranscript(result.transcript);
+      setReply(`Transcrição concluída com ${result.model}. O arquivo não foi guardado pelo ATLAS.`);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : "A transcrição não foi concluída.");
+    } finally {
+      setMediaBusy(false);
+    }
+  }
+
+  function investigateMediaTranscript() {
+    if (!mediaTranscript.trim()) return;
+    const prompt = `Investigue na web as hipóteses apresentadas nesta transcrição. Separe alegações verificáveis, conceitos estabelecidos, hipóteses e especulações; localize fontes primárias e proponha testes falsificáveis.\n\nTranscrição:\n${mediaTranscript.slice(0, 3300)}`;
+    void send(prompt);
+  }
+
   function VoiceCore({ compact = false }: { compact?: boolean }) {
     const contextualState = voiceState !== "ready"
       ? voiceState
@@ -1028,6 +1059,28 @@ function App() {
                 <small>Enter envia · Shift + Enter quebra a linha</small>
               </div>
             </div>
+          </>
+        );
+      case "Ouvir":
+        return (
+          <>
+            <SectionHeader eyebrow="Audio intelligence" title="Ouvir e transcrever" description="Envie áudio ou vídeo para gerar uma transcrição pesquisável; depois, peça ao ATLAS uma apuração baseada no conteúdo." />
+            <div className="form-panel atlas-surface media-transcription-panel">
+              <h3>Transcrever arquivo</h3>
+              <p>Áudio ou vídeo de até 512 MB. O ATLAS extrai a faixa de áudio, transcreve no idioma falado e descarta os arquivos temporários ao terminar.</p>
+              <div className="media-upload-row">
+                <label className="secondary upload-action media-picker">{mediaFile ? mediaFile.name : "Escolher áudio ou vídeo"}<input type="file" accept="audio/*,video/mp4,video/webm,video/quicktime,video/x-matroska" onChange={(event) => setMediaFile(event.target.files?.[0] || null)} /></label>
+                <button className="primary" disabled={!connected || !mediaFile || mediaBusy} onClick={() => void transcribeMedia()}>{mediaBusy ? "Ouvindo e transcrevendo…" : "Transcrever"}</button>
+              </div>
+              <small className="muted">Formatos comuns: MP3, M4A, WAV, OGG, FLAC, MP4, WebM e MOV. A transcrição usa o provedor de áudio configurado na API.</small>
+            </div>
+            {mediaTranscript && <div className="form-panel atlas-surface media-transcript-result">
+              <div className="section-row"><div><span className="eyebrow">Transcrição</span><h3>{mediaFile?.name || "Arquivo de mídia"}</h3></div><span className="publication-scope">Não armazenada</span></div>
+              <textarea aria-label="Transcrição do arquivo" rows={14} value={mediaTranscript} onChange={(event) => setMediaTranscript(event.target.value)} />
+              <div className="publication-actions"><button className="secondary" onClick={() => speak(mediaTranscript)}>Ouvir texto</button><button className="primary" disabled={!connected || mediaBusy} onClick={investigateMediaTranscript}>Investigar hipótese na web</button><button className="secondary" onClick={() => { navigator.clipboard?.writeText(mediaTranscript); setReply("Transcrição copiada."); }}>Copiar</button></div>
+              <small className="muted">Ao investigar, o trecho enviado será registrado no histórico de pesquisa do ATLAS.</small>
+            </div>}
+            <div className="empty-state atlas-surface"><strong>Conversa por voz ao vivo</strong><p>Para falar com o ATLAS sem gravar primeiro, use Talk → Conversar por voz. A conversa Realtime usa o microfone e responde em áudio.</p><button className="secondary" onClick={() => goTo("Talk")}>Abrir Talk</button></div>
           </>
         );
       case "Radar":
@@ -1360,7 +1413,7 @@ function App() {
         </div>
         <nav className="side-nav">
           {navigation.map((item) => (
-            <button key={item} title={item} aria-label={item} className={active === item ? "active" : ""} onClick={() => goTo(item)}><span className="nav-label">{item}</span><span className="nav-mark">{{ Agora: "AG", Talk: "TK", Radar: "RD", Urgente: "!", Ciência: "CI", Pesquisa: "PQ", Mundos: "MU", Laboratório: "LB", Ministérios: "MI", Conselho: "CO", Apps: "AP", Awareness: "AW", Corpo: "CV", "My World": "MW", Inovação: "IN", Ações: "AC" }[item]}</span></button>
+            <button key={item} title={item} aria-label={item} className={active === item ? "active" : ""} onClick={() => goTo(item)}><span className="nav-label">{item}</span><span className="nav-mark">{{ Agora: "AG", Talk: "TK", Ouvir: "OU", Radar: "RD", Urgente: "!", Ciência: "CI", Pesquisa: "PQ", Mundos: "MU", Laboratório: "LB", Ministérios: "MI", Conselho: "CO", Apps: "AP", Awareness: "AW", Corpo: "CV", "My World": "MW", Inovação: "IN", Ações: "AC" }[item]}</span></button>
           ))}
         </nav>
         <div className={connected ? "system-pill online" : "system-pill"}>{connected ? "ONLINE" : "NÃO PAREADO"}</div>

@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     openai_model: str = "gpt-6-luna"
     openai_realtime_model: str = "gpt-realtime-2.1-mini"
+    openai_transcription_model: str = "gpt-transcribe"
     openai_base_url: str = "https://api.openai.com/v1"
 
     anthropic_api_key: str | None = None

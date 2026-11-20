@@ -22,6 +22,7 @@ dependencies = [
   "pywebpush>=2.0,<3.0",
   "cryptography>=44,<47",
   "reportlab>=4.2,<5.0",
+  "av>=14,<17",
 ]
 
 [project.optional-dependencies]

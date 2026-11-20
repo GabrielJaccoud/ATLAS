@@ -8,9 +8,12 @@ import httpx
 import smtplib
 import ssl
 import time
+import tempfile
+import wave
 from email.message import EmailMessage
 from functools import lru_cache
 from io import BytesIO
+from pathlib import Path
 from typing import Literal
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -511,6 +514,83 @@ async def realtime_token() -> dict[str, object]:
         return await create_realtime_client_secret()
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post("/media/transcribe", dependencies=[Depends(require_token)])
+async def transcribe_media(file: UploadFile = File(...)) -> dict[str, object]:
+    """Transcribe uploaded audio/video without retaining either the media or transcript."""
+    if not settings.openai_api_key:
+        raise HTTPException(status_code=503, detail="A transcrição precisa de um provedor de áudio configurado no ATLAS.")
+    filename = Path(file.filename or "media").name
+    content_type = (file.content_type or "").lower()
+    allowed_types = {
+        "audio/mpeg", "audio/mp3", "audio/mp4", "audio/m4a", "audio/wav", "audio/x-wav",
+        "audio/ogg", "audio/webm", "audio/flac", "video/mp4", "video/webm", "video/quicktime",
+        "video/x-matroska", "application/octet-stream",
+    }
+    if content_type not in allowed_types:
+        raise HTTPException(status_code=415, detail="Envie áudio ou vídeo MP3, M4A, WAV, OGG, FLAC, MP4, WebM ou MOV.")
+    file.file.seek(0, 2)
+    size = file.file.tell()
+    file.file.seek(0)
+    if size <= 0 or size > 512 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="O arquivo precisa ter até 512 MB e conter dados.")
+
+    try:
+        import av
+    except ImportError as exc:
+        raise HTTPException(status_code=503, detail="O decodificador de mídia não está instalado nesta API.") from exc
+    try:
+        input_container = av.open(file.file)
+        audio_stream = next((stream for stream in input_container.streams if stream.type == "audio"), None)
+        if audio_stream is None:
+            input_container.close()
+            raise HTTPException(status_code=422, detail="Não encontrei uma faixa de áudio neste arquivo.")
+        resampler = av.AudioResampler(format="s16", layout="mono", rate=16000)
+        with tempfile.TemporaryDirectory(prefix="atlas-transcribe-") as temp_dir:
+            wav_path = Path(temp_dir) / "audio.wav"
+            with wave.open(str(wav_path), "wb") as wav_file:
+                wav_file.setnchannels(1)
+                wav_file.setsampwidth(2)
+                wav_file.setframerate(16000)
+                for frame in input_container.decode(audio_stream):
+                    for converted in resampler.resample(frame):
+                        wav_file.writeframesraw(converted.to_ndarray().tobytes())
+                        if wav_file.tell() * 2 > 24 * 1024 * 1024:
+                            raise HTTPException(status_code=413, detail="O áudio extraído excede 24 MB; envie um trecho menor.")
+                for converted in resampler.resample(None):
+                    wav_file.writeframesraw(converted.to_ndarray().tobytes())
+            input_container.close()
+            wav_size = wav_path.stat().st_size
+            if wav_size > 25 * 1024 * 1024:
+                raise HTTPException(status_code=413, detail="O áudio extraído excede 25 MB; envie um trecho menor.")
+            with wav_path.open("rb") as audio_file:
+                async with httpx.AsyncClient(timeout=240) as client:
+                    response = await client.post(
+                        f"{settings.openai_base_url}/audio/transcriptions",
+                        headers={"Authorization": f"Bearer {settings.openai_api_key}"},
+                        data={"model": settings.openai_transcription_model, "response_format": "json"},
+                        files={"file": (f"{Path(filename).stem}.wav", audio_file, "audio/wav")},
+                    )
+            if response.is_error:
+                raise HTTPException(status_code=502, detail="O provedor não concluiu a transcrição. Verifique o limite e tente novamente.")
+            result = response.json()
+            transcript = str(result.get("text", "")).strip()
+            if not transcript:
+                raise HTTPException(status_code=422, detail="O provedor não reconheceu fala neste arquivo.")
+            return {
+                "filename": filename,
+                "transcript": transcript,
+                "model": settings.openai_transcription_model,
+                "media_retained": False,
+                "transcript_retained": False,
+            }
+    except HTTPException:
+        raise
+    except (av.error.FFmpegError, OSError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail="Não foi possível decodificar a faixa de áudio. Tente outro formato ou arquivo.") from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail="O provedor de transcrição está indisponível neste momento.") from exc
 
 
 @app.get("/status", dependencies=[Depends(require_token)])
