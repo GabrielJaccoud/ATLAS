@@ -1,0 +1,69 @@
+{
+  "batch_id": "atlas-ciencia-interna-2026-11-20",
+  "producer": "ATLAS Ciência Interna",
+  "generated_at": "2026-11-20T18:54:01Z",
+  "findings": [
+    {
+      "source_id": "https://arxiv.org/abs/2611.22386",
+      "title": "Earth-strength magnetic-field axis modulates non-spatial probabilistic decision-making in humans",
+      "summary": "Preprint de 17/11/2026 relata diferenças de escolhas em configurações de campo geomagnético e propõe pares radicais; não demonstra transdução causal, consciência planetária ou efeito paranormal; requer replicação cega e dados brutos.",
+      "source_url": "https://arxiv.org/abs/2611.22386",
+      "published_at": "2026-11-17",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-006"
+      ],
+      "tags": [
+        "magnetorecepcao",
+        "neurociencia",
+        "preprint",
+        "RIA"
+      ],
+      "confidence": 0.63,
+      "priority": 0.88,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "https://doi.org/10.1021/acs.jpclett.4c03546",
+      "title": "Imaging Ultraweak Photon Emission from Living and Dead Mice and from Plants under Stress",
+      "summary": "Estudo experimental de 24/04/2025 usa câmeras EMCCD/CCD e relata contraste UPE entre camundongos vivos e mortos e mudanças sob estresse vegetal; não demonstra comunicação óptica funcional ou consciência.",
+      "source_url": "https://doi.org/10.1021/acs.jpclett.4c03546",
+      "published_at": "2025-04-24",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-001"
+      ],
+      "tags": [
+        "biofotons",
+        "UPE",
+        "imagem",
+        "RIA"
+      ],
+      "confidence": 0.88,
+      "priority": 0.79,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "https://doi.org/10.3389/fnins.2025.1497021",
+      "title": "Magnetic sense-dependent probabilistic decision-making in humans",
+      "summary": "Artigo experimental de 07/03/2025 relata alteração de escolhas sob manipulação geomagnética e radiofrequência; há corrigendum indicado pelo periódico, e o mecanismo de pares radicais permanece hipotético.",
+      "source_url": "https://doi.org/10.3389/fnins.2025.1497021",
+      "published_at": "2025-03-07",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-006"
+      ],
+      "tags": [
+        "geomagnetismo",
+        "decisao",
+        "replicacao"
+      ],
+      "confidence": 0.73,
+      "priority": 0.84,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
