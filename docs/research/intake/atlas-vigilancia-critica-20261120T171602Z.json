@@ -1,0 +1,29 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261120T171602Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-20T17:16:02Z",
+  "findings": [
+    {
+      "source_id": "GAO-27-108458",
+      "title": "AI and Cybersecurity: Technologies Can Magnify Cyberattacks and Enhance Cyber Defense",
+      "summary": "Relatório de avaliação tecnológica do GAO publicado em 20/11/2026. Revisou literatura e documentos, entrevistou especialistas e reuniu painel multissetorial. Descreve uso de IA generativa e agentes em ataques e defesa, desafios de testes e governança, quatro objetivos e 16 opções de políticas. Exemplos de incidentes dependem de relatos industriais secundários; não constituem demonstração independente nem benchmark de desempenho. RIA: testar em sandbox avaliação de agentes, proveniência, isolamento de ferramentas, detecção de injeção e trilhas de auditoria, comparando métricas ao baseline; nenhuma assimilação autorizada.",
+      "source_url": "https://www.gao.gov/products/gao-27-108458",
+      "published_at": "2026-11-20",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "GAO",
+        "AI-cybersecurity",
+        "agentic-AI",
+        "dual-use",
+        "red-teaming",
+        "governance",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.96,
+      "priority": 0.88,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
