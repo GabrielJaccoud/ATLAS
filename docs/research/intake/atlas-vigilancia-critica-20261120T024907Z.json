@@ -1,0 +1,32 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261120T024907Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-20T02:49:07Z",
+  "findings": [
+    {
+      "source_id": "DARPA-DPA27BZ02-DV002",
+      "title": "AMCOM-DI: Autonomous Metacognitive Collection Orchestration for Multi-Domain Intelligence",
+      "summary": "Solicitação SBIR DARPA publicada em 03/11/2026, identificada nesta vigilância. Propõe orquestração metacognitiva de coleta multimodal assíncrona, recomendações causalmente rastreáveis, comparação contra baselines de fusão clássica, aprendizagem ativa ou agentes LLM, testes com negação/decepção e limiares de confiança. São requisitos prospectivos de desenvolvimento, não desempenho já demonstrado; não há benchmark independente nem ganho verificado contra ATLAS. RIA-AMCOM-01: referência para desenho de testes de robustez e proveniência, sem assimilação. Possíveis restrições ITAR/EAR exigem atenção.",
+      "source_url": "https://www.darpa.mil/research/programs/amcom-di",
+      "published_at": "2026-11-03T00:00:00Z",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "SBIR",
+        "AMCOM-DI",
+        "metacognition",
+        "multimodal",
+        "causal-reasoning",
+        "adversarial-robustness",
+        "dual-use",
+        "RIA-AMCOM-01",
+        "solicitation-not-demonstration"
+      ],
+      "confidence": 0.97,
+      "priority": 0.78,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
