@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from .forge import HypothesisForge, MinistryAssessment, TechnologySeed
 from .ministry_router import MinistryInnovationRouter

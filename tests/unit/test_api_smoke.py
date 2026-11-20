@@ -12,7 +12,7 @@ HEADERS = {"Authorization": "Bearer dev-atlas-token"}
 def test_health_is_public():
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json()["version"] == "1.8.0"
+    assert response.json()["version"] == "1.9.0"
 
 
 def test_status_requires_token():
@@ -132,3 +132,22 @@ def test_owner_pairing_returns_session_token():
 def test_owner_pairing_rejects_wrong_code():
     response = client.post("/auth/session", json={"code": "wrong"})
     assert response.status_code == 401
+
+
+def test_possible_world_programs_are_exposed():
+    response = client.get("/possible-worlds/programs", headers=HEADERS)
+    assert response.status_code == 200
+    programs = response.json()
+    assert any(p["program_id"] == "program-semantic-codec" for p in programs)
+
+
+def test_possible_world_observation_updates_posterior():
+    response = client.post(
+        "/possible-worlds/programs/program-semantic-codec/observe",
+        headers=HEADERS,
+        json={"experiment_id": "codec-public-benchmark", "outcome": "beats_baseline"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "posterior" in data
+    assert data["posterior"]["probabilities"]
