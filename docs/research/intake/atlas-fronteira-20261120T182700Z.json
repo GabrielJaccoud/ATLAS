@@ -1,0 +1,69 @@
+{
+  "batch_id": "atlas-fronteira-2026-11-20",
+  "producer": "ATLAS Fronteira do Conhecimento",
+  "generated_at": "2026-11-20T18:27:00Z",
+  "findings": [
+    {
+      "source_id": "DOE-GENESIS-URSA-2026",
+      "title": "Los Alamos URSA: agente científico composicional com execução computacional",
+      "summary": "DOE documenta URSA, desenvolvido por Los Alamos, para planejamento, busca bibliográfica, geração/execução de código, experimentos computacionais e refinamento de hipóteses; relata aplicação em materiais e cápsulas de fusão por confinamento inercial. Não fornece nesta página benchmark independente, código reprodutível ou métricas de superioridade frente ao ATLAS. RIA: avaliar orquestração composicional em sandbox, com controles e revisão humana; não assimilar ainda.",
+      "source_url": "https://www.energy.gov/undersecretaryforscience/genesis-mission/genesis-mission-national-science-and-technology-challenges",
+      "published_at": "",
+      "source_type": "government_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "URSA",
+        "DOE",
+        "Los Alamos",
+        "agentic-research",
+        "RIA",
+        "benchmark-pending"
+      ],
+      "confidence": 0.93,
+      "priority": 0.93,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "DOE-GENESIS-MALA-2026",
+      "title": "Sandia/CASUS MALA: modelagem eletrônica híbrida física-ML",
+      "summary": "DOE relata simulações acima de 100 mil átomos e aceleração superior a 5000 vezes em comparação com DFT para caso de 2000 átomos. São resultados declarados pelo órgão; parâmetros, erro e comparabilidade não foram auditados independentemente nesta execução. RIA: registrar padrão de surrogate físico e validação fora da amostra; não importar desempenho para outros domínios.",
+      "source_url": "https://www.energy.gov/undersecretaryforscience/genesis-mission/genesis-mission-national-science-and-technology-challenges",
+      "published_at": "",
+      "source_type": "government_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "MALA",
+        "Sandia",
+        "materials",
+        "physics-informed-ML",
+        "RIA"
+      ],
+      "confidence": 0.9,
+      "priority": 0.7,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "DOE-GENESIS-COLDATOM-2026",
+      "title": "Brookhaven/Infleqtion: calibração autônoma de sensor quântico de átomos frios",
+      "summary": "Projeto DOE tem metas de reduzir calibração de horas para minutos, duty cycle acima de 95% sob drift e ruído, e ganho de sinal-ruído de pelo menos 2x. São metas de Fase I, não demonstrações verificadas. RIA: testar controlador de drift com dados sintéticos e baseline antes de qualquer aplicação em sensores reais.",
+      "source_url": "https://www.energy.gov/undersecretaryforscience/genesis-mission/genesis-mission-national-science-and-technology-challenges",
+      "published_at": "",
+      "source_type": "government_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "quantum-sensing",
+        "Brookhaven",
+        "Infleqtion",
+        "sensor-drift",
+        "phase-I",
+        "RIA"
+      ],
+      "confidence": 0.94,
+      "priority": 0.82,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
