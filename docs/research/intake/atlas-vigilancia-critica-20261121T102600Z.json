@@ -1,0 +1,29 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261121T102600Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-21T10:26:00Z",
+  "findings": [
+    {
+      "source_id": "GAO-27-108683",
+      "title": "Space Supply Chains: Additional DOD Actions Could Strengthen Its Enterprise Approach for Managing Risks",
+      "summary": "Auditoria primária GAO publicada em 17/11/2026 examinou documentação e entrevistas de três programas espaciais militares selecionados. Identificou gargalos em processadores resistentes à radiação, comunicações ópticas e fornecedores únicos; constatou coordenação insuficiente entre Space Force e outros atores, inclusive NRO, e emitiu três recomendações aceitas pelo DOD. Amostra não generalizável e auditoria de riscos, não demonstração de falha em missão nem comprovação de tecnologia classificada. RIA: avaliar grafo de dependências de fornecedores e propagação de riscos no ATLAS contra baseline com métricas de detecção, falsos alarmes e rastreabilidade; sem assimilação.",
+      "source_url": "https://files.gao.gov/reports/GAO-27-108683/index.html",
+      "published_at": "2026-11-17",
+      "source_type": "government_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "GAO",
+        "Space-Force",
+        "NRO",
+        "space-supply-chain",
+        "dual-use",
+        "risk-graph",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.97,
+      "priority": 0.81,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
