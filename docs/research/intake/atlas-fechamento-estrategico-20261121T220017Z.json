@@ -1,0 +1,69 @@
+{
+  "batch_id": "atlas-fechamento-estrategico-2026-11-21",
+  "producer": "ATLAS Fechamento Estratégico",
+  "generated_at": "2026-11-21T22:00:17Z",
+  "findings": [
+    {
+      "source_id": "https://www.reuters.com/business/energy/tanker-hit-by-unknown-projectile-near-omans-khasab-ukmto-says-2026-11-21/",
+      "title": "UKMTO relata dois incidentes com petroleiros próximos a Khasab",
+      "summary": "Reuters reproduz registros da UKMTO de dois impactos reportados em 21/11, a 11 milhas náuticas ao norte e 17 a leste de Khasab. Não está esclarecido se são duas embarcações distintas; projétil, autoria e dano ambiental não foram verificados independentemente nesta análise.",
+      "source_url": "https://www.reuters.com/business/energy/tanker-hit-by-unknown-projectile-near-omans-khasab-ukmto-says-2026-11-21/",
+      "published_at": "2026-11-21",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "Hormuz",
+        "UKMTO",
+        "maritime",
+        "incident",
+        "unverified_attribution"
+      ],
+      "confidence": 0.83,
+      "priority": 0.97,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.ft.com/content/5fbc2b9d-0360-4a1f-9e4a-3e86168cbbc5",
+      "title": "Fluxo marítimo em Ormuz cai 15% na semana até 18 de novembro",
+      "summary": "Financial Times cita dados de monitoramento marítimo: 263 embarcações cruzaram Ormuz na semana até 18/11, 15% menos que na anterior; petroleiros caíram de 52 para 37. Estimativas preliminares são sujeitas a revisão por trânsitos sem AIS detectados posteriormente; dados brutos não foram auditados aqui.",
+      "source_url": "https://www.ft.com/content/5fbc2b9d-0360-4a1f-9e4a-3e86168cbbc5",
+      "published_at": "2026-11-21",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ARO-01"
+      ],
+      "tags": [
+        "Hormuz",
+        "AIS",
+        "shipping",
+        "oil",
+        "traffic"
+      ],
+      "confidence": 0.78,
+      "priority": 0.96,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.reuters.com/world/middle-east/us-treasury-sanctions-iranian-trustees-collecting-oil-revenues-2026-11-20/",
+      "title": "Tesouro americano sanciona quatro pessoas ligadas a receitas de petróleo iraniano",
+      "summary": "Reuters reporta sanções anunciadas pelo Tesouro dos EUA contra quatro pessoas acusadas de gerir receitas petrolíferas iranianas. A existência das sanções é documentada; a conduta imputada permanece alegação da autoridade sancionadora, não prova judicial independente.",
+      "source_url": "https://www.reuters.com/world/middle-east/us-treasury-sanctions-iranian-trustees-collecting-oil-revenues-2026-11-20/",
+      "published_at": "2026-11-20",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "Iran",
+        "OFAC",
+        "sanctions",
+        "oil",
+        "financial_network"
+      ],
+      "confidence": 0.88,
+      "priority": 0.85,
+      "evidence_class": "secondary_source"
+    }
+  ]
+}
