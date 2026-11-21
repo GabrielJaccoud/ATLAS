@@ -1,0 +1,29 @@
+{
+  "batch_id": "atlas-ciencia-interna-2026-11-21",
+  "producer": "ATLAS Ciência Interna",
+  "generated_at": "2026-11-21T18:18:19Z",
+  "findings": [
+    {
+      "source_id": "https://doi.org/10.1038/s41586-026-10282-4",
+      "title": "Magnetic resonance control of spin-correlated radical pair dynamics in vivo",
+      "summary": "Experimento publicado na Nature em 2026 demonstra modulação de fluorescência de sistema proteína vermelha-flavina por campos estáticos e de radiofrequência, in vitro e em C. elegans transgênico. Sustenta mecanismo biofísico de pares radicais em sistema engenheirado; não demonstra magnetorrecepção humana, consciência ou fenômenos psi.",
+      "source_url": "https://www.nature.com/articles/s41586-026-10282-4",
+      "published_at": "2026-03-01",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-006"
+      ],
+      "tags": [
+        "radical-pair",
+        "magnetobiology",
+        "fluorescence",
+        "RIA",
+        "in-vivo"
+      ],
+      "confidence": 0.9,
+      "priority": 0.91,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
