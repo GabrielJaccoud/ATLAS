@@ -9,7 +9,7 @@
       "summary": "DARPA informa demonstração em órbita de montagem automatizada de estrutura treliçada por robô cartesiano de três eixos, conectando elementos compósitos e desdobrando malha refletora; carga lançada no Transporter-16 em março de 2026, hospedada pela Momentus Vigoride. Demonstração física de prova de conceito, sem métricas públicas suficientes de escala, taxa de falhas ou custo comparativo; estruturas de centenas de metros/quilômetros permanecem objetivo futuro. RIA: estudar decomposição modular e verificação de montagem, sem assimilação.",
       "source_url": "https://www.darpa.mil/news/2026/nom4d-program-demonstrates-automated-in-space-assembly",
       "published_at": "2026-11-05",
-      "source_type": "government_report",
+      "source_type": "official_report",
       "ministry_id": "research_evolution",
       "hypothesis_ids": [],
       "tags": [
@@ -32,7 +32,7 @@
       "summary": "DARPA documenta finais em 13/11/2026: RoboScout venceu Systems (US$1,5 milhão) e Disruptors venceu Data (US$1 milhão); provas incluíram busca de vítimas, avaliação rápida, sinais vitais, colaboração e alocação de recursos em cenários simulados de desastre. Prêmios e provas são verificáveis, mas a nota não fornece métricas comparativas completas, sensibilidade/especificidade clínicas ou generalização a emergências reais. RIA: estudar benchmark multimodal com decisão humana, sem assimilação.",
       "source_url": "https://www.darpa.mil/news/2026/triage-finals-winners",
       "published_at": "2026-11-16",
-      "source_type": "government_report",
+      "source_type": "official_report",
       "ministry_id": "research_evolution",
       "hypothesis_ids": [],
       "tags": [
