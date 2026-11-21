@@ -1,0 +1,49 @@
+{
+  "batch_id": "atlas-radar-matinal-2026-11-21",
+  "producer": "ATLAS Radar Matinal",
+  "generated_at": "2026-11-21T10:00:13Z",
+  "findings": [
+    {
+      "source_id": "IEA-WEO2026-ARC-LHC",
+      "title": "WEO 2026: cenários de redução da dependência de Ormuz",
+      "summary": "Fonte primária institucional IEA, capítulo de cenários, não artigo revisado por pares. No cenário ARC, demanda de petróleo em 2035 fica 4,4 milhões b/d abaixo do STEPS; no LHC, trânsito pelo estreito cai de 20 para 2 milhões b/d. São projeções condicionais, não observações futuras. Cálculo descritivo da diferença LHC: 18 milhões b/d (90%). Teste causal não executado: faltam premissas quantitativas por rota, custos, capacidade e séries de implantação.",
+      "source_url": "https://www.iea.org/reports/world-energy-outlook-2026/potential-additional-responses",
+      "published_at": "2026-11-19",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "energy-security",
+        "scenario",
+        "hormuz",
+        "IEA",
+        "institutional-report",
+        "conditional-projection"
+      ],
+      "confidence": 0.94,
+      "priority": 0.91,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "IEA-WEO2026-CRITICAL-MINERALS",
+      "title": "WEO 2026: concentração de minerais críticos e vulnerabilidade elétrica",
+      "summary": "Fonte primária institucional IEA. Estima concentração de refino de cerca de 85% em terras raras magnéticas e 75% em lítio e cobalto no maior país fornecedor, além de déficit projetado de 25% para cobre em 2035 no STEPS. Valores de cenário e estimativas, não previsões verificadas. Teste de cascata pendente: faltam matrizes comerciais por país, substituibilidade, estoques e capacidade de expansão.",
+      "source_url": "https://www.iea.org/reports/world-energy-outlook-2026/implications-for-energy-security-and-affordability",
+      "published_at": "2026-11-19",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "critical-minerals",
+        "supply-chain",
+        "electricity",
+        "IEA",
+        "institutional-report",
+        "scenario"
+      ],
+      "confidence": 0.91,
+      "priority": 0.86,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
