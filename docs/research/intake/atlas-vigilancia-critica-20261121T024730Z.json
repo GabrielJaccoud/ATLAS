@@ -1,0 +1,29 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261121T024730Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-21T02:47:30Z",
+  "findings": [
+    {
+      "source_id": "GAO-27-108661",
+      "title": "Cybersecurity: Agencies Need to Fully Address Federal Guidance as They Refine Zero Trust Architecture",
+      "summary": "Auditoria GAO publicada em 18/11/2026 examinou planos de arquitetura zero trust em 22 agências civis federais, confrontando-os com diretrizes OMB/NIST e entrevistas com responsáveis. Apenas 5 contemplavam integralmente as diretrizes selecionadas; 17 apresentavam lacunas, motivando 40 recomendações. Evidência de falhas de planejamento e governança, não prova de comprometimento ou eficácia superior de implementação específica. RIA: candidato a auditoria de identidade de agentes, inventário de ativos, autorização por ferramenta e métricas de conformidade; sem assimilação ou ganho medido.",
+      "source_url": "https://www.gao.gov/products/gao-27-108661",
+      "published_at": "2026-11-18",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "GAO",
+        "zero-trust",
+        "NIST",
+        "OMB",
+        "agent-security",
+        "dual-use",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.97,
+      "priority": 0.78,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
