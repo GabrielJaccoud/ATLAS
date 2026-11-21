@@ -1,0 +1,30 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261121T134943Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-21T13:49:43Z",
+  "findings": [
+    {
+      "source_id": "DARPA-SN-27-17",
+      "title": "FLASH: Formal Learning and Abstractions for System Heterogeneity — DARPA RFI",
+      "summary": "Aviso público DARPA/IPTO de 03/11/2026 solicita propostas conceituais sobre síntese automatizada de sistemas ciberfísicos heterogêneos de alta garantia a partir de especificações formais, combinando raciocínio simbólico, modelos generativos, invariantes verificáveis e diversidade de modos de falha. Confirma interesse institucional e oportunidade de pesquisa, não programa contratado, protótipo validado nem melhoria demonstrada. RIA: avaliar protótipo isolado de especificações formais e validação de invariantes versus baseline ASAS/ZAZA, medindo taxa de violações, cobertura, custo e latência, com auditoria e rollback; nenhuma assimilação.",
+      "source_url": "https://www.darpa.mil/work-with-us/opportunities/darpa-sn-27-17",
+      "published_at": "2026-11-03",
+      "source_type": "government_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "FLASH",
+        "formal-methods",
+        "neuro-symbolic",
+        "heterogeneous-systems",
+        "RFI",
+        "research-frontier",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.96,
+      "priority": 0.75,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
