@@ -9,7 +9,7 @@
       "summary": "Aviso público DARPA/IPTO de 03/11/2026 solicita propostas conceituais sobre síntese automatizada de sistemas ciberfísicos heterogêneos de alta garantia a partir de especificações formais, combinando raciocínio simbólico, modelos generativos, invariantes verificáveis e diversidade de modos de falha. Confirma interesse institucional e oportunidade de pesquisa, não programa contratado, protótipo validado nem melhoria demonstrada. RIA: avaliar protótipo isolado de especificações formais e validação de invariantes versus baseline ASAS/ZAZA, medindo taxa de violações, cobertura, custo e latência, com auditoria e rollback; nenhuma assimilação.",
       "source_url": "https://www.darpa.mil/work-with-us/opportunities/darpa-sn-27-17",
       "published_at": "2026-11-03",
-      "source_type": "government_report",
+      "source_type": "official_report",
       "ministry_id": "research_evolution",
       "hypothesis_ids": [],
       "tags": [
