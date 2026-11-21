@@ -1,0 +1,49 @@
+{
+  "batch_id": "atlas-fronteira-2026-11-21",
+  "producer": "ATLAS Fronteira do Conhecimento",
+  "generated_at": "2026-11-21T18:40:00Z",
+  "findings": [
+    {
+      "source_id": "DARPA-SN-27-17",
+      "title": "FLASH: síntese formal de sistemas heterogêneos de alta garantia",
+      "summary": "RFI pública de 3/11/2026 para métodos de aprendizado formal, abstrações e síntese automatizada de sistemas ciberfísicos a partir de especificações. Programa de consulta confirmado, não capacidade operacional demonstrada. H0: verificação formal não reduz violações de invariantes frente ao baseline; controles: especificações corretas e defeituosas, testes cegos e modelos heterogêneos; falta benchmark público e resultados.",
+      "source_url": "https://www.darpa.mil/about/offices/ipto",
+      "published_at": "2026-11-03T00:00:00Z",
+      "source_type": "government_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "FLASH",
+        "formal-methods",
+        "heterogeneity",
+        "RIA",
+        "program-announcement"
+      ],
+      "confidence": 0.91,
+      "priority": 0.92,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "DARPA-SN-27-10",
+      "title": "Flexoelectric Futures: sensores por gradiente de deformação",
+      "summary": "RFI oficial publicada em 4/11/2026 explora materiais flexoelétricos, metrologia e transdução de estados mecânicos por gradientes de deformação. Não demonstra novo dispositivo. H0: sinal não discrimina estados mecânicos acima de controles piezoelétricos e ruído; requer amostras, calibração, dados brutos e testes cegos. Aplicação ATLAS: ontologia de sensores e plano de avaliação, não integração física.",
+      "source_url": "https://www.darpa.mil/work-with-us/opportunities/darpa-sn-27-10",
+      "published_at": "2026-11-04T00:00:00Z",
+      "source_type": "government_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "flexoelectricity",
+        "sensors",
+        "metrology",
+        "dual-use",
+        "RIA"
+      ],
+      "confidence": 0.95,
+      "priority": 0.72,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
