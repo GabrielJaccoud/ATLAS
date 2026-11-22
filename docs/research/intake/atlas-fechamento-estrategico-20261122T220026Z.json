@@ -1,0 +1,48 @@
+{
+  "batch_id": "atlas-fechamento-estrategico-2026-11-22",
+  "producer": "ATLAS Fechamento Estratégico",
+  "generated_at": "2026-11-22T22:00:26Z",
+  "findings": [
+    {
+      "source_id": "https://www.reuters.com/world/middle-east/most-gulf-bourses-retreat-sporadic-attacks-continue-2026-11-22/",
+      "title": "Mercados do Golfo recuam após novos ataques e riscos regionais",
+      "summary": "Reuters relata em 22/11 queda de 2% no índice saudita, 1,6% no catariano e 0,6% no Bahrein, em meio a ataques e aversão a risco. São movimentos de mercado publicados, não prova de que cada queda foi causada exclusivamente pelo conflito; vendas globais também pesaram.",
+      "source_url": "https://www.reuters.com/world/middle-east/most-gulf-bourses-retreat-sporadic-attacks-continue-2026-11-22/",
+      "published_at": "2026-11-22",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "Gulf",
+        "markets",
+        "Iran",
+        "geopolitics",
+        "risk"
+      ],
+      "confidence": 0.88,
+      "priority": 0.88,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.aljazeera.com/news/2026/11/22/whats-behind-irans-escalation-of-attacks-in-the-gulf",
+      "title": "Vídeo geolocalizado e corroborado de incêndio em instalação civil no Bahrein",
+      "summary": "Cobertura de 22/11 apresenta imagem de incêndio em Sitra após ataque de 21/11; legenda da Reuters informa verificação do traçado viário e edifícios contra imagens de arquivo e satélite, vídeo corroborante e data alinhada ao Ministério do Interior. A verificação apoia localização e ocorrência do incêndio, mas não comprova por si só origem do projétil ou danos a radares militares alegados pelo Irã.",
+      "source_url": "https://www.aljazeera.com/news/2026/11/22/whats-behind-irans-escalation-of-attacks-in-the-gulf",
+      "published_at": "2026-11-22",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "Bahrain",
+        "Sitra",
+        "geolocation",
+        "satellite_reference",
+        "verification",
+        "Iran"
+      ],
+      "confidence": 0.84,
+      "priority": 0.94,
+      "evidence_class": "secondary_source"
+    }
+  ]
+}
