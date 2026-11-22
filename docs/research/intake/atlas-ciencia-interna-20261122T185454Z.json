@@ -1,0 +1,74 @@
+{
+  "batch_id": "atlas-ciencia-interna-2026-11-22",
+  "producer": "ATLAS Ciência Interna",
+  "generated_at": "2026-11-22T18:54:54Z",
+  "findings": [
+    {
+      "source_id": "https://doi.org/10.1038/s41586-026-10448-0",
+      "title": "Plasticity and language in the anaesthetized human hippocampus",
+      "summary": "Registros intracranianos com Neuropixels em pacientes anestesiados encontraram discriminação de estímulos, plasticidade e informação semântica/gramatical sob anestesia geral. Evidência de processamento neural complexo sem consciência relatável; não demonstra ausência absoluta de experiência, consciência não local ou proto-consciência. Correções editoriais publicadas em junho e setembro de 2026 exigem auditoria.",
+      "source_url": "https://www.nature.com/articles/s41586-026-10448-0",
+      "published_at": "2026-05-06",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-004"
+      ],
+      "tags": [
+        "consciousness",
+        "hippocampus",
+        "anesthesia",
+        "semantic-processing",
+        "RIA"
+      ],
+      "confidence": 0.87,
+      "priority": 0.94,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "https://doi.org/10.1038/s41593-026-02220-4",
+      "title": "Adversarial AI reveals mechanisms and treatments for disorders of consciousness",
+      "summary": "Modelo adversarial treinado em mais de 680 mil segmentos neuroeletrofisiológicos de dez segundos, validado em 565 pacientes, voluntários e animais, confronta classificadores e modelos de campo neural interpretáveis. Produz simulações e previsões de intervenção; generalização clínica e causalidade de mecanismos propostos requerem testes prospectivos independentes.",
+      "source_url": "https://www.nature.com/articles/s41593-026-02220-4",
+      "published_at": "2026-03-24",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-004",
+        "SLCH"
+      ],
+      "tags": [
+        "consciousness",
+        "adversarial-models",
+        "neural-field",
+        "RIA",
+        "causal-inference"
+      ],
+      "confidence": 0.86,
+      "priority": 0.91,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "https://doi.org/10.1038/s41598-026-50911-6",
+      "title": "An experimental study of the effect of neuromuscular blockade on EEG-based measures of awareness",
+      "summary": "Estudo experimental com seis voluntários compara EEG acordado sem bloqueio, acordado paralisado e sedado paralisado; avalia confusão por sinais musculares em métricas de consciência. Amostra pequena, cenário clínico controlado, não autoriza inferências metafísicas; mostra necessidade de controles EMG e estado motor.",
+      "source_url": "https://www.nature.com/articles/s41598-026-50911-6",
+      "published_at": "2026-05-02",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-004"
+      ],
+      "tags": [
+        "EEG",
+        "EMG",
+        "confounding",
+        "consciousness",
+        "RIA"
+      ],
+      "confidence": 0.89,
+      "priority": 0.88,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
