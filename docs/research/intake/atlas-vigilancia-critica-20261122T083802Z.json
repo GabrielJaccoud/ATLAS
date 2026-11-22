@@ -1,0 +1,30 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261122T083802Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-22T08:38:02Z",
+  "findings": [
+    {
+      "source_id": "https://www.darpa.mil/news/2026/triage-finals-winners",
+      "title": "DARPA Triage Challenge completes Finals event",
+      "summary": "Em 16/11/2026, DARPA informou resultados das finais de 13/11/2026 em Disaster City, Texas: RoboScout venceu a competição Systems e Disruptors venceu Data. Equipes humano-máquina e plataformas autônomas foram avaliadas em cenários simulados de desastre, com obstáculos, fumaça e baixa visibilidade. Resultados e premiações são documentados por fonte institucional primária, mas faltam nesta apuração métricas completas, validação externa e comparação quantitativa com o baseline ATLAS. Não implica autonomia clínica validada nem superioridade universal. RIA: candidato apenas à avaliação de fusão de sensores, triagem probabilística e alocação de recursos; sem assimilação.",
+      "source_url": "https://www.darpa.mil/news/2026/triage-finals-winners",
+      "published_at": "2026-11-16",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "triage-challenge",
+        "robotics",
+        "human-machine-teaming",
+        "biotechnology",
+        "disaster-response",
+        "RIA-evaluation-only",
+        "independent-validation-pending"
+      ],
+      "confidence": 0.94,
+      "priority": 0.7,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
