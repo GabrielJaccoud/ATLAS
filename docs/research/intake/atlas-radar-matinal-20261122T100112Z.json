@@ -1,0 +1,48 @@
+{
+  "batch_id": "atlas-radar-matinal-2026-11-22",
+  "producer": "ATLAS Radar Matinal",
+  "generated_at": "2026-11-22T10:01:12Z",
+  "findings": [
+    {
+      "source_id": "NASA-EO-XAVIER-2026-11-20",
+      "title": "Ciclone Xavier: intensificação rápida no Pacífico Sudoeste observada por MODIS",
+      "summary": "NASA Earth Observatory publicou análise de imagem Aqua/MODIS de 17/11 às 02:53 UTC; ventos estimados de 195 km/h na imagem e pico posterior estimado em 220 km/h. Água superficial ~29 °C, cisalhamento baixo e El Niño são mecanismos plausíveis, não atribuição causal isolada. Intensidade derivada de análise meteorológica, não medida direta do MODIS; faltam séries de SST, cisalhamento, trajetórias e casos-controle para teste causal.",
+      "source_url": "https://science.nasa.gov/earth/earth-observatory/the-stormy-southwest-pacific/",
+      "published_at": "2026-11-20T00:00:00Z",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "institutional-science-report",
+        "cyclone",
+        "MODIS",
+        "ENSO",
+        "rapid-intensification",
+        "causality-unverified"
+      ],
+      "confidence": 0.92,
+      "priority": 0.84,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "NOAA-SWPC-3DAY-20261122T0030Z",
+      "title": "NOAA: ausência de previsão G1 em 22–24 de novembro",
+      "summary": "Boletim oficial NOAA SWPC emitido em 22/11 00:30 UTC: Kp máximo observado 3 nas 24h anteriores, máximo previsto 4.00 até 24/11, abaixo de G1; probabilidades S1+ de 1% ao dia e R1-R2 de 10% ao dia. É previsão institucional e observação agregada, não garantia de ausência de eventos. Atualização temporal do risco; não é artigo científico.",
+      "source_url": "https://services.swpc.noaa.gov/text/3-day-forecast.txt",
+      "published_at": "2026-11-22T00:30:00Z",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "official-forecast",
+        "space-weather",
+        "Kp",
+        "NOAA",
+        "low-risk"
+      ],
+      "confidence": 0.98,
+      "priority": 0.65,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
