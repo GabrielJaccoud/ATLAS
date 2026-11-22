@@ -1,0 +1,31 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261122T000537Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-22T00:05:37Z",
+  "findings": [
+    {
+      "source_id": "DPA27BZ02-DV002",
+      "title": "AMCOM-DI: Autonomous Metacognitive Collection Orchestration for Multi-Domain Intelligence",
+      "summary": "Solicitação SBIR DARPA/IPTO com pré-publicação em 03/11/2026 e abertura prevista para 02/12/2026. Objetivo declarado: desenvolver e demonstrar orquestração metacognitiva de coleta multimodal de inteligência, com fluxos assíncronos, recomendações rastreáveis e informação causal. Evidência confirma uma demanda de pesquisa, não protótipo concluído, contrato adjudicado, desempenho demonstrado ou sistema operacional. RIA: comparar arquitetura experimental de seleção de sensores e proveniência causal com o baseline ATLAS usando completude de rastreabilidade, precisão de atribuição, latência, custo e falsos alertas; sem assimilação antes de benchmark e auditoria.",
+      "source_url": "https://www.darpa.mil/work-with-us/communities/small-business/sbir-sttr-topics",
+      "published_at": "2026-11-03",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "IPTO",
+        "AMCOM-DI",
+        "multimodal-ISR",
+        "metacognition",
+        "causal-traceability",
+        "SBIR",
+        "research-solicitation",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.94,
+      "priority": 0.79,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
