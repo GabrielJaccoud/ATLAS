@@ -1,0 +1,30 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261122T034843Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-22T03:48:43Z",
+  "findings": [
+    {
+      "source_id": "https://www.darpa.mil/news/2026/nom4d-program-demonstrates-automated-in-space-assembly",
+      "title": "NOM4D program demonstrates automated in-space assembly",
+      "summary": "DARPA (05/11/2026) relata demonstração orbital do protótipo Caltech ASTRA: robô cartesiano de três eixos conectou membros de treliça compósitos e instalou malha refletiva em órbita, com suporte da plataforma Momentus Vigoride. Evidência primária institucional de prova de conceito; não demonstra construção quilométrica, escala industrial, desempenho militar ou validação independente completa. Já examinado na edição anterior, arquivado agora após conferência dos nomes dos pacotes de intake; deduplicação pela API ainda necessária. RIA: avaliar indicador de maturidade de montagem orbital contra baseline, sem assimilação antes de benchmark.",
+      "source_url": "https://www.darpa.mil/news/2026/nom4d-program-demonstrates-automated-in-space-assembly",
+      "published_at": "2026-11-05",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "NOM4D",
+        "Caltech",
+        "orbital-assembly",
+        "dual-use",
+        "proof-of-concept",
+        "RIA-evaluation-only",
+        "historical-deduplication-pending"
+      ],
+      "confidence": 0.95,
+      "priority": 0.72,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
