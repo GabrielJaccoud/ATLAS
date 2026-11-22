@@ -1,0 +1,30 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261122T130847Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-22T13:08:47Z",
+  "findings": [
+    {
+      "source_id": "GAO-27-108683",
+      "title": "Space Supply Chains: Additional DOD Actions Could Strengthen Its Enterprise Approach for Managing Risks",
+      "summary": "Relatório GAO de 17/11/2026, baseado em documentação de riscos de três programas da Space Force, entrevistas e comparação com práticas de gestão de riscos, identifica restrições de capacidade produtiva de componentes críticos para satélites e coordenação incompleta entre órgãos, incluindo NRO. Evidência primária de risco industrial e governança, não demonstração de capacidade espacial extraordinária. Limites: amostra de três programas, dependência de documentos e entrevistas e ausência de quantificação pública completa da probabilidade de interrupções. RIA: candidato a variáveis precursoras de gargalos de suprimento e resiliência orbital; requer benchmark retrospectivo contra baseline.",
+      "source_url": "https://www.gao.gov/products/gao-27-108683",
+      "published_at": "2026-11-17",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "GAO",
+        "Space-Force",
+        "space-supply-chain",
+        "dual-use",
+        "satellite-constellations",
+        "industrial-capacity",
+        "precursor-engine",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.95,
+      "priority": 0.77,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
