@@ -1,0 +1,28 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261123T061857Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-23T06:18:57Z",
+  "findings": [
+    {
+      "source_id": "GAO-27-109184",
+      "title": "Science & Tech Spotlight: AI Chatbots and Mental Health",
+      "summary": "GAO publicou em 20/11/2026 avaliação de riscos e maturidade de chatbots para apoio psicológico: descreve viés de concordância, riscos de privacidade, eficácia clínica ainda incerta e ausência de autorização FDA para chatbots destinados a cuidados de saúde mental até novembro de 2026. Síntese documental, não ensaio clínico nem demonstração causal. RIA: testar detecção de concordância indevida, respostas em cenários sintéticos de vulnerabilidade, encaminhamento humano, proteção de dados e regressão contra baseline; sem assimilação sem melhoria mensurável.",
+      "source_url": "https://www.gao.gov/products/gao-27-109184",
+      "published_at": "2026-11-20",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "GAO",
+        "mental-health",
+        "human-ai-interaction",
+        "sycophancy",
+        "neurotechnology-adjacent",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.96,
+      "priority": 0.73,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
