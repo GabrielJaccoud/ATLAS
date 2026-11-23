@@ -1,0 +1,29 @@
+{
+  "batch_id": "atlas-radar-matinal-2026-11-23",
+  "producer": "ATLAS Radar Matinal",
+  "generated_at": "2026-11-23T10:03:31Z",
+  "findings": [
+    {
+      "source_id": "NOAA-SWPC-3DAY-20261123T0030Z",
+      "title": "NOAA SWPC: Kp observado 2 e ausência de previsão G1 em 23–25 novembro",
+      "summary": "Boletim oficial NOAA emitido 23/11 00:30 UTC: maior Kp observado nas 24h anteriores 2; Kp previsto máximo 4,00 até 25/11; S1+ 1% e R1-R2 10% por dia. Fonte primária institucional de previsão, não artigo científico; não garante ausência de tempestades. Validação de calibração requer séries de previsão emitida e Kp definitivo.",
+      "source_url": "https://services.swpc.noaa.gov/text/3-day-forecast.txt",
+      "published_at": "2026-11-23T00:30:00Z",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "institutional-forecast",
+        "not-peer-reviewed",
+        "NOAA",
+        "space-weather",
+        "Kp",
+        "G1-not-forecast",
+        "forecast-not-observation"
+      ],
+      "confidence": 0.98,
+      "priority": 0.63,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
