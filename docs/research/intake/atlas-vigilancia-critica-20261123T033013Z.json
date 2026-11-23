@@ -1,0 +1,28 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261123T033013Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-23T03:30:13Z",
+  "findings": [
+    {
+      "source_id": "GAO-27-108458",
+      "title": "AI and Cybersecurity: Technologies Can Magnify Cyberattacks and Enhance Cyber Defense",
+      "summary": "Relatório GAO publicado em 20/11/2026, baseado em literatura, documentos, entrevistas e reunião de especialistas, descreve amplificação de phishing, deepfakes e ataques por IA agêntica e benefícios defensivos. Identifica ausência de critérios amplamente aceitos de avaliação e propõe 16 opções de políticas. Exemplos de incidentes baseiam-se parcialmente em relatos setoriais, não em reprodução independente pelo GAO. RIA: testar isolamento de agentes, avaliações adversariais, proveniência e controles humanos contra baseline antes de adoção.",
+      "source_url": "https://www.gao.gov/products/gao-27-108458",
+      "published_at": "2026-11-20",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "GAO",
+        "cybersecurity",
+        "agentic-ai",
+        "dual-use",
+        "evaluation",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.96,
+      "priority": 0.84,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
