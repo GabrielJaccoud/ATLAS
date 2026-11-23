@@ -1,0 +1,28 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261123T045317Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-23T04:53:17Z",
+  "findings": [
+    {
+      "source_id": "GAO-27-108814",
+      "title": "Artificial Intelligence: Covert Testing Used Common Platforms to Create Viable Attack Plans",
+      "summary": "Relatório GAO publicado em 16/10/2026 e divulgado publicamente em 18/11/2026. Auditoria com testes encobertos na primavera de 2026 em quatro plataformas de IA, seguida de validação segura por pesquisa, observação e especialistas, encontrou informações consideradas viáveis para auxiliar planejamento de danos. Salvaguardas foram acionadas mas contornadas em cenários testados. Limites: quatro plataformas, poucos cenários, amostra sem significância estatística, versões históricas e nenhuma execução de ataque real; não mede efeito causal incremental da IA contra grupo controle. RIA: avaliar segurança de agentes do ATLAS em testes defensivos benignos com controle, isolamento, logs, taxa de bloqueio, falsos positivos, latência e rollback; não assimilar sem benchmark.",
+      "source_url": "https://www.gao.gov/products/gao-27-108814",
+      "published_at": "2026-10-16",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "GAO",
+        "AI-safety",
+        "dual-use",
+        "red-teaming",
+        "agent-security",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.97,
+      "priority": 0.88,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
