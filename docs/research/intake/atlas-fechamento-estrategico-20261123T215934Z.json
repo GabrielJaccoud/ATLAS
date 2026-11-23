@@ -1,0 +1,86 @@
+{
+  "batch_id": "atlas-fechamento-estrategico-2026-11-23",
+  "producer": "ATLAS Fechamento Estratégico",
+  "generated_at": "2026-11-23T21:59:34Z",
+  "findings": [
+    {
+      "source_id": "https://www.reuters.com/business/energy/oil-prices-fall-amid-equity-selloff-though-iran-war-attacks-limit-losses-2026-11-23/",
+      "title": "Brent cai a mínima de três meses com retomada de fluxo líbio",
+      "summary": "Reuters informa Brent a US$ 89,37 (-3,46%) e WTI a US$ 80,17 (-3,88%), associado à reabertura do oleoduto Sharara e maior oferta regional. Preços publicados são evidência de mercado; causalidade é interpretação multivariada. Dados brutos de produção não auditados.",
+      "source_url": "https://www.reuters.com/business/energy/oil-prices-fall-amid-equity-selloff-though-iran-war-attacks-limit-losses-2026-11-23/",
+      "published_at": "2026-11-23",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ARO-01"
+      ],
+      "tags": [
+        "Brent",
+        "Libya",
+        "oil_supply"
+      ],
+      "confidence": 0.9,
+      "priority": 0.94,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://gcaptain.com/fake-iran-tanker-highlights-uncertainty-around-hormuz-traffic/",
+      "title": "Sinal AIS de suposto petroleiro iraniano é considerado provavelmente falso",
+      "summary": "Reportagem Bloomberg republicada por gCaptain relata suposto Khat Shekan sem número IMO e histórico verificável; MarineTraffic indica spoofing AIS. Sinal transmitido não comprova travessia nem existência do navio; análise bruta AIS/SAR não foi reproduzida.",
+      "source_url": "https://gcaptain.com/fake-iran-tanker-highlights-uncertainty-around-hormuz-traffic/",
+      "published_at": "2026-11-23",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "Hormuz",
+        "AIS",
+        "spoofing",
+        "maritime"
+      ],
+      "confidence": 0.82,
+      "priority": 0.97,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.reuters.com/business/energy/russian-western-oil-exports-curbed-by-bad-weather-drones-2026-11-23/",
+      "title": "Exportações russas enfrentam atrasos por tempestades e drones",
+      "summary": "Reuters relata mais de dez petroleiros atrasados em portos bálticos e interrupções em Novorossiysk, com fontes comerciais e dados de programação. Causas meteorológicas e ataques coexistem; não foram obtidos registros brutos portuários nem satélite SAR.",
+      "source_url": "https://www.reuters.com/business/energy/russian-western-oil-exports-curbed-by-bad-weather-drones-2026-11-23/",
+      "published_at": "2026-11-23",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ARO-02"
+      ],
+      "tags": [
+        "Russia",
+        "oil_exports",
+        "weather",
+        "drones"
+      ],
+      "confidence": 0.84,
+      "priority": 0.89,
+      "evidence_class": "secondary_source"
+    },
+    {
+      "source_id": "https://www.reuters.com/world/middle-east/iran-says-it-will-use-all-available-tools-confront-us-naval-blockade-2026-11-23/",
+      "title": "Irã declara oposição ao bloqueio naval; transbordo segue incerto",
+      "summary": "Reuters registra declaração oficial de que Irã usará todos os meios contra bloqueio e menciona hipótese de carregamento navio-navio reportada por TankerTrackers; porta-voz iraniano chama relatos de especulação. Confirma declaração, não exportação ou ruptura de bloqueio.",
+      "source_url": "https://www.reuters.com/world/middle-east/iran-says-it-will-use-all-available-tools-confront-us-naval-blockade-2026-11-23/",
+      "published_at": "2026-11-23",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "Iran",
+        "blockade",
+        "ship_to_ship",
+        "official_claim"
+      ],
+      "confidence": 0.91,
+      "priority": 0.9,
+      "evidence_class": "secondary_source"
+    }
+  ]
+}
