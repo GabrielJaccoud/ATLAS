@@ -1,0 +1,73 @@
+{
+  "batch_id": "atlas-ciencia-interna-2026-11-23",
+  "producer": "ATLAS Ciência Interna",
+  "generated_at": "2026-11-23T18:43:39Z",
+  "findings": [
+    {
+      "source_id": "https://doi.org/10.1093/pnasnexus/pgag048",
+      "title": "Atlas of intracranial electroencephalography complexity across cortical regions and global states of consciousness in the human brain",
+      "summary": "Análise de 5703 registros iEEG em 106 participantes, com validação adicional em 474 registros, compara entropias e complexidade entre vigília, REM, N2/N3 e anestesia. Associação com estados não demonstra mecanismo causal ou consciência fundamental.",
+      "source_url": "https://doi.org/10.1093/pnasnexus/pgag048",
+      "published_at": "2026-02-26",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-004",
+        "SLCH"
+      ],
+      "tags": [
+        "iEEG",
+        "consciousness",
+        "entropy",
+        "validation",
+        "RIA"
+      ],
+      "confidence": 0.9,
+      "priority": 0.9,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "https://doi.org/10.1103/4l3h-b66c",
+      "title": "Interradical motion can push magnetosensing precision toward quantum limits",
+      "summary": "Estudo teórico de 24/02/2026 modela como movimento molecular estruturado pode aumentar sensibilidade de pares radicais em contexto de criptocromo. É previsão de modelo, não demonstração de sensor humano ou dispositivo construído.",
+      "source_url": "https://doi.org/10.1103/4l3h-b66c",
+      "published_at": "2026-02-24",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-006"
+      ],
+      "tags": [
+        "radical-pairs",
+        "magnetoreception",
+        "quantum-metrology",
+        "simulation",
+        "RIA"
+      ],
+      "confidence": 0.85,
+      "priority": 0.86,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "https://doi.org/10.3389/fnins.2025.1591645",
+      "title": "Corrigendum: Magnetic sense-dependent probabilistic decision-making in humans",
+      "summary": "Correção editorial publicada em 25/03/2025 esclarece frase sobre protocolo de seleção de pedras de Go; autores afirmam que conclusões não mudam. Não constitui replicação nem validação independente da magnetorrecepção humana.",
+      "source_url": "https://doi.org/10.3389/fnins.2025.1591645",
+      "published_at": "2025-03-25",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-006"
+      ],
+      "tags": [
+        "corrigendum",
+        "magnetoreception",
+        "audit",
+        "uncertainty"
+      ],
+      "confidence": 0.96,
+      "priority": 0.7,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
