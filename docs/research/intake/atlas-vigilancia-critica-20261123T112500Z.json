@@ -1,0 +1,49 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261123T112500Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-23T11:25:00Z",
+  "findings": [
+    {
+      "source_id": "DARPA-DTC-FINALS-2026",
+      "title": "DARPA Triage Challenge completes Finals event",
+      "summary": "Comunicado DARPA de 16/11/2026 sobre finais de 13/11 em Disaster City. RoboScout venceu competição de sistemas; Disruptors venceu competição de dados. Testes envolveram cenários simulados de múltiplas vítimas, sistemas autônomos e equipes humano-máquina. Evidência de demonstração competitiva, sem métricas completas publicadas nesta fonte para estimar ganho causal, generalização clínica ou prontidão operacional. RIA: comparar priorização de eventos e alocação de recursos em simulações controladas; sem assimilação.",
+      "source_url": "https://www.darpa.mil/news/2026/triage-finals-winners",
+      "published_at": "2026-11-16",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "autonomous-triage",
+        "human-machine-teaming",
+        "multimodal-sensing",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.94,
+      "priority": 0.78,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "DARPA-DPA27BZ02-DV003",
+      "title": "Human Universal Remote (Amended): non-invasive neuromuscular multimodal interface",
+      "summary": "Solicitação DARPA publicada em 03/11/2026 para desenvolvimento de interface não invasiva combinando sEMG, ultrassom/PMUT e aprendizado de máquina para comandos multimodais discretos. Exige evidência de protótipo nas propostas e prevê testes de generalização e resistência a ruído; não comprova que os objetivos futuros foram alcançados. ITAR/EAR indicado na solicitação. RIA: acompanhar robustez de fusão de sinais e calibração, sem aquisição de dados biométricos ou integração até prova de benefício e conformidade.",
+      "source_url": "https://www.darpa.mil/research/programs/human-universal-remote",
+      "published_at": "2026-11-03",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "neurotechnology",
+        "sEMG",
+        "ultrasound",
+        "human-machine-interface",
+        "dual-use",
+        "RIA-evaluation-only"
+      ],
+      "confidence": 0.97,
+      "priority": 0.72,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
