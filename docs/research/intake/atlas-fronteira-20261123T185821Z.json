@@ -1,0 +1,29 @@
+{
+  "batch_id": "atlas-fronteira-2026-11-23",
+  "producer": "ATLAS Fronteira do Conhecimento",
+  "generated_at": "2026-11-23T18:58:21Z",
+  "findings": [
+    {
+      "source_id": "DARPA-TRIAGE-FINALS-2026-11-16",
+      "title": "DARPA Triage Challenge: resultados de autonomia e coordenação humano-máquina em cenários simulados",
+      "summary": "DARPA divulgou em 16/11/2026 os resultados das finais de 13/11 em Disaster City: RoboScout venceu sistemas e Disruptors venceu dados. Cenários incluíram fumaça, baixa visibilidade e obstáculos. A existência de desempenho competitivo está documentada; não foram disponibilizadas nesta execução telemetrias brutas nem métricas completas que demonstrem superioridade geral de equipes humano-máquina. H0: coordenação entre agentes não melhora precisão/custo em casos cegos frente a agente isolado. Controles: agentes isolados, múltiplos agentes sem coordenação e equipes coordenadas, com orçamento equivalente. RIA: benchmark modular e reversível, não implantado.",
+      "source_url": "https://www.darpa.mil/news/2026/triage-finals-winners",
+      "published_at": "2026-11-16T00:00:00Z",
+      "source_type": "government_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "DARPA",
+        "Triage-Challenge",
+        "human-machine-teaming",
+        "autonomous-systems",
+        "multisensor",
+        "benchmark",
+        "RIA"
+      ],
+      "confidence": 0.96,
+      "priority": 0.84,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
