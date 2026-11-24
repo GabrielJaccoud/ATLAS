@@ -19,19 +19,29 @@ Every report should explain unfamiliar abbreviations at first use and include a 
 ## API
 
 - `GET /research/central`: findings, hypothesis records, backlog, latest plan/run, and configuration state.
+- `GET /research/packages`: paginated package ledger with producer, batch, archive path/commit, workflow run, counts, and API ingestion status.
+- `GET /research/packages/{batch_id}`: one package and its findings.
+- `POST /research/packages/{batch_id}/replay`: owner-authorized, idempotent reprocessing of a supplied package with the matching batch ID.
 - `POST /research/intake`: owner-authenticated manual or JSON-package intake.
-- `POST /research/automation/intake`: scheduled producer intake using `X-Atlas-Automation-Key`.
+- `POST /research/github-intake`: GitHub Actions intake, authenticated by short-lived OIDC and restricted to the ATLAS repository, branch, and workflow.
+- `POST /research/automation/intake`: optional direct scheduled intake using `X-Atlas-Automation-Key`.
 - `POST /research/investigate`: immediate web investigation from Talk or Pesquisa; requires the OpenAI API web-search capability.
 - `POST /research/automation/daily-run`: scheduled native web research, ingestion, daily-plan generation, and email when available; requires the automation key and an OpenAI API key.
 - `POST /research/daily-plan`: manually consolidate current inputs.
 - `PATCH /research/goals/{goal_id}`: update goal progress.
 - `POST /research/daily-plan/{plan_id}/email`: send the page link by email.
 
-Set `ATLAS_RESEARCH_AUTOMATION_TOKEN` only as a private Render service variable. The Render cron producer uses the same value; never put it in frontend configuration, a URL, a report, or source control.
+`ATLAS_RESEARCH_AUTOMATION_TOKEN` is only needed for an optional direct Render producer. The GitHub Actions OIDC path does not need that secret and is the standard route for the five ChatGPT routines.
 
 ## ChatGPT scheduled reports
 
-The five scheduled ChatGPT research automations retain their individual reports and append an importable JSON envelope. They are instructed to archive nonempty reports and packages in the dedicated GitHub data branch. GitHub Actions exchanges a short-lived OIDC identity for authenticated ingestion into the Atlas API; its run must succeed before an API import is claimed. If the GitHub connector is unavailable to a scheduled run, the JSON remains available for manual import in Pesquisa. This path does not use a paid Render cron.
+The five scheduled ChatGPT research automations retain their individual reports and append an importable JSON envelope. They archive nonempty reports and packages in the dedicated GitHub data branch. The GitHub Actions workflow imports changed packages automatically and can reconcile the full JSON archive after a workflow update or manual dispatch. The API records one audit entry per package, links its findings to the batch, and stores the GitHub path, commit, and workflow run. A successful commit alone is not proof of ingestion: the workflow must finish successfully and the package must appear in the API ledger. If the GitHub connector is unavailable to a scheduled run, the JSON remains available for manual import in Pesquisa.
+
+## Package audit and management
+
+`research_intake_batch` is the API ledger for package-level status. Each successful intake records the producer, batch ID, generation and ingestion times, ingestion channel, archive path and commit, workflow run URL, received/inserted/duplicate counts, and stable finding IDs. Finding records keep their source URL and are marked unverified until apuração. Repeated imports are idempotent by stable source identity and update the package's latest ingestion record rather than creating duplicate findings.
+
+The Pesquisa screen displays the package count and recent import ledger. Owners can query packages and findings through the API routes above, or replay an archived JSON package through the owner-authenticated route. New JSON pushes are imported continuously; a full archive reconciliation is available through GitHub Actions.
 
 The API endpoint and runner for a native ATLAS daily run are implemented. The Render cron could not be provisioned because Render returned HTTP 402 and requires a payment method on the account. Until that requirement is resolved, there is no direct scheduled API run; ChatGPT task results enter through JSON import. When provisioned, the Render cron uses `web_search`, writes to the API, and can email the result link when SMTP is configured.
 
