@@ -24,7 +24,14 @@
       "source_type": "scientific_paper",
       "ministry_id": "research_evolution",
       "hypothesis_ids": [],
-      "tags": ["neuroscience", "optogenetics", "enteric_nervous_system", "neuroimmune", "microbiome", "ex_vivo"],
+      "tags": [
+        "neuroscience",
+        "optogenetics",
+        "enteric_nervous_system",
+        "neuroimmune",
+        "microbiome",
+        "ex_vivo"
+      ],
       "confidence": 0.93,
       "priority": 0.9,
       "evidence_class": "primary_source"
@@ -50,7 +57,13 @@
       "source_type": "scientific_paper",
       "ministry_id": "research_evolution",
       "hypothesis_ids": [],
-      "tags": ["neuroscience", "optogenetics", "synaptic_mapping", "compressive_sensing", "computational_methods"],
+      "tags": [
+        "neuroscience",
+        "optogenetics",
+        "synaptic_mapping",
+        "compressive_sensing",
+        "computational_methods"
+      ],
       "confidence": 0.94,
       "priority": 0.88,
       "evidence_class": "primary_source"
@@ -75,7 +88,14 @@
       "source_type": "scientific_paper",
       "ministry_id": "research_evolution",
       "hypothesis_ids": [],
-      "tags": ["neuroscience", "BCI", "EEG", "AI_copilot", "shared_autonomy", "assistive_technology"],
+      "tags": [
+        "neuroscience",
+        "BCI",
+        "EEG",
+        "AI_copilot",
+        "shared_autonomy",
+        "assistive_technology"
+      ],
       "confidence": 0.92,
       "priority": 0.91,
       "evidence_class": "primary_source"
@@ -101,10 +121,18 @@
       "source_type": "scientific_paper",
       "ministry_id": "research_evolution",
       "hypothesis_ids": [],
-      "tags": ["biotechnology", "CRISPR", "protein_language_model", "machine_learning", "genome_editing"],
+      "tags": [
+        "biotechnology",
+        "CRISPR",
+        "protein_language_model",
+        "machine_learning",
+        "genome_editing"
+      ],
       "confidence": 0.94,
       "priority": 0.92,
       "evidence_class": "primary_source"
     }
-  ]
+  ],
+  "report_path": "docs/research/reports/2026-11-24/atlas-fronteira-cientifica-20261124.md",
+  "report": "Triagem de quatro publicações primárias (2025–2026) sobre optogenética, mapeamento neural, interface cérebro-computador e desenho computacional de variantes CRISPR. Os resultados são demonstrações em tecido ex vivo, modelo animal, participantes em tarefa delimitada e ensaio in vitro; nenhum estabelece tratamento clínico geral. Próximas ações propostas são documentais e de desenho de RIA."
 }
