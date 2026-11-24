@@ -47,6 +47,8 @@ textarea { resize: vertical; line-height: 1.55; }
 .command-bar > div:first-child { display:flex; flex-direction:column; gap:3px; }
 .command-bar strong { font-size:1rem; font-weight:520; }
 .command-tools { display:flex; align-items:center; gap:8px; }
+.disconnect-button { border-color:rgba(228,111,97,.2); color:#d99a93; }
+.disconnect-button:hover { border-color:rgba(228,111,97,.42); background:rgba(228,111,97,.07); }
 .command-shortcut { display:flex; align-items:center; gap:10px; }
 kbd { padding:3px 6px; border:1px solid var(--atlas-border); border-radius:6px; color:var(--atlas-silver); font-size:.68rem; }
 .global-feedback { margin:14px 6px 0; padding:12px 16px; border:1px solid rgba(87,230,217,.18); border-radius:14px; background:rgba(87,230,217,.06); color:#c9e9e6; line-height:1.5; }
