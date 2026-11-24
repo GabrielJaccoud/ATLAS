@@ -2,6 +2,12 @@
 
 The Pesquisa screen is the operational inbox for new reports, hypothesis links, daily goals, and RIA triage. Manual intake and scheduled producers use the same finding schema and deduplicate records by stable source identity.
 
+New findings may include structured teaching fields: `what_happened`, `background`, `why_it_matters`, `implications`, `glossary`, `recommended_action`, and `limits`. The web screen renders these separately so a reader can distinguish the observed result from context, inference, possible consequences, next steps, and limitations. Old records remain valid because every field is optional.
+
+Research routines should continuously scan neuroscience, optogenetics and neurotechnology; computing and AI, including biologically inspired methods; and biotechnology, including genome editing, organoids and synthetic biology. Report only substantive, sourced updates. State whether evidence comes from cells, animals, observational work, or human clinical studies; laboratory feasibility is not clinical proof.
+
+Every report should explain unfamiliar abbreviations at first use and include a short glossary. Each alert should teach: what changed, how it is known, what happened before, what is fact versus inference, why it matters to ATLAS, and what concrete safe step could reduce uncertainty or produce a useful result. If no justified action exists, say “monitor” and define a measurable trigger.
+
 ## Daily flow
 
 1. A scheduled ATLAS run searches current web sources for changes relevant to the ministry registry, open research questions, and hypotheses stored in `research_hypothesis` or `hypothesis` records.
