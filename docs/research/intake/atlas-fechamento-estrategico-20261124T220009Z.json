@@ -1,0 +1,99 @@
+{
+  "batch_id": "atlas-fechamento-estrategico-20261124T220009Z",
+  "producer": "ATLAS Fechamento Estratégico",
+  "generated_at": "2026-11-24T22:00:09Z",
+  "report_path": "docs/research/reports/2026-11-24/atlas-fechamento-estrategico-20261124T220009Z.md",
+  "report": "Radar matinal recuperado parcialmente: tempestades Sul, reorganização energética, IA asiática e Cassiopeia A; sem probabilidades numéricas. Três achados: queda de embarques, investigação cibernética sem atribuição e resposta municipal a temporal. Sem confirmação física independente; sem revisão calibrada.",
+  "findings": [
+    {
+      "source_id": "https://www.reuters.com/commentary/reuters-open-interest/middle-east-crude-oil-exports-trend-lower-amid-fake-iran-stalemate-2026-11-24/",
+      "title": "Exportações do Oriente Médio recuam",
+      "summary": "Coluna Reuters cita Kpler: 20,86 milhões b/d na semana de 12/10 e 13,96 na de 16/11, queda de 33,1%. Coluna, dados brutos não auditados.",
+      "source_url": "https://www.reuters.com/commentary/reuters-open-interest/middle-east-crude-oil-exports-trend-lower-amid-fake-iran-stalemate-2026-11-24/",
+      "published_at": "2026-11-24",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ARO-01"
+      ],
+      "tags": [
+        "oil",
+        "shipping"
+      ],
+      "confidence": 0.78,
+      "priority": 0.94,
+      "evidence_class": "secondary_source",
+      "what_happened": "Coluna Reuters cita Kpler: 20,86 milhões b/d na semana de 12/10 e 13,96 na de 16/11, queda de 33,1%.",
+      "background": "Outubro mensal recuperou para 18,99 milhões b/d.",
+      "why_it_matters": "Defasagem entre embarque e chegada pode ocultar aperto.",
+      "implications": "Risco de preços e logística; causalidade não estabelecida.",
+      "glossary": {
+        "AIS": "Sistema de Identificação Automática",
+        "b/d": "barris por dia",
+        "INMET": "Instituto Nacional de Meteorologia",
+        "WSJ": "Wall Street Journal"
+      },
+      "recommended_action": "Conferir séries de embarques e estoques.",
+      "limits": "Coluna, dados brutos não auditados."
+    },
+    {
+      "source_id": "https://www.reuters.com/world/middle-east/us-eyes-iran-possible-culprit-dozens-new-cyberattacks-against-ships-wsj-reports-2026-11-24/",
+      "title": "Investigação de incidentes cibernéticos marítimos",
+      "summary": "Reuters reproduz WSJ sobre investigação americana de possível envolvimento iraniano. Fonte derivada; sem logs ou atribuição confirmada.",
+      "source_url": "https://www.reuters.com/world/middle-east/us-eyes-iran-possible-culprit-dozens-new-cyberattacks-against-ships-wsj-reports-2026-11-24/",
+      "published_at": "2026-11-24",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "cyber",
+        "maritime"
+      ],
+      "confidence": 0.65,
+      "priority": 0.88,
+      "evidence_class": "secondary_source",
+      "what_happened": "Reuters reproduz WSJ sobre investigação americana de possível envolvimento iraniano.",
+      "background": "Fechamento anterior discutiu falsificação AIS.",
+      "why_it_matters": "Risco digital pode afetar confiança logística.",
+      "implications": "Atribuição permanece aberta.",
+      "glossary": {
+        "AIS": "Sistema de Identificação Automática",
+        "b/d": "barris por dia",
+        "INMET": "Instituto Nacional de Meteorologia",
+        "WSJ": "Wall Street Journal"
+      },
+      "recommended_action": "Buscar alertas públicos e perícia independente.",
+      "limits": "Fonte derivada; sem logs ou atribuição confirmada."
+    },
+    {
+      "source_id": "https://www1.folha.uol.com.br/cotidiano/2026/11/sob-alerta-de-chuvas-tupancireta-rs-orienta-moradores-a-buscar-abrigo-e-suspende-aulas-por-sete-dias.shtml",
+      "title": "Tupanciretã suspende aulas e orienta abrigo",
+      "summary": "Folha relata suspensão por sete dias e recuperação parcial de energia. Sem inspeção direta de danos ou radar.",
+      "source_url": "https://www1.folha.uol.com.br/cotidiano/2026/11/sob-alerta-de-chuvas-tupancireta-rs-orienta-moradores-a-buscar-abrigo-e-suspende-aulas-por-sete-dias.shtml",
+      "published_at": "2026-11-24",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "Brazil",
+        "weather",
+        "resilience"
+      ],
+      "confidence": 0.85,
+      "priority": 0.95,
+      "evidence_class": "secondary_source",
+      "what_happened": "Folha relata suspensão por sete dias e recuperação parcial de energia.",
+      "background": "Temporal de 20/11; alerta vermelho já no Radar.",
+      "why_it_matters": "Vulnerabilidade acumulada aumenta impacto de nova chuva.",
+      "implications": "Continuidade escolar e elétrica comprometida.",
+      "glossary": {
+        "AIS": "Sistema de Identificação Automática",
+        "b/d": "barris por dia",
+        "INMET": "Instituto Nacional de Meteorologia",
+        "WSJ": "Wall Street Journal"
+      },
+      "recommended_action": "Acompanhar Defesa Civil e INMET.",
+      "limits": "Sem inspeção direta de danos ou radar."
+    }
+  ]
+}
