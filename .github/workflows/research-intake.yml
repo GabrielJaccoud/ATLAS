@@ -9,6 +9,7 @@ on:
       - .github/workflows/research-intake.yml
   workflow_dispatch:
 
+# Changes to this workflow deliberately reconcile every archived package.
 permissions:
   contents: read
   id-token: write
