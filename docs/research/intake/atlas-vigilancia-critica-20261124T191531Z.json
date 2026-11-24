@@ -1,0 +1,8 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261124T191531Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-24T19:15:31Z",
+  "report_path": "docs/research/reports/2026-11-24/atlas-vigilancia-critica-20261124T191531Z.md",
+  "report": "Triagem pública direcionada a DARPA, IARPA, AARO e Nature, com resultados principalmente históricos. DARPA RoQS (27/08/2025), QBI e revisão de organoides (02/11/2026) já discutidos. Artigo de 10/01/2026 sobre reservatório físico de nanotubos de dissulfeto de tungstênio (https://doi.org/10.1038/s41467-025-68229-8) relata tarefas multimodais em dispositivo físico, não em células ou animais; candidato documental, sem auditoria de métricas, consumo ou novidade no acervo integral. Nenhum achado novo qualificado. Cobertura parcial; DOE/NNSA, NASA, CIA/FOIA, GAO, contratos, patentes e literatura psi não auditados nesta rodada. Programa Anímico–Parapsicológico preservado; nenhuma hipótese promovida. RIA: comparar processamento de reservatório com modelos clássicos em dados temporais, medindo erro, latência e energia; nenhum teste ou integração executado. Ingestão não verificada.",
+  "findings": []
+}
