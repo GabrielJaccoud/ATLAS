@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-11-19T19:24:09-03:00",
+  "producer": "ATLAS Vigilância Crítica",
+  "batch_id": "atlas-vigilancia-critica-2026-11-19T1924",
+  "findings": [
+    {
+      "source_id": "NASA-CR-20260010060",
+      "title": "Fault Detection Modeling Languages and Automated Maintenance Planning for Rapid Emergency Response",
+      "summary": "Relatório técnico NASA de outubro de 2026. Descreve FDML, representação de falhas em JSON/XML e síntese automatizada de 50 procedimentos para 50 falhas em três sistemas e 18 componentes. Utiliza planejamento goal-regression e module-token, com ações reutilizáveis e rastreabilidade. Capacidade de geração demonstrada no escopo relatado, mas sem benchmark operacional independente suficiente para estabelecer superioridade, segurança em campo ou ganho frente ao ATLAS. Riscos incluem propagação de erros de modelos e necessidade de validação humana e testes de segurança. RIA-FDML-01: candidato a experimento isolado, sem assimilação.",
+      "source_url": "https://ntrs.nasa.gov/api/citations/20260010060/downloads/FDML_for_Automated_Maintenance_and_Response_v1_1.pdf?attachment=true",
+      "published_at": "2026-10-01T00:00:00Z",
+      "source_type": "technical_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": ["NASA", "FDML", "fault-detection", "autonomous-recovery", "model-based-systems-engineering", "ASAS", "ZAZA", "RIA-FDML-01", "candidate-for-testing"],
+      "confidence": 0.93,
+      "priority": 0.86,
+      "evidence_class": "primary_source"
+    }
+  ]
+}

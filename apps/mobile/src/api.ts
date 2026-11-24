@@ -36,6 +36,21 @@ export async function pairOwner(code: string): Promise<{ token: string; expires_
   return data;
 }
 
+export async function refreshSession(): Promise<void> {
+  const config = loadConfig();
+  if (!config.token) throw new Error("Este navegador ainda não está pareado.");
+  const response = await fetch(`${config.baseUrl}/auth/refresh`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${config.token}` },
+  });
+  if (!response.ok) {
+    if (response.status === 401) clearSession();
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+  const data = await response.json();
+  saveConfig({ ...config, token: data.token });
+}
+
 export async function atlasFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const config = loadConfig();
   const headers = new Headers(init.headers || {});
