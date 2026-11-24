@@ -94,5 +94,7 @@
       "priority": 0.91,
       "evidence_class": "internal_hypothesis_not_tested"
     }
-  ]
+  ],
+  "report_path": "docs/research/reports/2026-11-20-atlas-intuicao-calibrada.md",
+  "report": "Pesquisa sobre interocepção, percepção corporal e calibração de previsões intuitivas. Dois estudos mostram como sinais corporais e expectativa podem influenciar percepção em tarefas delimitadas; o método Brier oferece uma métrica para testar previsões probabilísticas. A hipótese sobre intuição foi registrada como não testada, sem evidência de precognição."
 }
