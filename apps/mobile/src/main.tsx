@@ -90,13 +90,32 @@ type DailyResearchPlan = {
   goals: ResearchGoal[];
   ria_candidates: Array<{ candidate_id: string; title: string; stage: string; status: string; steps: string[]; source_ids: string[] }>;
 };
+type ResearchPackage = {
+  package_id: string;
+  batch_id: string;
+  producer: string;
+  generated_at: string;
+  ingested_at: string;
+  status: string;
+  ingestion_channel: string;
+  archive_path?: string;
+  archive_commit?: string;
+  workflow_run_id?: string;
+  workflow_run_url?: string;
+  received_count: number;
+  inserted_count: number;
+  duplicate_count: number;
+  finding_ids: string[];
+};
 type ResearchCentralData = {
   findings: ResearchFindingRecord[];
+  packages: ResearchPackage[];
+  package_count: number;
   hypotheses: Array<Record<string, unknown>>;
   backlog: ResearchItem[];
   latest_plan: DailyResearchPlan | null;
   latest_run: Record<string, unknown> | null;
-  automation_bridge: { endpoint: string; authentication: string; configured: boolean; web_search_configured: boolean; smtp_configured: boolean; scheduled_chat_tasks_connected: boolean };
+  automation_bridge: { endpoint: string; authentication: string; configured: boolean; github_oidc_enabled: boolean; direct_automation_configured: boolean; web_search_configured: boolean; smtp_configured: boolean; scheduled_chat_tasks_connected: boolean };
   publication_email: { configured: boolean; recipient: string };
 };
 
@@ -425,6 +444,17 @@ function App() {
       }
     } catch {
       setConnected(false);
+    }
+  }
+
+  async function loadMoreResearchPackages() {
+    const offset = researchCentral?.packages.length ?? 0;
+    if (!researchCentral || offset >= researchCentral.package_count) return;
+    try {
+      const page = await atlasFetch<{ packages: ResearchPackage[] }>(`/research/packages?limit=100&offset=${offset}`);
+      setResearchCentral((current) => current ? { ...current, packages: [...current.packages, ...page.packages] } : current);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -1220,6 +1250,7 @@ function App() {
             <SectionHeader eyebrow="Research & Production" title="Central de Pesquisa" description="Achados, hipóteses, apuração e metas do dia em um único fluxo. O ATLAS mantém notícia, hipótese e conclusão em classes separadas." />
             <div className="metric-grid">
               <Metric label="Achados recebidos" value={researchCentral?.findings.length ?? 0} hint="inclui rotina e entrada manual" />
+              <Metric label="Pacotes confirmados na API" value={researchCentral?.package_count ?? 0} hint={`${researchCentral?.packages.filter((pkg) => pkg.ingestion_channel === "github_actions_oidc").length ?? 0} via GitHub OIDC`} />
               <Metric label="Hipóteses registradas" value={researchCentral?.hypotheses.length ?? 0} />
               <Metric label="Metas de hoje" value={researchCentral?.latest_plan?.goals.length ?? 0} hint={researchCentral?.latest_plan?.status || "plano ainda não consolidado"} />
               <Metric label="Fila dos ministérios" value={researchItems.length} hint={`${status?.research?.blocked ?? 0} bloqueada(s)`} />
@@ -1241,14 +1272,17 @@ function App() {
               <button className="primary" disabled={!connected || busy || researchTitle.trim().length < 4 || researchSummary.trim().length < 10} onClick={() => void ingestResearchFinding()}>Receber na Central de Pesquisa</button>
             </div>
             <div className="form-panel atlas-surface">
-              <div className="section-row"><div><span className="eyebrow">Automated intake bridge</span><h3>Ponte segura das rotinas</h3></div><span className={`evidence-badge ${researchCentral?.automation_bridge.configured ? "ready" : "internal"}`}>{researchCentral?.automation_bridge.configured ? "chave configurada" : "aguardando chave privada"}</span></div>
+              <div className="section-row"><div><span className="eyebrow">Automated intake bridge</span><h3>Ponte segura das rotinas</h3></div><span className={`evidence-badge ${researchCentral?.automation_bridge.github_oidc_enabled ? "ready" : "internal"}`}>{researchCentral?.automation_bridge.github_oidc_enabled ? "GitHub OIDC habilitado" : "ponte indisponível"}</span></div>
               <p>Endpoint de ingestão: <code>{loadConfig().baseUrl}{researchCentral?.automation_bridge.endpoint || "/research/automation/intake"}</code></p>
-              <p className="publication-note">A ponte ChatGPT → GitHub → API usa identidade OIDC de curta duração, sem segredo no repositório. Quando um pacote JSON entra em <code>docs/research/intake</code> na branch de dados do ATLAS, o GitHub Actions o valida e envia à API; a Central e o app leem esses dados da API. A rotina diária direta do Render continua inativa por exigir forma de pagamento; este fluxo não usa o cron do Render.</p>
+              <p className="publication-note">A ponte ChatGPT → GitHub → API usa identidade OIDC de curta duração, sem senha fixa. Todo JSON da branch <code>atlas-research-data</code> é enviado e registrado como pacote na API pelo GitHub Actions; os achados ficam ligados ao lote, ao commit e à execução do workflow. O fluxo não depende do cron pago do Render.</p>
               <p className="publication-note">Última execução automática: {researchCentral?.latest_run?.completed_at ? `${new Date(String(researchCentral.latest_run.completed_at)).toLocaleString("pt-BR")} · ${researchCentral.latest_run.status} · ${String(researchCentral.latest_run.finding_count ?? 0)} achado(s)` : "nenhuma execução registrada"}. Rota diária: <code>/research/automation/daily-run</code>.</p>
               <label>Importar pacote JSON de uma rotina ou do Chat<textarea rows={5} value={researchImportJson} onChange={(event) => setResearchImportJson(event.target.value)} placeholder={'{"batch_id":"radar-2026-11-20","producer":"atlas-radar","findings":[{"title":"…","summary":"…","source_url":"https://…","source_type":"news","ministry_id":"science_frontiers","tags":["…"],"confidence":0.7,"priority":0.8}]}'} /></label>
               <button className="secondary" disabled={!connected || !researchImportJson.trim() || busy} onClick={() => void importResearchPackage()}>Importar pacote na Central</button>
               <div className="form-row"><button className="secondary" onClick={() => void refresh()}>Atualizar estado da ponte</button><button className="secondary" onClick={() => goTo("Conselho")}>Ver rotinas e provedores</button></div>
             </div>
+            <div className="section-row"><div><span className="eyebrow">Import audit</span><h3>Pacotes recebidos pela API</h3></div><span className="publication-scope">{researchCentral?.package_count ?? 0} lote(s) registrados</span></div>
+            {researchCentral?.packages.length ? <div className="event-list research-package-list">{researchCentral.packages.map((pkg) => <article className="event-card atlas-surface research-package" key={pkg.package_id}><div><span className="eyebrow">{pkg.producer} · {pkg.status === "imported" ? "importado na API" : pkg.status}</span><strong>{pkg.batch_id || "Pacote sem batch_id"}</strong><p>{pkg.received_count} achado(s) · {pkg.inserted_count} novo(s) · {pkg.duplicate_count} duplicado(s)</p><small>Recebido em {pkg.ingested_at ? new Date(pkg.ingested_at).toLocaleString("pt-BR") : "data não informada"} · {pkg.ingestion_channel.replaceAll("_", " ")}</small>{pkg.workflow_run_url && <p><a href={pkg.workflow_run_url} target="_blank" rel="noreferrer">Ver execução de ingestão ↗</a></p>}{pkg.archive_path && <p><a href={`https://github.com/GabrielJaccoud/ATLAS/blob/atlas-research-data/${pkg.archive_path}`} target="_blank" rel="noreferrer">Abrir JSON arquivado ↗</a>{pkg.archive_commit ? ` · commit ${pkg.archive_commit.slice(0, 8)}` : ""}</p>}</div><small>{pkg.finding_ids.length} vínculo(s)</small></article>)}</div> : <div className="empty-state atlas-surface">A API ainda não recebeu pacotes com registro de auditoria. Os arquivos no GitHub serão reconciliados automaticamente.</div>}
+            {researchCentral && researchCentral.packages.length < researchCentral.package_count && <div className="form-row"><button className="secondary" onClick={() => void loadMoreResearchPackages()}>Carregar próximos pacotes ({researchCentral.packages.length}/{researchCentral.package_count})</button></div>}
             <div className="section-row"><h3>Metas e produção de hoje</h3><div className="form-row"><button className="secondary" disabled={!researchCentral?.latest_plan || !researchCentral.publication_email.configured} onClick={() => void emailDailyResearchPlan()}>Enviar link por e-mail</button><button className="secondary" onClick={() => void refresh()}>Atualizar</button></div></div>
             {researchCentral?.latest_plan?.goals.length ? <div className="cards-grid">{researchCentral.latest_plan.goals.map((goal) => <article className="feature-card atlas-surface research-goal" key={goal.goal_id}><span>{goal.ministries.join(" · ")} · {goal.status.replaceAll("_", " ")}</span><strong>{goal.title}</strong><p>{goal.action}</p><small><b>Entrega:</b> {goal.deliverable}</small><small><b>Concluída quando:</b> {goal.done_criteria}</small><div className="form-row"><select value={goal.status} onChange={(event) => void updateResearchGoal(goal, event.target.value as ResearchGoal["status"])}><option value="planned">Planejada</option><option value="in_progress">Em andamento</option><option value="blocked">Bloqueada</option><option value="completed">Concluída</option><option value="deferred">Adiada</option></select><button className="secondary" onClick={() => goTo("Ciência")}>Preparar artigo / relatório</button></div></article>)}</div> : <div className="empty-state atlas-surface">Quando novos achados ou hipóteses entrarem, o ATLAS poderá propor metas. Para não inventar produção, o plano vazio é identificado como tal.</div>}
             {researchCentral?.latest_plan?.ria_candidates?.length ? <><div className="section-row"><h3>RIA e engenharia reversa em triagem</h3><span className="eyebrow">Sem promoção automática de hipótese</span></div><div className="cards-grid">{researchCentral.latest_plan.ria_candidates.map((candidate) => <article className="feature-card atlas-surface" key={candidate.candidate_id}><span>{candidate.stage} · {candidate.status}</span><strong>{candidate.title}</strong><p>Sequência: {candidate.steps.join(" → ")}</p></article>)}</div></> : null}
