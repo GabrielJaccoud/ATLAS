@@ -136,7 +136,7 @@ class ResearchFinding(BaseModel):
     limits: str = Field(default="", max_length=4000)
     source_url: str = Field(default="", max_length=2000)
     published_at: str = Field(default="", max_length=80)
-    source_type: Literal["scientific_paper", "technical_report", "official_report", "news_article", "news", "ministry_report", "internal_hypothesis", "other"] = "other"
+    source_type: Literal["scientific_paper", "technical_report", "official_report", "government_report", "news_article", "news", "ministry_report", "internal_hypothesis", "other"] = "other"
     ministry_id: str = Field(default="research_evolution", max_length=120)
     hypothesis_ids: list[str] = Field(default_factory=list, max_length=30)
     tags: list[str] = Field(default_factory=list, max_length=40)
@@ -149,6 +149,10 @@ class ResearchIntakeRequest(BaseModel):
     batch_id: str = Field(default="", max_length=200)
     producer: str = Field(default="external_research_routine", max_length=200)
     generated_at: str = Field(default="", max_length=80)
+    archive_path: str = Field(default="", max_length=500)
+    archive_commit: str = Field(default="", max_length=80)
+    workflow_run_id: str = Field(default="", max_length=200)
+    workflow_run_url: str = Field(default="", max_length=1000)
     findings: list[ResearchFinding] = Field(min_length=1, max_length=100)
 
 
@@ -727,10 +731,16 @@ def latest_records(kind: str) -> list[dict[str, object]]:
     return list(latest.values())
 
 
-def store_research_intake(request: ResearchIntakeRequest) -> dict[str, object]:
+def research_package_record_id(batch_id: str, producer: str, generated_at: str) -> str:
+    identity = batch_id.strip() or f"{producer}:{generated_at}"
+    return f"research_package:{hashlib.sha256(identity.encode('utf-8')).hexdigest()[:24]}"
+
+
+def store_research_intake(request: ResearchIntakeRequest, *, ingestion_channel: str = "owner_manual") -> dict[str, object]:
     inserted: list[dict[str, object]] = []
     duplicates = 0
     now = datetime.now(timezone.utc).isoformat()
+    finding_ids: list[str] = []
     for finding in request.findings:
         source_identity = finding.source_id.strip() or finding.source_url.strip() or f"{finding.title}|{finding.summary[:300]}"
         fingerprint = hashlib.sha256(source_identity.encode("utf-8")).hexdigest()[:20]
@@ -738,6 +748,7 @@ def store_research_intake(request: ResearchIntakeRequest) -> dict[str, object]:
         existing = get_record("research_finding", external_id)
         if existing:
             duplicates += 1
+            finding_ids.append(external_id)
             continue
         data = {
             **finding.model_dump(),
@@ -750,7 +761,30 @@ def store_research_intake(request: ResearchIntakeRequest) -> dict[str, object]:
             "source_verification": "pending",
         }
         inserted.append(save_record("research_finding", external_id, title=finding.title, body=finding.summary, data=data))
-    return {"received": len(request.findings), "inserted": len(inserted), "duplicates": duplicates, "findings": [item["data"] for item in inserted]}
+        finding_ids.append(external_id)
+    package_id = research_package_record_id(request.batch_id, request.producer, request.generated_at)
+    previous = get_record("research_intake_batch", package_id)
+    previous_data = previous.get("data", {}) if previous else {}
+    package = {
+        "package_id": package_id,
+        "batch_id": request.batch_id,
+        "producer": request.producer,
+        "generated_at": request.generated_at,
+        "ingested_at": now,
+        "status": "imported",
+        "ingestion_channel": ingestion_channel,
+        "archive_path": request.archive_path,
+        "archive_commit": request.archive_commit,
+        "workflow_run_id": request.workflow_run_id,
+        "workflow_run_url": request.workflow_run_url,
+        "received_count": len(request.findings),
+        "inserted_count": len(inserted),
+        "duplicate_count": duplicates,
+        "finding_ids": finding_ids,
+        "revision": int(previous_data.get("revision", 0)) + 1,
+    }
+    save_record("research_intake_batch", package_id, title=request.batch_id or request.producer, body=f"{len(request.findings)} achado(s): {len(inserted)} novo(s), {duplicates} duplicado(s).", data=package)
+    return {"received": len(request.findings), "inserted": len(inserted), "duplicates": duplicates, "package": package, "findings": [item["data"] for item in inserted]}
 
 
 @lru_cache(maxsize=1)
@@ -874,23 +908,28 @@ Ministérios disponíveis: {json.dumps(ministry_names, ensure_ascii=False)}
 @app.get("/research/central", dependencies=[Depends(require_token)])
 def research_central() -> dict[str, object]:
     findings = latest_records("research_finding")
+    packages = latest_records("research_intake_batch")
     plans = latest_records("research_daily_plan")
     hypotheses = latest_records("research_hypothesis") + latest_records("hypothesis")
     backlog = latest_records("research")
     runs = latest_records("research_run")
     return {
         "findings": [row["data"] for row in findings[:100]],
+        "packages": [row["data"] for row in packages[:100]],
+        "package_count": len(packages),
         "hypotheses": [row["data"] for row in hypotheses[:100]],
         "backlog": [row["data"] for row in backlog[:100]],
         "latest_plan": plans[0]["data"] if plans else None,
         "latest_run": runs[0]["data"] if runs else None,
         "automation_bridge": {
-            "endpoint": "/research/automation/intake",
-            "authentication": "X-Atlas-Automation-Key",
-            "configured": bool(settings.research_automation_token),
+            "endpoint": "/research/github-intake",
+            "authentication": "GitHub Actions OIDC",
+            "configured": bool(settings.github_research_repo and settings.github_research_ref and settings.github_research_workflow),
+            "github_oidc_enabled": True,
+            "direct_automation_configured": bool(settings.research_automation_token),
             "web_search_configured": bool(settings.openai_api_key),
             "smtp_configured": bool(settings.publication_email and settings.smtp_host and settings.smtp_username and settings.smtp_password),
-            "scheduled_chat_tasks_connected": False,
+            "scheduled_chat_tasks_connected": any(row["data"].get("ingestion_channel") == "github_actions_oidc" for row in packages),
         },
         "publication_email": {"configured": bool(settings.publication_email and settings.smtp_host and settings.smtp_username and settings.smtp_password), "recipient": settings.publication_email},
     }
@@ -898,7 +937,36 @@ def research_central() -> dict[str, object]:
 
 @app.post("/research/intake", dependencies=[Depends(require_token)])
 def research_intake(request: ResearchIntakeRequest) -> dict[str, object]:
-    return store_research_intake(request)
+    return store_research_intake(request, ingestion_channel="owner_manual")
+
+
+@app.get("/research/packages", dependencies=[Depends(require_token)])
+def list_research_packages(limit: int = 100, offset: int = 0, producer: str = "") -> dict[str, object]:
+    all_packages = latest_records("research_intake_batch")
+    if producer.strip():
+        all_packages = [row for row in all_packages if str(row["data"].get("producer", "")).casefold() == producer.strip().casefold()]
+    safe_limit = max(1, min(limit, 500))
+    safe_offset = max(0, offset)
+    return {"total": len(all_packages), "limit": safe_limit, "offset": safe_offset, "packages": [row["data"] for row in all_packages[safe_offset:safe_offset + safe_limit]]}
+
+
+@app.get("/research/packages/{batch_id}", dependencies=[Depends(require_token)])
+def get_research_package(batch_id: str) -> dict[str, object]:
+    package_id = research_package_record_id(batch_id, "", "")
+    record = get_record("research_intake_batch", package_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Research package not found.")
+    package = record["data"]
+    ids = set(str(value) for value in package.get("finding_ids", []))
+    findings = [row["data"] for row in latest_records("research_finding") if str(row["external_id"]) in ids]
+    return {"package": package, "findings": findings}
+
+
+@app.post("/research/packages/{batch_id}/replay", dependencies=[Depends(require_token)])
+def replay_research_package(batch_id: str, request: ResearchIntakeRequest) -> dict[str, object]:
+    if request.batch_id.strip() != batch_id:
+        raise HTTPException(status_code=422, detail="O batch_id do pacote precisa corresponder ao identificador da rota.")
+    return store_research_intake(request, ingestion_channel="owner_replay")
 
 
 @app.post("/research/automation/intake")
@@ -911,7 +979,7 @@ def research_automation_intake(
         raise HTTPException(status_code=503, detail="A chave privada da ponte de automação ainda não foi configurada.")
     if not research_intake_allowed(authorization, x_atlas_automation_key):
         raise HTTPException(status_code=401, detail="Credencial de ingestão inválida.")
-    return store_research_intake(request)
+    return store_research_intake(request, ingestion_channel="github_actions_oidc")
 
 
 @app.post("/research/github-intake")
