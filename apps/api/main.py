@@ -515,6 +515,21 @@ def owner_session(request: OwnerLoginRequest) -> dict[str, object]:
     }
 
 
+@app.post("/auth/refresh")
+def refresh_owner_session(authorization: str | None = Header(default=None)) -> dict[str, object]:
+    """Rotate a valid owner session so a paired browser stays connected."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing ATLAS session.")
+    current_token = authorization.removeprefix("Bearer ").strip()
+    if not verify_session_token(current_token):
+        raise HTTPException(status_code=401, detail="Invalid or expired ATLAS session.")
+    return {
+        "token": create_session_token(),
+        "expires_in_days": settings.session_days,
+        "role": "owner",
+    }
+
+
 @app.post("/voice/realtime-token", dependencies=[Depends(require_token)])
 async def realtime_token() -> dict[str, object]:
     try:
