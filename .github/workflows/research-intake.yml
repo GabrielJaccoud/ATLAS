@@ -25,7 +25,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const path = require('path');
+            const pathUtil = require('path');
             const commit = await github.rest.repos.getCommit({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -39,7 +39,17 @@ jobs:
             const intakeDir = 'docs/research/intake';
             const allPaths = fs.readdirSync(intakeDir)
               .filter((name) => name.endsWith('.json'))
-              .map((name) => path.posix.join(intakeDir, name));
+              .map((name) => pathUtil.posix.join(intakeDir, name));
+            const reportFiles = [];
+            const collectReports = (directory) => {
+              for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+                const reportPath = pathUtil.posix.join(directory, entry.name);
+                if (entry.isDirectory()) collectReports(reportPath);
+                else if (entry.isFile() && entry.name.endsWith('.md')) reportFiles.push(reportPath);
+              }
+            };
+            collectReports('docs/research/reports');
+            const reportByStem = new Map(reportFiles.map((reportPath) => [pathUtil.posix.basename(reportPath, '.md'), reportPath]));
             const paths = (reconcileAll ? allPaths : changedPaths)
               .filter((name) => name.startsWith('docs/research/intake/') && name.endsWith('.json'))
               .sort();
@@ -47,6 +57,7 @@ jobs:
             for (const path of paths) {
               const payload = JSON.parse(fs.readFileSync(path, 'utf8'));
               payload.archive_path = path;
+              payload.report_path = payload.report_path || reportByStem.get(pathUtil.posix.basename(path, '.json')) || '';
               payload.archive_commit = context.sha;
               payload.workflow_run_id = String(context.runId);
               payload.workflow_run_url = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${context.runId}`;
