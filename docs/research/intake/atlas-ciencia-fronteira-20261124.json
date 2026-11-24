@@ -1,0 +1,110 @@
+{
+  "batch_id": "atlas-ciencia-fronteira-2026-11-24",
+  "producer": "ATLAS Fronteira Científica",
+  "generated_at": "2026-11-24T12:00:12-03:00",
+  "findings": [
+    {
+      "source_id": "https://doi.org/10.1038/s41467-025-64995-7",
+      "title": "Optogenética permite estudar comunicação entre neurônios intestinais, imunidade e microbiota",
+      "summary": "Estudo primário de 2025 desenvolveu cultura ex vivo de tecido intestinal de camundongos com ativação optogenética de subtipos neuronais. Padrões de disparo diferentes alteraram motilidade, expressão gênica imunológica e marcadores de barreira intestinal; micróbios também modificaram respostas. Demonstra um método experimental e efeitos em tecido animal fora do organismo, não um tratamento humano.",
+      "what_happened": "Os pesquisadores combinaram luz controlada e neurônios geneticamente sensíveis à luz em fragmentos intestinais de camundongo mantidos em cultura. A frequência e o tipo de neurônio ativado mudaram respostas fisiológicas e imunológicas mensuráveis.",
+      "background": "A rede nervosa do intestino (sistema nervoso entérico) conversa com células de defesa e microrganismos. Antes, era difícil isolar a contribuição de neurônios específicos sem a interferência do cérebro e do restante do organismo.",
+      "why_it_matters": "O estudo fornece uma plataforma para separar causa e efeito em interações entre sistema nervoso, imunidade e microbiota, com controle temporal e celular mais fino.",
+      "implications": "Pode acelerar pesquisa mecanística sobre eixo intestino-imunidade e triagem experimental de micróbios, fármacos ou metabólitos. A aplicação clínica é uma possibilidade futura, não resultado demonstrado.",
+      "glossary": {
+        "Optogenética": "Técnica que usa proteínas sensíveis à luz para ativar ou inibir células selecionadas.",
+        "ENS / sistema nervoso entérico": "Rede de neurônios localizada na parede do trato gastrointestinal.",
+        "Ex vivo": "Experimento feito em tecido retirado do organismo e mantido em condições controladas.",
+        "Microbiota": "Conjunto de microrganismos que vivem em um ambiente, como o intestino."
+      },
+      "recommended_action": "RIA: mapear quais variáveis e controles seriam necessários para reproduzir o sistema com dados publicados; desenhar uma matriz de frequência luminosa × tipo celular × resposta, sem propor intervenção em pessoas.",
+      "limits": "Estudo em tecido intestinal de camundongo, em cultura de curta duração. Não estabelece eficácia, segurança ou benefício terapêutico em humanos; o próprio artigo discute possíveis contribuições de células não neuronais e limites da extrapolação.",
+      "source_url": "https://www.nature.com/articles/s41467-025-64995-7",
+      "published_at": "2025-11-14",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": ["neuroscience", "optogenetics", "enteric_nervous_system", "neuroimmune", "microbiome", "ex_vivo"],
+      "confidence": 0.93,
+      "priority": 0.9,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "https://doi.org/10.1038/s41593-025-02024-y",
+      "title": "Mapeamento sináptico combina optogenética holográfica e compressive sensing in vivo",
+      "summary": "Estudo de 2025 combinou estimulação optogenética holográfica de dois fótons, registros celulares e reconstrução computacional para mapear conexões no córtex visual de camundongos anestesiados. Os autores sondaram até 100 neurônios pré-sinápticos em cerca de cinco minutos; em populações esparsamente conectadas, o método combinado reduziu em até três vezes as medições necessárias. É uma demonstração em modelo animal e configuração laboratorial específica.",
+      "what_happened": "Um laser holográfico ativou células selecionadas enquanto os pesquisadores mediam respostas em outra célula. Um método matemático reconstruiu conexões a partir de menos medições simultâneas.",
+      "background": "Mapear quem se conecta a quem no cérebro é demorado: métodos tradicionais testam neurônios um a um e exigem muitas repetições para separar sinais fracos de ruído.",
+      "why_it_matters": "Mostra ganho potencial de escala ao integrar controle óptico de células, instrumentação e inferência computacional, uma arquitetura útil para pensar em pesquisa multimodal orientada por experimentos.",
+      "implications": "Pode tornar estudos de circuitos neurais mais rápidos e densos e servir como padrão metodológico para sistemas que selecionam medições informativas. Não permite mapear o cérebro humano de forma não invasiva.",
+      "glossary": {
+        "Sinapse": "Ponto de comunicação funcional entre neurônios.",
+        "Optogenética holográfica de dois fótons": "Ativação de células específicas usando padrões de luz focalizados em volume, com proteínas sensíveis à luz.",
+        "Compressive sensing": "Técnica matemática para reconstruir uma estrutura esparsa a partir de menos medições do que o método direto exigiria.",
+        "In vivo": "Experimento realizado dentro de um organismo vivo."
+      },
+      "recommended_action": "RIA: registrar como padrão de desenho experimental (intervenção controlada + medição + reconstrução computacional) e comparar com métodos de amostragem adaptativa aplicáveis às pesquisas digitais do ATLAS.",
+      "limits": "Demonstração em camundongos anestesiados, córtex visual e janela microscópica pequena, usando optogenética e eletrofisiologia invasiva. A generalização para outros circuitos, comportamento natural ou humanos requer trabalho adicional.",
+      "source_url": "https://www.nature.com/articles/s41593-025-02024-y",
+      "published_at": "2025-09-17",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": ["neuroscience", "optogenetics", "synaptic_mapping", "compressive_sensing", "computational_methods"],
+      "confidence": 0.94,
+      "priority": 0.88,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "https://doi.org/10.1038/s42256-025-01090-y",
+      "title": "Copilotos de IA melhoram controle experimental de interface cérebro-computador",
+      "summary": "Estudo de 2025 combinou decodificação de sinais de eletroencefalografia não invasiva com copilotos de inteligência artificial em tarefas de cursor e braço robótico. Um participante com paralisia apresentou taxa de acerto de alvos 3,9 vezes maior no controle do cursor com auxílio do copiloto e completou uma tarefa de manipulação que não conseguia realizar sem esse auxílio. Demonstração com participantes em tarefas específicas, não sistema clínico geral aprovado.",
+      "what_happened": "O sistema dividiu o controle: a interface decodificava a intenção motora e o copiloto ajudava a transformar essa intenção em ações para alcançar um objetivo definido.",
+      "background": "Interfaces cérebro-computador traduzem sinais neurais em comandos. Pequenos erros de decodificação tornam tarefas contínuas difíceis; autonomia compartilhada permite ao usuário indicar intenção enquanto o sistema auxilia na execução.",
+      "why_it_matters": "É uma aplicação concreta da colaboração humano-IA em que a IA melhora desempenho sem substituir completamente a intenção do usuário.",
+      "implications": "O padrão pode inspirar ferramentas assistivas com confirmação humana e objetivos explícitos. Para o ATLAS, a analogia útil é apoiar decisões do usuário com controles claros, rastreabilidade e correção fácil — não inferir intenções privadas.",
+      "glossary": {
+        "BCI / interface cérebro-computador": "Sistema que traduz sinais cerebrais em comandos para um computador ou dispositivo.",
+        "EEG / eletroencefalografia": "Registro de atividade elétrica cerebral por sensores no couro cabeludo.",
+        "Autonomia compartilhada": "Divisão de tarefas em que a pessoa define ou inicia objetivos e o sistema auxilia na execução."
+      },
+      "recommended_action": "RIA: extrair princípios de autonomia compartilhada para uma especificação de interação do ATLAS: intenção explícita, sugestões reversíveis, confirmação antes de ações externas e apresentação de incerteza.",
+      "limits": "A avaliação ocorreu em tarefas delimitadas, com número pequeno de participantes e um participante com paralisia. O ganho não demonstra benefício universal, desempenho em uso cotidiano prolongado nem substituição de avaliação clínica.",
+      "source_url": "https://www.nature.com/articles/s42256-025-01090-y",
+      "published_at": "2025-09-01",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": ["neuroscience", "BCI", "EEG", "AI_copilot", "shared_autonomy", "assistive_technology"],
+      "confidence": 0.92,
+      "priority": 0.91,
+      "evidence_class": "primary_source"
+    },
+    {
+      "source_id": "https://doi.org/10.1038/s41587-025-02995-0",
+      "title": "Modelo de linguagem de proteínas orienta variantes CRISPR com novas preferências de alvo",
+      "summary": "Artigo publicado em 2026 descreveu Protein2PAM, modelo de aprendizagem profunda treinado em mais de 45 mil motivos PAM para prever especificidade de enzimas CRISPR-Cas. Variantes Nme1Cas9 orientadas pelo modelo ampliaram compatibilidade de alvo e tiveram aumento de até 50 vezes na taxa de clivagem em ensaio in vitro frente ao tipo selvagem. É resultado laboratorial, não edição clínica demonstrada.",
+      "what_happened": "Pesquisadores usaram um modelo computacional treinado com dados evolutivos para sugerir alterações em uma enzima CRISPR. Testes in vitro mostraram que algumas variantes reconheceram mais sequências-alvo e aumentaram a atividade medida.",
+      "background": "Sistemas CRISPR precisam reconhecer um pequeno motivo de DNA ao lado do trecho desejado. Essa exigência limita quais regiões podem ser editadas; alterar a especificidade da proteína costuma demandar ciclos demorados de engenharia e teste.",
+      "why_it_matters": "Ilustra como modelos de proteínas podem estreitar o espaço experimental, priorizando variantes com maior chance de funcionar e reduzindo iterações de bancada.",
+      "implications": "Pode ampliar a flexibilidade de ferramentas de edição genética e apoiar novos fluxos de desenho computacional seguido de validação experimental. A relevância clínica depende de especificidade, segurança, entrega celular e validação adicional.",
+      "glossary": {
+        "CRISPR-Cas": "Sistema derivado de mecanismos bacterianos que pode ser adaptado para reconhecer e modificar sequências genéticas.",
+        "PAM": "Motivo adjacente ao alvo (protospacer-adjacent motif); sequência curta que a enzima CRISPR precisa reconhecer para atuar.",
+        "Modelo de linguagem de proteínas": "Modelo computacional treinado em sequências de proteínas para prever padrões e propriedades funcionais.",
+        "In vitro": "Ensaio realizado fora do organismo, em condições laboratoriais controladas."
+      },
+      "recommended_action": "RIA: acompanhar disponibilidade de dados e comparar o fluxo modelo → mutação proposta → ensaio experimental com o protocolo geral de RIA do ATLAS; não propor edição genética própria sem laboratório qualificado e revisão ética.",
+      "limits": "O aumento de atividade foi medido in vitro para enzimas e condições específicas. Não demonstra segurança, ausência de efeitos fora do alvo ou eficácia terapêutica em organismos ou pacientes.",
+      "source_url": "https://www.nature.com/articles/s41587-025-02995-0",
+      "published_at": "2026-02-02",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": ["biotechnology", "CRISPR", "protein_language_model", "machine_learning", "genome_editing"],
+      "confidence": 0.94,
+      "priority": 0.92,
+      "evidence_class": "primary_source"
+    }
+  ]
+}
