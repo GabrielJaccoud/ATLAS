@@ -54,6 +54,13 @@ type ResearchFindingRecord = {
   finding_id: string;
   title: string;
   summary: string;
+  what_happened?: string;
+  background?: string;
+  why_it_matters?: string;
+  implications?: string;
+  glossary?: Record<string, string>;
+  recommended_action?: string;
+  limits?: string;
   source_url: string;
   source_type: string;
   ministry_id: string;
@@ -262,6 +269,14 @@ function App() {
     const requested = new URLSearchParams(window.location.search).get("screen") as ScreenId | null;
     return requested && navigation.includes(requested) ? requested : "Agora";
   });
+  useEffect(() => {
+    const syncScreenFromUrl = () => {
+      const requested = new URLSearchParams(window.location.search).get("screen") as ScreenId | null;
+      setActive(requested && navigation.includes(requested) ? requested : "Agora");
+    };
+    window.addEventListener("popstate", syncScreenFromUrl);
+    return () => window.removeEventListener("popstate", syncScreenFromUrl);
+  }, []);
   const [status, setStatus] = useState<Status | null>(null);
   const [connected, setConnected] = useState(false);
   const [ownerCode, setOwnerCode] = useState("");
@@ -723,6 +738,9 @@ function App() {
 
   function goTo(screen: ScreenId) {
     setActive(screen);
+    const url = new URL(window.location.href);
+    url.searchParams.set("screen", screen);
+    window.history.pushState({ screen }, "", url);
     setMenuOpen(false);
     setCommandOpen(false);
     setCommandQuery("");
@@ -1214,7 +1232,15 @@ function App() {
             {researchCentral?.latest_plan?.goals.length ? <div className="cards-grid">{researchCentral.latest_plan.goals.map((goal) => <article className="feature-card atlas-surface research-goal" key={goal.goal_id}><span>{goal.ministries.join(" · ")} · {goal.status.replaceAll("_", " ")}</span><strong>{goal.title}</strong><p>{goal.action}</p><small><b>Entrega:</b> {goal.deliverable}</small><small><b>Concluída quando:</b> {goal.done_criteria}</small><div className="form-row"><select value={goal.status} onChange={(event) => void updateResearchGoal(goal, event.target.value as ResearchGoal["status"])}><option value="planned">Planejada</option><option value="in_progress">Em andamento</option><option value="blocked">Bloqueada</option><option value="completed">Concluída</option><option value="deferred">Adiada</option></select><button className="secondary" onClick={() => goTo("Ciência")}>Preparar artigo / relatório</button></div></article>)}</div> : <div className="empty-state atlas-surface">Quando novos achados ou hipóteses entrarem, o ATLAS poderá propor metas. Para não inventar produção, o plano vazio é identificado como tal.</div>}
             {researchCentral?.latest_plan?.ria_candidates?.length ? <><div className="section-row"><h3>RIA e engenharia reversa em triagem</h3><span className="eyebrow">Sem promoção automática de hipótese</span></div><div className="cards-grid">{researchCentral.latest_plan.ria_candidates.map((candidate) => <article className="feature-card atlas-surface" key={candidate.candidate_id}><span>{candidate.stage} · {candidate.status}</span><strong>{candidate.title}</strong><p>Sequência: {candidate.steps.join(" → ")}</p></article>)}</div></> : null}
             <div className="section-row"><h3>Achados recebidos</h3><span className="eyebrow">Registros recentes da API</span></div>
-            {researchCentral?.findings.length ? <div className="event-list">{researchCentral.findings.map((finding) => <article className="event-card atlas-surface" key={finding.finding_id}><div><span className="eyebrow">{finding.source_type.replaceAll("_", " ")} · {finding.ministry_id} · {finding.triage_status}</span><strong>{finding.title}</strong><p>{finding.summary}</p>{finding.source_url && <a href={finding.source_url} target="_blank" rel="noreferrer">Abrir fonte ↗</a>}</div><small>{finding.ingested_at ? new Date(finding.ingested_at).toLocaleString("pt-BR") : ""}</small></article>)}</div> : <div className="empty-state atlas-surface">Nenhum achado recebido pela API ainda.</div>}
+            {researchCentral?.findings.length ? <div className="event-list">{researchCentral.findings.map((finding) => <article className="event-card atlas-surface research-finding" key={finding.finding_id}><div><span className="eyebrow">{finding.source_type.replaceAll("_", " ")} · {finding.ministry_id} · {finding.triage_status}</span><strong>{finding.title}</strong><p>{finding.summary}</p>
+              {finding.what_happened && <p><b>O que aconteceu:</b> {finding.what_happened}</p>}
+              {finding.background && <p><b>Contexto:</b> {finding.background}</p>}
+              {finding.why_it_matters && <p><b>Por que importa:</b> {finding.why_it_matters}</p>}
+              {finding.implications && <p><b>O que pode significar:</b> {finding.implications}</p>}
+              {finding.glossary && Object.keys(finding.glossary).length > 0 && <details className="finding-glossary"><summary>Siglas e termos</summary><dl>{Object.entries(finding.glossary).map(([term, definition]) => <div key={term}><dt>{term}</dt><dd>{definition}</dd></div>)}</dl></details>}
+              {finding.recommended_action && <p><b>Próximo passo sugerido:</b> {finding.recommended_action}</p>}
+              {finding.limits && <p className="publication-note"><b>Limites:</b> {finding.limits}</p>}
+              {finding.source_url && <a href={finding.source_url} target="_blank" rel="noreferrer">Abrir fonte ↗</a>}</div><small>{finding.ingested_at ? new Date(finding.ingested_at).toLocaleString("pt-BR") : ""}</small></article>)}</div> : <div className="empty-state atlas-surface">Nenhum achado recebido pela API ainda.</div>}
             <div className="section-row"><h3>Backlog dos ministérios</h3><button className="secondary" onClick={() => void runAction<ResearchItem>("/research", { ministry_id: status?.ministries?.[0]?.id || "research_evolution", question: researchQuestion.trim(), priority: 0.5 }, (item) => `Pergunta registrada: ${item.question}`)} disabled={!researchQuestion.trim() || busy}>Registrar pergunta</button></div>
             <div className="form-row"><input value={researchQuestion} onChange={(event) => setResearchQuestion(event.target.value)} placeholder="Nova pergunta ou hipótese para o backlog" /></div>
             <button className="secondary" disabled={!connected || !researchQuestion.trim() || dailyPlanBusy || !status?.provider?.openai_configured} onClick={() => void investigateResearchTopic()}>{dailyPlanBusy ? "Pesquisando…" : "Investigar agora na web"}</button>
