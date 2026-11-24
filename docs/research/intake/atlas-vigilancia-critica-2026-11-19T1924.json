@@ -12,10 +12,22 @@
       "source_type": "technical_report",
       "ministry_id": "research_evolution",
       "hypothesis_ids": [],
-      "tags": ["NASA", "FDML", "fault-detection", "autonomous-recovery", "model-based-systems-engineering", "ASAS", "ZAZA", "RIA-FDML-01", "candidate-for-testing"],
+      "tags": [
+        "NASA",
+        "FDML",
+        "fault-detection",
+        "autonomous-recovery",
+        "model-based-systems-engineering",
+        "ASAS",
+        "ZAZA",
+        "RIA-FDML-01",
+        "candidate-for-testing"
+      ],
       "confidence": 0.93,
       "priority": 0.86,
       "evidence_class": "primary_source"
     }
-  ]
+  ],
+  "report_path": "docs/research/reports/2026-11-19-atlas-intake-note.md",
+  "report": "Triagem de um relatório técnico NASA sobre FDML e planejamento automatizado de manutenção: geração reportada de 50 procedimentos para 50 falhas em três sistemas e 18 componentes. O registro classifica RIA-FDML-01 como candidato a experimento isolado, sem assimilação; o relatório associado descreve o benchmark futuro proposto, ainda não executado."
 }
