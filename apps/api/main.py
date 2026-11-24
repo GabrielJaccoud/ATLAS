@@ -127,6 +127,13 @@ class ResearchFinding(BaseModel):
     source_id: str = Field(default="", max_length=300)
     title: str = Field(min_length=4, max_length=500)
     summary: str = Field(min_length=10, max_length=12000)
+    what_happened: str = Field(default="", max_length=4000)
+    background: str = Field(default="", max_length=4000)
+    why_it_matters: str = Field(default="", max_length=4000)
+    implications: str = Field(default="", max_length=4000)
+    glossary: dict[str, str] = Field(default_factory=dict)
+    recommended_action: str = Field(default="", max_length=4000)
+    limits: str = Field(default="", max_length=4000)
     source_url: str = Field(default="", max_length=2000)
     published_at: str = Field(default="", max_length=80)
     source_type: Literal["scientific_paper", "technical_report", "official_report", "news_article", "news", "ministry_report", "internal_hypothesis", "other"] = "other"
@@ -790,18 +797,20 @@ async def search_research_sources(question: str, ministry_id: str, hypothesis_id
     ministry_names = [{"id": ministry.ministry_id, "name": ministry.name, "skills": list(ministry.skills)} for ministry in registry.values()]
     research_prompt = f"""Pesquise na web por fontes novas e relevantes ao objetivo abaixo. Use busca web, priorize artigos científicos, dados primários, órgãos oficiais e documentos de ministérios. Distinga data do evento e data de publicação; evite duplicatas e inclua URL direta. Não trate alegação como fato sem evidência. Hipóteses especulativas, tradições e relatos devem ser classificados como tais, incluindo contraevidências quando encontradas.
 
+Ao cobrir ciência e tecnologia, inclua de forma recorrente (sem fabricar novidade quando não houver): neurociência, optogenética, neurotecnologia e interfaces cérebro-computador; computação e IA, inclusive métodos inspirados biologicamente; biotecnologia, incluindo edição genética, organoides e biologia sintética. Compare o avanço com o estado anterior e diga se é demonstração em células/animais, estudo observacional ou resultado clínico em humanos. Não apresente potencial translacional como tratamento comprovado.
+
 Objetivo/tema: {question}
 Ministério de entrada: {ministry_id}
 Hipóteses registradas: {json.dumps(hypothesis_context, ensure_ascii=False)}
 Backlog de pesquisa: {json.dumps(backlog_context, ensure_ascii=False)}
 Ministérios disponíveis: {json.dumps(ministry_names, ensure_ascii=False)}
 
- Retorne somente um objeto JSON válido com as chaves `report` e `findings`. `report` deve resumir as mudanças, separar fato/inferência/hipótese e sugerir o próximo passo. `findings` deve conter até seis itens, cada um com: source_id (estável; DOI ou URL quando houver), title, summary (alegação + dado/método + limite), source_url, published_at (ISO quando disponível), source_type (scientific_paper, technical_report, official_report, news_article, news, ministry_report, internal_hypothesis ou other), ministry_id (id da lista ou research_evolution), hypothesis_ids (apenas IDs listados acima), tags (lista), confidence (0 a 1, refletindo a qualidade da evidência), priority (0 a 1), evidence_class (ex.: primary_source, peer_reviewed, official_report, unverified_report, contrary_evidence). Se não houver achado novo e útil, retorne findings vazio e explique no report. Responda em português. Não gere diagnósticos médicos nem confirme fenômenos extraordinários sem evidência independente."""
+ Retorne somente um objeto JSON válido com as chaves `report` e `findings`. `report` deve resumir as mudanças, separar fato/inferência/hipótese e sugerir próximos passos concretos. `findings` deve conter até seis itens, cada um com: source_id (estável; DOI ou URL quando houver), title, summary (síntese concisa), what_happened (o achado em linguagem simples), background (de onde veio e o contexto anterior necessário), why_it_matters, implications (consequências plausíveis, explicitando inferência), glossary (objeto com siglas/termos e definição curta; use {{}} se não houver), recommended_action (passo seguro e executável para ATLAS, ou "monitorar" se não houver ação justificada), limits (o que o estudo não demonstra e seus limites), source_url, published_at (ISO quando disponível), source_type (scientific_paper, technical_report, official_report, news_article, news, ministry_report, internal_hypothesis ou other), ministry_id (id da lista ou research_evolution), hypothesis_ids (apenas IDs listados acima), tags (lista), confidence (0 a 1, refletindo a qualidade da evidência), priority (0 a 1), evidence_class (ex.: primary_source, peer_reviewed, official_report, unverified_report, contrary_evidence). Explique siglas na primeira ocorrência e escreva para quem está começando, sem infantilizar nem presumir conhecimento prévio. Se não houver achado novo e útil, retorne findings vazio e explique no report. Responda em português. Não gere diagnósticos médicos nem confirme fenômenos extraordinários sem evidência independente."""
     payload = {
         "model": settings.openai_model,
         "tools": [{"type": "web_search"}],
         "input": [
-            {"role": "system", "content": "Você é o pesquisador do ATLAS. Apure fontes, retenha proveniência e declare incerteza; não invente referências nem resultados."},
+            {"role": "system", "content": "Você é o pesquisador e professor do ATLAS. Apure fontes, retenha proveniência, explique contexto e siglas com clareza, e declare incerteza; não invente referências nem resultados."},
             {"role": "user", "content": research_prompt},
         ],
     }
