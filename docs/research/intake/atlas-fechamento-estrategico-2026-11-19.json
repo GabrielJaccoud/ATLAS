@@ -12,7 +12,13 @@
       "source_type": "official_report",
       "ministry_id": "research_evolution",
       "hypothesis_ids": [],
-      "tags": ["space_weather", "NOAA", "Kp", "G1", "instrumental"],
+      "tags": [
+        "space_weather",
+        "NOAA",
+        "Kp",
+        "G1",
+        "instrumental"
+      ],
       "confidence": 0.96,
       "priority": 0.75,
       "evidence_class": "primary_source"
@@ -25,8 +31,16 @@
       "published_at": "2026-11-19T15:39:00+09:00",
       "source_type": "news_article",
       "ministry_id": "research_evolution",
-      "hypothesis_ids": ["ARO-03"],
-      "tags": ["semiconductors", "AI", "exports", "South_Korea", "concentration"],
+      "hypothesis_ids": [
+        "ARO-03"
+      ],
+      "tags": [
+        "semiconductors",
+        "AI",
+        "exports",
+        "South_Korea",
+        "concentration"
+      ],
       "confidence": 0.93,
       "priority": 0.88,
       "evidence_class": "secondary_source"
@@ -39,10 +53,18 @@
       "published_at": "2026-11-18",
       "source_type": "news_article",
       "ministry_id": "research_evolution",
-      "hypothesis_ids": ["ARO-02"],
-      "tags": ["Russia", "refining", "drones", "energy", "supply"],
+      "hypothesis_ids": [
+        "ARO-02"
+      ],
+      "tags": [
+        "Russia",
+        "refining",
+        "drones",
+        "energy",
+        "supply"
+      ],
       "confidence": 0.77,
-      "priority": 0.90,
+      "priority": 0.9,
       "evidence_class": "secondary_source"
     },
     {
@@ -54,7 +76,13 @@
       "source_type": "news_article",
       "ministry_id": "research_evolution",
       "hypothesis_ids": [],
-      "tags": ["FAA", "infrastructure", "resilience", "routers", "failure_analysis"],
+      "tags": [
+        "FAA",
+        "infrastructure",
+        "resilience",
+        "routers",
+        "failure_analysis"
+      ],
       "confidence": 0.91,
       "priority": 0.85,
       "evidence_class": "secondary_source"
@@ -67,11 +95,21 @@
       "published_at": "2026-11-19",
       "source_type": "news_article",
       "ministry_id": "research_evolution",
-      "hypothesis_ids": ["ARO-01"],
-      "tags": ["gasoline", "refining_margins", "Asia", "oil", "supply"],
+      "hypothesis_ids": [
+        "ARO-01"
+      ],
+      "tags": [
+        "gasoline",
+        "refining_margins",
+        "Asia",
+        "oil",
+        "supply"
+      ],
       "confidence": 0.88,
       "priority": 0.82,
       "evidence_class": "secondary_source"
     }
-  ]
+  ],
+  "report_path": "docs/research/reports/2026-11-19-atlas-intake-note.md",
+  "report": "Fechamento estratégico de 19/11 com cinco pistas: boletim NOAA/NWS sobre Kp/G1, concentração das exportações sul-coreanas em semicondutores, relatos sobre processamento de refinarias russas, medidas da FAA após interrupção aérea e margens asiáticas de gasolina. As fontes e limitações são resumidas no relatório associado; os itens permanecem pistas de evidência, não previsões confirmadas."
 }
