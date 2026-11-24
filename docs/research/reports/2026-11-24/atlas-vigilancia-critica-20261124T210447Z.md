@@ -1,0 +1,7 @@
+# ATLAS — Vigilância Crítica
+
+24/11/2026 18:04:47 BRT
+
+Busca pública em DARPA, IARPA, AARO e Nature sobre sensores quânticos e neurotecnologia. A agenda Multi X Office de 26/06/2026 é repetida. A página https://www.darpa.mil/events/rewinds/spark-tank-2025 descreve evento de 2025, não avanço técnico recente. A página https://www.darpa.mil/about/offices/mxo menciona quatro equipes adicionais na etapa C do Quantum Benchmarking Initiative, mas a data e documentação específica não foram verificadas. Artigo Neural-LWE de 21/04/2026 (https://doi.org/10.1038/s41598-026-48527-x) propõe autenticação pós-quântica para interfaces cérebro-computador; métricas, modelo experimental e novidade no acervo não auditados. Nenhum achado novo qualificado. Cobertura parcial, sem dados brutos, contratos, patentes, DOE/NNSA, NASA, CIA/FOIA, GAO ou literatura psi auditados. Programa Anímico–Parapsicológico preservado; nenhuma hipótese promovida. RIA: nenhum benchmark ou integração. Glossário: QBI = iniciativa de avaliação de computação quântica; pós-quântico = criptografia projetada para resistir a ataques por computadores quânticos; baseline = referência comparativa. Ingestão não verificada.
+
+Ação recomendada: verificar anúncio específico da etapa C e comparar resultados com metas anteriores; não confundir seleção de equipes com capacidade demonstrada.
