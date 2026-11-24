@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { atlasFetch, loadConfig, pairOwner } from "./api";
+import { atlasFetch, clearSession, loadConfig, pairOwner, refreshSession } from "./api";
 import { RealtimeHandle, startRealtimeVoice } from "./realtime";
 import "./design-system.css";
 import "./styles.css";
@@ -390,6 +390,13 @@ function App() {
       return;
     }
     try {
+      try {
+        await refreshSession();
+      } catch (error) {
+        // Keep an existing session on transient network/API errors; a 401 is
+        // already cleared by refreshSession and will reveal the pairing form.
+        if (!loadConfig().token) throw error;
+      }
       const data = await atlasFetch<Status>("/status");
       setStatus(data);
       setConnected(true);
@@ -419,6 +426,20 @@ function App() {
     } catch {
       setConnected(false);
     }
+  }
+
+  useEffect(() => {
+    const renewal = window.setInterval(() => {
+      if (loadConfig().token) void refreshSession().catch(() => undefined);
+    }, 30 * 24 * 60 * 60 * 1000);
+    return () => window.clearInterval(renewal);
+  }, []);
+
+  function disconnect() {
+    clearSession();
+    setConnected(false);
+    setStatus(null);
+    setReply("Este navegador foi desconectado. Para parear novamente, informe o código do proprietário.");
   }
 
   async function loadWorlds() {
@@ -1451,7 +1472,7 @@ function App() {
             <span className="eyebrow">Private Intelligence System</span>
             <strong>{active}</strong>
           </div>
-          <div className="command-tools"><button className="secondary command-shortcut" onClick={() => setCommandOpen(true)} aria-label="Abrir busca de módulos">Buscar <kbd>⌘ / Ctrl K</kbd></button><button className="secondary refresh-button" onClick={() => void refresh()} aria-label="Atualizar dados">Atualizar</button><VoiceCore compact /></div>
+          <div className="command-tools">{connected && <button className="secondary disconnect-button" onClick={disconnect} aria-label="Desconectar este navegador do ATLAS">Desconectar</button>}<button className="secondary command-shortcut" onClick={() => setCommandOpen(true)} aria-label="Abrir busca de módulos">Buscar <kbd>⌘ / Ctrl K</kbd></button><button className="secondary refresh-button" onClick={() => void refresh()} aria-label="Atualizar dados">Atualizar</button><VoiceCore compact /></div>
         </header>
 
         {reply && active !== "Talk" && <div className="global-feedback" role="status" aria-live="polite">{reply}</div>}
