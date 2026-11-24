@@ -150,10 +150,12 @@ class ResearchIntakeRequest(BaseModel):
     producer: str = Field(default="external_research_routine", max_length=200)
     generated_at: str = Field(default="", max_length=80)
     archive_path: str = Field(default="", max_length=500)
+    report_path: str = Field(default="", max_length=500)
     archive_commit: str = Field(default="", max_length=80)
     workflow_run_id: str = Field(default="", max_length=200)
     workflow_run_url: str = Field(default="", max_length=1000)
-    findings: list[ResearchFinding] = Field(min_length=1, max_length=100)
+    report: str = Field(default="", max_length=30000)
+    findings: list[ResearchFinding] = Field(default_factory=list, max_length=100)
 
 
 class ResearchInvestigationRequest(BaseModel):
@@ -771,9 +773,10 @@ def store_research_intake(request: ResearchIntakeRequest, *, ingestion_channel: 
         "producer": request.producer,
         "generated_at": request.generated_at,
         "ingested_at": now,
-        "status": "imported",
+        "status": "imported" if request.findings else "completed_no_findings",
         "ingestion_channel": ingestion_channel,
         "archive_path": request.archive_path,
+        "report_path": request.report_path,
         "archive_commit": request.archive_commit,
         "workflow_run_id": request.workflow_run_id,
         "workflow_run_url": request.workflow_run_url,
@@ -781,9 +784,13 @@ def store_research_intake(request: ResearchIntakeRequest, *, ingestion_channel: 
         "inserted_count": len(inserted),
         "duplicate_count": duplicates,
         "finding_ids": finding_ids,
+        "report_summary": request.report,
         "revision": int(previous_data.get("revision", 0)) + 1,
     }
-    save_record("research_intake_batch", package_id, title=request.batch_id or request.producer, body=f"{len(request.findings)} achado(s): {len(inserted)} novo(s), {duplicates} duplicado(s).", data=package)
+    package_body = f"{len(request.findings)} achado(s): {len(inserted)} novo(s), {duplicates} duplicado(s)."
+    if not request.findings:
+        package_body = "Execução arquivada sem achados novos."
+    save_record("research_intake_batch", package_id, title=request.batch_id or request.producer, body=package_body, data=package)
     return {"received": len(request.findings), "inserted": len(inserted), "duplicates": duplicates, "package": package, "findings": [item["data"] for item in inserted]}
 
 
@@ -979,7 +986,7 @@ def research_automation_intake(
         raise HTTPException(status_code=503, detail="A chave privada da ponte de automação ainda não foi configurada.")
     if not research_intake_allowed(authorization, x_atlas_automation_key):
         raise HTTPException(status_code=401, detail="Credencial de ingestão inválida.")
-    return store_research_intake(request, ingestion_channel="github_actions_oidc")
+    return store_research_intake(request, ingestion_channel="scheduled_automation")
 
 
 @app.post("/research/github-intake")
@@ -989,7 +996,7 @@ def research_github_intake(
 ) -> dict[str, object]:
     if not verify_github_actions_token(authorization):
         raise HTTPException(status_code=401, detail="Token GitHub Actions inválido ou fora do escopo autorizado.")
-    return store_research_intake(request)
+    return store_research_intake(request, ingestion_channel="github_actions_oidc")
 
 
 @app.post("/research/investigate", dependencies=[Depends(require_token)])

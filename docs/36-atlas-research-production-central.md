@@ -35,7 +35,7 @@ Every report should explain unfamiliar abbreviations at first use and include a 
 
 ## ChatGPT scheduled reports
 
-The five scheduled ChatGPT research automations retain their individual reports and append an importable JSON envelope. They archive nonempty reports and packages in the dedicated GitHub data branch. The GitHub Actions workflow imports changed packages automatically and can reconcile the full JSON archive after a workflow update or manual dispatch. The API records one audit entry per package, links its findings to the batch, and stores the GitHub path, commit, and workflow run. A successful commit alone is not proof of ingestion: the workflow must finish successfully and the package must appear in the API ledger. If the GitHub connector is unavailable to a scheduled run, the JSON remains available for manual import in Pesquisa.
+The five scheduled ChatGPT research automations retain their individual reports and archive a Markdown report plus an importable JSON envelope for every completed run, including runs with no new findings. Empty runs use `findings: []` and remain explicitly visible in the API ledger as `completed_no_findings`. The GitHub Actions workflow imports each changed package automatically and can reconcile the full JSON archive after a workflow update or manual dispatch. The API records one audit entry per package, links its findings to the batch, and stores the GitHub report/JSON paths, commit, and workflow run. A successful commit alone is not proof of ingestion: the workflow must finish successfully and the package must appear in the API ledger. If the GitHub connector is unavailable to a scheduled run, the automation must report the failure and leave the JSON/report available for recovery.
 
 ## Package audit and management
 
@@ -47,7 +47,7 @@ The API endpoint and runner for a native ATLAS daily run are implemented. The Re
 
 ## Persistent website pairing
 
-Owner sessions are stored in the paired browser and renewed silently on app startup, manual refresh, and every 30 days while the page remains open. The API issues rolling 365-day sessions. This keeps the browser paired between normal visits; pairing is needed again only after the local session is cleared/disconnected or remains unused beyond its validity. “Desconectar” removes the browser's saved session.
+Owner sessions are stored on the paired device and renewed silently on app startup, manual refresh, and every 30 days while the page remains open. The API issues rolling 365-day sessions. This keeps the browser or installed Android app paired between normal visits; each separate browser profile or new app installation still needs a one-time owner-code pairing. Pairing is needed again only after the local session is cleared/disconnected or remains unused beyond its validity. “Desconectar” removes the device's saved session. The website, PWA, and Android package share this frontend and the same Render API; Android uses its own on-device storage.
 
 ## Historical context in scheduled reports
 
