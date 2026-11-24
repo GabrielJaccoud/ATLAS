@@ -1,0 +1,40 @@
+{
+  "batch_id": "atlas-ciencia-interna-20261124T182107Z",
+  "producer": "ATLAS Ciência Interna",
+  "generated_at": "2026-11-24T18:21:07Z",
+  "report_path": "docs/research/reports/2026-11-24/atlas-ciencia-interna-20261124T182107Z.md",
+  "report": "Modelo cérebro-corpo de 16/11, revisão conceitual e preprint como contexto; teste sintético de controle espectral; uma oportunidade RIA, sem atualização empírica. Radar, Fronteira e Vigilância consultados.",
+  "findings": [
+    {
+      "source_id": "https://doi.org/10.1038/s41598-026-72942-9",
+      "title": "Energy-driven structure in coupled brain–body dynamics",
+      "summary": "Modelo computacional de osciladores neurais, autonômico e variável energética escalar com acoplamento bidirecional; prova de conceito, não experimento biológico.",
+      "source_url": "https://www.nature.com/articles/s41598-026-72942-9",
+      "published_at": "2026-11-16",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-004",
+        "SLCH"
+      ],
+      "tags": [
+        "RIA",
+        "brain-body",
+        "simulation"
+      ],
+      "confidence": 0.85,
+      "priority": 0.86,
+      "evidence_class": "primary_source",
+      "what_happened": "Publicação de modelo gerador acoplado.",
+      "background": "Modelos neurais frequentemente tratam metabolismo como restrição.",
+      "why_it_matters": "Permite comparar acoplamento com causa comum.",
+      "implications": "Candidato a benchmark computacional, não prova de consciência.",
+      "glossary": {
+        "Oscilador": "Sistema com dinâmica repetitiva",
+        "Acoplamento": "Influência entre variáveis"
+      },
+      "recommended_action": "Comparar modelos em dados retidos e controles espectrais.",
+      "limits": "Resumo consultado; parâmetros e dados não auditados; sem validação biológica nesta execução."
+    }
+  ]
+}
