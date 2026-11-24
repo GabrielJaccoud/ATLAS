@@ -1,0 +1,36 @@
+{
+  "batch_id": "atlas-fronteira-20261124T184018Z",
+  "producer": "ATLAS Fronteira do Conhecimento",
+  "generated_at": "2026-11-24T18:40:18Z",
+  "report_path": "docs/research/reports/2026-11-24/atlas-fronteira-20261124T184018Z.md",
+  "report": "Triagem pública: TUM relata teste humano temporário de BCI; reunião Royal Society sobre computação neuromórfica é agenda, não resultado. Sem benchmark próprio ou conclusão sobre hipóteses extraordinárias.",
+  "findings": [
+    {
+      "source_id": "TUM-BCI-2026-11-24",
+      "title": "Interface cerebral superficial de 512 microeletrodos",
+      "summary": "TUM relata coleta intraoperatória temporária em um humano; sem eficácia clínica demonstrada.",
+      "source_url": "https://www.tum.de/en/news-and-events/all-news/press-releases/details/researchers-at-tum-are-testing-a-novel-brain-computer-interface",
+      "published_at": "2026-11-24",
+      "source_type": "government_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "BCI",
+        "neurotechnology",
+        "RIA"
+      ],
+      "confidence": 0.95,
+      "priority": 0.85,
+      "evidence_class": "primary_source",
+      "what_happened": "Implantação temporária em 23/11 e retirada após coleta.",
+      "background": "Interfaces superficiais registram atividade cortical.",
+      "why_it_matters": "Aquisição neural de alta densidade.",
+      "implications": "Pesquisa de decodificação e integração de sinais.",
+      "glossary": {
+        "BCI": "Interface cérebro-computador"
+      },
+      "recommended_action": "Testar dados anonimizados com rótulos permutados e validação por paciente; sem intervenção.",
+      "limits": "Um humano; sem dados brutos, eficácia clínica ou benchmark independente."
+    }
+  ]
+}
