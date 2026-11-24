@@ -1,0 +1,28 @@
+{
+  "batch_id": "atlas-radar-matinal-2026-11-24",
+  "producer": "ATLAS Radar Matinal",
+  "generated_at": "2026-11-24T09:55:41Z",
+  "findings": [
+    {
+      "source_id": "10.3847/2041-8213/aea901",
+      "title": "Cassiopeia A: composição da poeira como evidência de mistura de camadas estelares",
+      "summary": "NASA, ESA e STScI divulgaram em 23/11 estudo ApJL baseado em JWST/MIRI, com contexto Spitzer, Chandra e XRISM. Composição de poeira sustenta hipótese de mistura de camadas antes do colapso; timing de horas é inferência. DOI ligado pela ESA; artigo integral inacessível nesta execução. Faltam cubos espectrais, erros e modelos alternativos para replicação.",
+      "source_url": "https://doi.org/10.3847/2041-8213/aea901",
+      "published_at": "2026-11-23",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "JWST",
+        "MIRI",
+        "inverse-problem",
+        "supernova",
+        "institutional-summary",
+        "full-text-unavailable"
+      ],
+      "confidence": 0.85,
+      "priority": 0.88,
+      "evidence_class": "secondary_source"
+    }
+  ]
+}
