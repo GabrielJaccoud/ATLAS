@@ -10,7 +10,9 @@ class Settings(BaseSettings):
     api_token: str = "dev-atlas-token"
     owner_code: str = "000000"
     session_secret: str = "dev-session-secret-change-me"
-    session_days: int = 30
+    # Rolling owner sessions are renewed by the web app and remain paired
+    # across visits. Users can still disconnect the local browser session.
+    session_days: int = 365
     database_url: str = "sqlite:///./atlas.db"
     artifact_dir: str = "./data/artifacts"
     cors_origins: str = "*"
