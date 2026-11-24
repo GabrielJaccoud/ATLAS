@@ -34,3 +34,11 @@ Set `ATLAS_RESEARCH_AUTOMATION_TOKEN` only as a private Render service variable.
 The five scheduled ChatGPT research automations retain their individual reports and append an importable JSON envelope. They are instructed to archive nonempty reports and packages in the dedicated GitHub data branch. GitHub Actions exchanges a short-lived OIDC identity for authenticated ingestion into the Atlas API; its run must succeed before an API import is claimed. If the GitHub connector is unavailable to a scheduled run, the JSON remains available for manual import in Pesquisa. This path does not use a paid Render cron.
 
 The API endpoint and runner for a native ATLAS daily run are implemented. The Render cron could not be provisioned because Render returned HTTP 402 and requires a payment method on the account. Until that requirement is resolved, there is no direct scheduled API run; ChatGPT task results enter through JSON import. When provisioned, the Render cron uses `web_search`, writes to the API, and can email the result link when SMTP is configured.
+
+## Persistent website pairing
+
+Owner sessions are stored in the paired browser and renewed silently on app startup, manual refresh, and every 30 days while the page remains open. The API issues rolling 365-day sessions. This keeps the browser paired between normal visits; pairing is needed again only after the local session is cleared/disconnected or remains unused beyond its validity. “Desconectar” removes the browser's saved session.
+
+## Historical context in scheduled reports
+
+Use historical context when it helps explain a mechanism, trend, or change in interpretation. Compare the new observation with a dated precedent, baseline, or earlier phase; say what is similar and what differs. Treat historical analogy as a way to generate questions, not proof of a causal link. Distinguish when an event occurred, when it was published, and when ATLAS ingested it if those dates differ materially.
