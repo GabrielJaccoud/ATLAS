@@ -1,0 +1,41 @@
+{
+  "batch_id": "atlas-radar-matinal-20261125T100002Z",
+  "producer": "ATLAS Radar Matinal",
+  "generated_at": "2026-11-25T10:00:02Z",
+  "report_path": "docs/research/reports/2026-11-25/atlas-radar-matinal-20261125T100002Z.md",
+  "report": "Radar 25/11: NOAA prevê G1 menor em 27/11, Kp observado 2 e máximo previsto 5; ontem não havia G1 previsto até 26/11. Fonte https://services.swpc.noaa.gov/text/3-day-forecast.txt (25/11 00:30 UTC). Probabilidades S1+ e R1–R2 de 1% ao dia. Hipótese de vento solar rápido de buraco coronal: H0 sem aumento de Kp associado após controles; faltam séries DSCOVR/ACE de velocidade, densidade, Bz e Kp definitivo; teste não executado. Petróleo: Reuters 25/11 08:45 UTC Brent 90,58 e WTI 80,96; estoques API +126 mil contra +1,5 milhão esperado, surpresa -1,374 milhão; queda de preços não demonstra causalidade de oferta. Fonte https://www.reuters.com/business/energy/oil-prices-fall-supply-glut-concerns-offset-middle-east-disruption-fears-2026-11-25/ . H0 coeficientes estáveis; regressão com surpresas de estoques, dólar, demanda, fretes e fluxos AIS; faltam séries. Brasil: Petrobras acordou adquirir 42% da Neomille, Reuters 24/11 https://www.reuters.com/business/energy/petrobras-seek-more-corn-ethanol-deals-after-neomille-sources-say-2026-11-24/ ; não confundir acordo com fechamento. Ciência: Estudo de viabilidade humano com dez participantes, cruzado, randomizado, controle simulado e cegamento simples. Resumo relata modulação localizada e melhora de classificação offline em P4, sem melhora online de caracteres. Sem replicação independente. H0 diferença real-simulada na mudança de acurácia online igual a zero; modelo misto condição×tempo, controles ordem, fadiga, desempenho inicial e multiplicidade. Faltam EEG, rótulos, acurácia por sessão e código. Positivo documental local, negativo funcional reportado, inconclusivo causal independente. Fonte adicional https://pubmed.ncbi.nlm.nih.gov/43019598/ e https://doi.org/10.1088/issn.1741-2552 . Memória histórica: choques petrolíferos 1973/1979 são analogias, não prova; comparar períodos sem interrupção. Escopo limitado de neurotecnologia, IA, organoides e biotecnologia; nenhum outro achado selecionado. Sem inspeção direta de sensores, sem probabilidades próprias calibradas, sem intervenções. Horizontes 72h Kp e petróleo; 7d estoques; 30d dados BCI; 90d validação; 1a generalização. Ingestão pendente no momento da preparação.",
+  "findings": [
+    {
+      "source_id": "10.1088/1741-2552/aec199",
+      "title": "Estimulação transcraniana e interface cerebral P300: ganho local sem ganho funcional demonstrado",
+      "summary": "Estudo de viabilidade humano com dez participantes, cruzado, randomizado, controle simulado e cegamento simples. Resumo relata modulação localizada e melhora de classificação offline em P4, sem melhora online de caracteres. Sem replicação independente.",
+      "source_url": "https://doi.org/10.1088/1741-2552/aec199",
+      "published_at": "2026-11-24",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "BCI",
+        "P300",
+        "human-feasibility",
+        "negative-functional-result",
+        "abstract-only"
+      ],
+      "confidence": 0.85,
+      "priority": 0.85,
+      "evidence_class": "primary_source",
+      "what_happened": "Estudo identificado em PubMed e resumo da editora; resultado local não se traduziu em desempenho funcional.",
+      "background": "Interfaces P300 classificam respostas elétricas a estímulos; a data de 24/11 consta no PubMed, outros índices indicam 12/11.",
+      "why_it_matters": "Melhorar um indicador intermediário não garante melhorar o sistema completo.",
+      "implications": "Avaliar desempenho ponta a ponta em decodificadores e no ATLAS.",
+      "glossary": {
+        "P300": "potencial elétrico cerebral relacionado a eventos",
+        "BCI": "interface cérebro-computador",
+        "tDCS": "estimulação transcraniana por corrente contínua",
+        "P4": "posição de eletrodo no couro cabeludo"
+      },
+      "recommended_action": "Obter dados anonimizados por participante e sessão, código e métricas online; testar interação condição-tempo com controle de multiplicidade.",
+      "limits": "Amostra pequena, resumo apenas, sem eficácia clínica demonstrada; data editorial divergente; não recomendar intervenção."
+    }
+  ]
+}
