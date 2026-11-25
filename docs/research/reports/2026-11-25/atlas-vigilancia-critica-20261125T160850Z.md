@@ -1,0 +1,5 @@
+# ATLAS — Vigilância Crítica
+
+25/11/2026 — 13:08:50 BRT
+
+Triagem pública de sete dias em DARPA/IARPA/AARO, Nature, DOE/NASA. NASA publicou em 24/11/2026 a previsão da missão CRS-25, transporte de cerca de 11 mil libras de suprimentos e pesquisa à estação espacial (https://www.nasa.gov/missions/station/nasas-northrop-grumman-crs-25-mission-overview/); anúncio de missão, não resultado experimental. Nature recuperou reportagem anterior sobre proteínas quânticas (https://www.nature.com/articles/d41586-026-00662-1), tema já abordado na edição anterior, sem auditoria primária. DARPA retornou página geral de tecnologias biológicas (https://www.darpa.mil/about/offices/bto). Nenhum achado novo qualificado; nenhuma hipótese promovida. Cobertura documental parcial, sem dados brutos, contratos, patentes, CIA/FOIA, GAO, NNSA ou literatura psi individualmente auditados; sem deduplicação integral. Programa Anímico–Parapsicológico preservado. RIA: nenhum ganho medido ou integração. Glossário: CRS = serviços comerciais de reabastecimento; baseline = referência comparativa; RIA = regra de investigação e assimilação. Ingestão a verificar após commit.
