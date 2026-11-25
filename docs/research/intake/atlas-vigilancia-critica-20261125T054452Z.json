@@ -1,0 +1,8 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261125T054452Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-25T05:44:52Z",
+  "report_path": "docs/research/reports/2026-11-25/atlas-vigilancia-critica-20261125T054452Z.md",
+  "report": "Triagem documental em 25/11/2026: buscas agrupadas DARPA/IARPA/AARO e Nature, janela solicitada de sete dias. Resultados históricos ou gerais. DARPA QBI (https://www.darpa.mil/research/programs/quantum-benchmarking-initiative) mantém avaliação de utilidade industrial até 2033, não demonstração; programa já discutido. RoQS (https://www.darpa.mil/news/2025/roqs-launches-first-phase), 27/08/2025, confirma início de fase de pesquisa em robustez de sensores, não desempenho operacional. Nature Neuroscience, Toker et al., 24/03/2026 (https://doi.org/10.1038/s41593-026-02220-4), artigo sobre IA adversarial e distúrbios da consciência: metadados recuperados, métodos e resultados não auditados. Nenhum achado novo qualificado; deduplicação integral não realizada. Cobertura parcial, sem auditoria NASA, DOE/NNSA, CIA/FOIA, GAO, contratos, patentes, literatura psi ou dados brutos. Programa Anímico–Parapsicológico preservado; nenhuma hipótese promovida. RIA: nenhum teste ou integração; avaliar artigo de Toker mediante métodos, controles e dados publicados antes de propor aplicação. Glossário: QBI = iniciativa de avaliação quântica; RoQS = sensores quânticos robustos; baseline = referência comparativa. Ingestão não verificada.",
+  "findings": []
+}
