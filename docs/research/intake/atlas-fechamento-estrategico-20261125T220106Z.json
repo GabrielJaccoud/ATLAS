@@ -1,0 +1,67 @@
+{
+  "batch_id": "atlas-fechamento-estrategico-20261125T220106Z",
+  "producer": "ATLAS Fechamento Estratégico",
+  "generated_at": "2026-11-25T22:01:06Z",
+  "report_path": "docs/research/reports/2026-11-25/atlas-fechamento-estrategico-20261125T220106Z.md",
+  "report": "Radar recuperado parcialmente: Brent 90,58, WTI 80,96, Kp 2 e previsão G1 em 27/11. Dois achados: revisão Equinor e alta do petróleo. Sem probabilidades matinais completas ou modelo calibrado. Triagem científica encontrou notícia de interface neural humana já contemplada na manhã; sem nova eficácia demonstrada. Sem análise direta SAR/AIS/on-chain.",
+  "findings": [
+    {
+      "source_id": "https://www.equinor.com/news/20261125-equinor-updates-2026-production-guidance",
+      "title": "Equinor reduz previsão de crescimento de produção",
+      "summary": "Comunicado de 25/11: crescimento previsto de 4% para 3%; Bacalhau interrompido após incidente de 18/11, previsão de cinco a oito semanas. Reuters corrobora o anúncio, não a inspeção física.",
+      "source_url": "https://www.equinor.com/news/20261125-equinor-updates-2026-production-guidance",
+      "published_at": "2026-11-25",
+      "source_type": "official_report",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ARO-01"
+      ],
+      "tags": [
+        "Brazil",
+        "energy",
+        "operational_risk"
+      ],
+      "confidence": 0.94,
+      "priority": 0.9,
+      "evidence_class": "primary_source",
+      "what_happened": "Revisão de crescimento de 4% para 3%.",
+      "background": "Incidente em Bacalhau em 18/11 e incêndio em Visund em 4/11.",
+      "why_it_matters": "Oferta alternativa também enfrenta falhas operacionais.",
+      "implications": "Menor produção corporativa; não implica escassez global.",
+      "glossary": {
+        "FPSO": "Unidade flutuante de produção, armazenamento e transferência"
+      },
+      "recommended_action": "Conferir registros da ANP e anúncio de retomada.",
+      "limits": "Previsão empresarial; sem inspeção independente."
+    },
+    {
+      "source_id": "https://www.reuters.com/business/energy/oil-prices-fall-supply-glut-concerns-offset-middle-east-disruption-fears-2026-11-25/",
+      "title": "Petróleo sobe com alegações de ataque e estoques",
+      "summary": "Reuters reporta Brent US$93,20 e WTI US$83,01; estoques americanos +1,1 milhão de barris. Houthis reivindicam ataque, dano não confirmado; cobertura independente registra versão saudita de interceptação.",
+      "source_url": "https://www.reuters.com/business/energy/oil-prices-fall-supply-glut-concerns-offset-middle-east-disruption-fears-2026-11-25/",
+      "published_at": "2026-11-25",
+      "source_type": "news_article",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "ARO-01"
+      ],
+      "tags": [
+        "oil",
+        "market",
+        "claims"
+      ],
+      "confidence": 0.85,
+      "priority": 0.9,
+      "evidence_class": "secondary_source",
+      "what_happened": "Preços publicados subiram frente à referência matinal.",
+      "background": "Radar: Brent 90,58 e WTI 80,96.",
+      "why_it_matters": "Prêmio de risco pode mudar antes da confirmação física.",
+      "implications": "Monitorar oferta, estoques e política de produção.",
+      "glossary": {
+        "WTI": "West Texas Intermediate, referência americana de petróleo"
+      },
+      "recommended_action": "Conferir série oficial de estoques e danos por fontes independentes.",
+      "limits": "Cotação publicada, não necessariamente fechamento; autoria e danos não confirmados."
+    }
+  ]
+}
