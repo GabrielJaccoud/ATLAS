@@ -1,0 +1,35 @@
+# ATLAS — Vigilância Crítica
+
+Triagem pública de sete dias em Nature, DARPA/IARPA/AARO, GAO/DOE/NASA. Achado: Pook-Kolb et al., Physical Review Letters, 19/11/2026, https://doi.org/10.1103/vlt2-xzgk; NASA https://science.nasa.gov/open-science/fermi-data-pulsar-discovery/. Análise observacional astronômica de 15 anos de dados Fermi-LAT: método geométrico de reticulados identificou pulsar de 261 Hz em cerca de 10 horas de CPU, enquanto busca anterior falhou após cerca de 600 anos de CPU. Não é comparação de duas buscas bem-sucedidas nem ganho universal. Artigo primário e resumo institucional consultados, sem replicação independente. RIA: candidato a avaliação documental e benchmark civil de sinais periódicos esparsos, comparar sensibilidade, falsos positivos e custo em dados públicos; nenhuma integração. DOE publicou balanço Genesis em 24/11/2026 (https://www.energy.gov/articles/fact-sheet-energy-department-delivering-president-trumps-genesis-mission), anúncio institucional, não auditoria de desempenho. QBI repetida. Nenhuma hipótese extraordinária promovida; Programa Anímico–Parapsicológico preservado. Cobertura parcial, sem auditoria individual CIA/FOIA, NNSA, contratos, patentes, audiências ou literatura psi; sem deduplicação integral. Glossário: CPU = unidade central de processamento; reticulado = conjunto discreto regular de pontos; pulsar = estrela de nêutrons em rotação. Ingestão ainda não verificada.
+
+## Registro científico
+
+{
+  "source_id": "10.1103/vlt2-xzgk",
+  "title": "Gamma-Ray Pulsar Discovery Using a Lattice-Based Method",
+  "summary": "Análise de dados astronômicos públicos: descoberta de pulsar em cerca de 10 horas de CPU; busca anterior falhou após 600 anos de CPU. Sem reprodução independente nesta rodada.",
+  "source_url": "https://doi.org/10.1103/vlt2-xzgk",
+  "published_at": "2026-11-19",
+  "source_type": "scientific_paper",
+  "ministry_id": "research_evolution",
+  "hypothesis_ids": [],
+  "tags": [
+    "sensoriamento",
+    "astronomia",
+    "RIA"
+  ],
+  "confidence": 0.9,
+  "priority": 0.8,
+  "evidence_class": "primary_source",
+  "what_happened": "Identificação de pulsar de 261 Hz em dados Fermi-LAT.",
+  "background": "Método anterior de busca semicoerente não detectou o objeto.",
+  "why_it_matters": "Busca eficiente de periodicidade em sinais esparsos.",
+  "implications": "Avaliação civil em séries temporais científicas.",
+  "glossary": {
+    "CPU": "Unidade central de processamento",
+    "LAT": "Telescópio de grande área",
+    "reticulado": "Conjunto discreto regular de pontos"
+  },
+  "recommended_action": "Comparar em dados públicos sensibilidade, falsos positivos e custo computacional.",
+  "limits": "Sem replicação independente ou deduplicação integral; ganho não generalizável; nenhuma integração."
+}
