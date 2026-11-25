@@ -1,0 +1,8 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261125T132840Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-25T13:28:40Z",
+  "report_path": "docs/research/reports/2026-11-25/atlas-vigilancia-critica-20261125T132840Z.md",
+  "report": "Triagem documental de 25/11/2026, janela solicitada de sete dias: buscas AARO/GAO, DARPA/IARPA e Nature. GAO (https://www.gao.gov/) lista GAO-27-108458 e GAO-27-109184, ambos de 20/11/2026, sobre IA e cibersegurança e chatbots e saúde mental; apenas índice consultado, sem auditoria dos relatórios. DARPA (https://www.darpa.mil/work-with-us/opportunities) e IARPA (https://www.iarpa.gov/who-we-are/history) retornaram páginas gerais; IARPA distingue pesquisa de implantação operacional. Nature recuperou artigo de 30/12/2025 sobre tractografia e teorias da consciência (https://www.nature.com/articles/s41598-025-31016-y), histórico e sem auditoria de métodos ou amostra. Nenhum achado novo qualificado; deduplicação integral não realizada. Sem auditoria NASA, DOE/NNSA, CIA/FOIA, contratos, patentes, audiências, literatura psi ou dados brutos. Nenhuma hipótese promovida; Programa Anímico–Parapsicológico preservado. RIA: nenhum teste ou integração; próxima ação examinar relatórios GAO e verificar fontes primárias. Glossário: tractografia = estimativa de trajetórias de fibras nervosas por imagem; baseline = referência comparativa. Ingestão ainda não verificada.",
+  "findings": []
+}
