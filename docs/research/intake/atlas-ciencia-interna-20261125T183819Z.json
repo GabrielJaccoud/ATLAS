@@ -1,0 +1,39 @@
+{
+  "batch_id": "atlas-ciencia-interna-20261125T183819Z",
+  "producer": "ATLAS Ciência Interna",
+  "generated_at": "2026-11-25T18:38:19Z",
+  "report_path": "docs/research/reports/2026-11-25/atlas-ciencia-interna-20261125T183819Z.md",
+  "report": "Fonte histórica UPE, cálculo Poisson de sensibilidade, candidato RIA óptico; integração parcial; sem atualização empírica.",
+  "findings": [
+    {
+      "source_id": "https://doi.org/10.1021/acs.jpclett.4c03546",
+      "title": "Imaging Ultraweak Photon Emission from Living and Dead Mice and from Plants under Stress",
+      "summary": "Experimentos em camundongos e plantas detectaram contraste óptico fisiológico; não demonstram comunicação ou consciência.",
+      "source_url": "https://pubs.acs.org/doi/10.1021/acs.jpclett.4c03546",
+      "published_at": "2025-04-24",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [
+        "CI-001"
+      ],
+      "tags": [
+        "UPE",
+        "RIA",
+        "photon-counting"
+      ],
+      "confidence": 0.85,
+      "priority": 0.85,
+      "evidence_class": "primary_source",
+      "what_happened": "Imagens de emissão ultrafraca distinguiram estados fisiológicos.",
+      "background": "Emissão óptica espontânea associada a processos bioquímicos já era conhecida.",
+      "why_it_matters": "Permite especificar limites de detecção.",
+      "implications": "Candidato a benchmark óptico, não prova de sinalização.",
+      "glossary": {
+        "UPE": "Emissão ultrafraca de fótons",
+        "CCD": "Detector de carga acoplada"
+      },
+      "recommended_action": "Recuperar suplementos e simular fundo variável.",
+      "limits": "Resumo consultado; dados brutos não auditados; fonte histórica, duplicidade global não verificada."
+    }
+  ]
+}
