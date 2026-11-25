@@ -1,0 +1,8 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261125T182748Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-25T18:27:48Z",
+  "report_path": "docs/research/reports/2026-11-25/atlas-vigilancia-critica-20261125T182748Z.md",
+  "report": "Triagem pública de sete dias em DARPA/IARPA/AARO, Nature e DOE/NASA. Resultados predominantemente páginas gerais ou referências repetidas: https://www.darpa.mil/about/offices/bto ; https://www.nature.com/subjects/quantum-physics/nature (comentário de 18/11 já examinado); https://www.energy.gov/undersecretaryforscience/genesis-mission/genesis-mission-one-year (balanço Genesis já abordado; expansão Tara de memória GPU anunciada em novembro, sem benchmark independente); https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/ (acervo histórico de dados de degradação, possível referência para testes civis de previsão, não novidade). Nenhum achado novo qualificado; sem deduplicação integral. Cobertura documental parcial, sem auditoria de CIA/FOIA, GAO, NNSA, contratos, patentes, audiências, literatura psi ou dados brutos. Nenhuma hipótese promovida; Programa Anímico–Parapsicológico preservado. RIA: considerar dados públicos de degradação para comparar erro de previsão e falsos alertas com baseline; nenhum teste ou integração executado. Glossário: GPU = unidade de processamento gráfico; baseline = referência comparativa; RIA = regra de investigação e assimilação. Ingestão a verificar após commit.",
+  "findings": []
+}
