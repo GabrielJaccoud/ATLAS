@@ -1,0 +1,66 @@
+{
+  "batch_id": "atlas-fronteira-20261125T185654Z",
+  "producer": "ATLAS Fronteira do Conhecimento",
+  "generated_at": "2026-11-25T18:56:54Z",
+  "report_path": "docs/research/reports/2026-11-25/atlas-fronteira-20261125T185654Z.md",
+  "report": "Triagem pública focalizada ESA, NIST, DARPA e busca AARO; dois candidatos incrementais frente às edições visíveis. Sem auditoria exaustiva ou confirmação extraordinária. Ingestão pendente de verificação.",
+  "findings": [
+    {
+      "source_id": "10.5194/acp-26-14085-2026",
+      "title": "EarthCARE: chuva como precursor de abertura de nuvens marinhas",
+      "summary": "Observações orbitais de agosto de 2024 a novembro de 2025 em quatro regiões subtropicais; aumento de chuva até 25 horas antes da transição. Associação observacional, não causalidade isolada.",
+      "source_url": "https://acp.copernicus.org/articles/26/14085/2026/acp-26-14085-2026.html",
+      "published_at": "2026-10-08",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "EarthCARE",
+        "climate",
+        "precursors",
+        "RIA"
+      ],
+      "confidence": 0.95,
+      "priority": 0.9,
+      "evidence_class": "primary_source",
+      "what_happened": "ESA destacou em 24/11 estudo publicado em 08/10 e disponibilização de dados e fluxo EarthCODE.",
+      "background": "Nuvens fechadas refletem luz solar; abertura reduz cobertura.",
+      "why_it_matters": "Possível precursor meteorológico mensurável.",
+      "implications": "Testar previsão de transições com fusão de satélites.",
+      "glossary": {
+        "ESA": "Agência Espacial Europeia",
+        "EarthCARE": "Earth Cloud Aerosol and Radiation Explorer"
+      },
+      "recommended_action": "Comparar modelo meteorológico sem chuva e com chuva em regiões e períodos retidos; medir Brier e falsos alarmes.",
+      "limits": "Observacional, diurno, quatro regiões; dados brutos não processados nesta rodada."
+    },
+    {
+      "source_id": "10.1038/s41586-026-11247-3",
+      "title": "Verificação quântica de posição com dispositivos remotos não confiáveis",
+      "summary": "NIST relata demonstração física com estações separadas por 195 m, fótons emaranhados e teste de Bell. Aplicação prática distante; não implica comunicação superluminal.",
+      "source_url": "https://www.nist.gov/news-events/news/2026/11/quantum-physics-can-verify-persons-location-nist-researchers-show",
+      "published_at": "2026-11-18",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "quantum",
+        "authentication",
+        "RIA"
+      ],
+      "confidence": 0.94,
+      "priority": 0.76,
+      "evidence_class": "primary_source",
+      "what_happened": "NIST anunciou demonstração experimental e artigo Nature com DOI indicado.",
+      "background": "Verificação de posição por tempo de propagação e correlações quânticas.",
+      "why_it_matters": "Autenticação física sob hipóteses explícitas de segurança.",
+      "implications": "Referência de metrologia e autenticação, não implantação imediata.",
+      "glossary": {
+        "NIST": "Instituto Nacional de Padrões e Tecnologia dos EUA",
+        "QPV": "Verificação quântica de posição"
+      },
+      "recommended_action": "Obter artigo e dados, comparar erro de localização e rejeição de fraude com controle clássico.",
+      "limits": "Experimento físico, não clínico; artigo integral e dados não auditados; infraestrutura especializada."
+    }
+  ]
+}
