@@ -1,0 +1,5 @@
+# ATLAS — Vigilância Crítica
+
+Triagem pública em 25/11/2026, janela solicitada de sete dias: consultas AARO/UAP, DARPA/IARPA e Nature/neurotecnologia. DARPA Spark Tank (https://www.darpa.mil/events/rewinds/spark-tank-2025) indexado recentemente, mas evento de 2025; MXO (https://www.darpa.mil/about/offices/mxo) e Tiqker repetidos. Revisão neuromórfica de 20/08/2026 (https://doi.org/10.1038/s44385-026-00074-w) repetida. Nenhum resultado específico AARO recuperado. Nenhum achado novo qualificado; cobertura parcial, sem auditoria de NASA, DOE/NNSA, CIA, GAO, contratos, patentes, literatura psi ou dados brutos. Sem deduplicação integral. Programa Anímico–Parapsicológico preservado; nenhuma hipótese promovida. RIA: nenhum ganho medido ou integração. Glossário: UAP = fenômenos anômalos não identificados; baseline = referência comparativa. Ingestão ainda não verificada.
+
+Próxima ação: separar data de indexação da data do evento e comparar DOI/URL com acervo antes da admissão.
