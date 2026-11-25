@@ -1,0 +1,7 @@
+# ATLAS — Vigilância Crítica
+
+24/11/2026 21:11 BRT / 25/11 UTC
+
+Triagem pública em DARPA, IARPA, AARO, DOE, NASA e Nature. Resultados institucionais predominantemente repetidos. Artigo primário de Brosler et al., 14/09/2026, https://doi.org/10.1038/s41593-026-02446-2: estudo experimental humano com três participantes com paralisia e implantes de eletrocorticografia; dois participaram da comparação de fala e gestos simultâneos. Treinamento com contextos isolados e simultâneos melhorou generalização; em um participante, acurácia mediana em combinações inéditas de 66,7% para gestos e 80% para fala. Vocabulário restrito, amostra pequena, sem replicação independente auditada. Não demonstra leitura irrestrita de pensamentos. Candidato documental histórico, novidade no acervo integral não verificada. RIA: testar treinamento com eventos simultâneos e isolados em dados históricos do ATLAS, medir falsos alertas e erro fora da amostra; nenhum teste ou integração realizado. Programa Anímico–Parapsicológico preservado, nenhuma hipótese promovida. Cobertura parcial, sem auditoria de contratos, patentes, CIA/FOIA, GAO, NNSA, literatura psi ou dados brutos. Glossário: eletrocorticografia = registro elétrico na superfície cortical; baseline = referência comparativa. Ingestão ainda não verificada.
+
+Nenhum achado admitido por falta de deduplicação integral.
