@@ -1,0 +1,5 @@
+# ATLAS — Vigilância Crítica
+
+25/11/2026 23:28 BRT (26/11 UTC)
+
+Triagem pública de sete dias em DARPA/IARPA/AARO, DOE/NASA e Nature/PubMed. DARPA Altered B, aviso DARPA-SN-27-20 de 17/11/2026 (https://www.darpa.mil/events/2026/proposers-day-altered-b), anuncia reunião de 16/12 sobre altermagnetismo para eletrônica de baixo consumo; objetivos, não demonstração. QBI e Lift repetidos; DOE retornou referências de 2025, NASA páginas gerais e acervo histórico; Nature retornou referências históricas sobre organoides e índices. Nenhum achado novo qualificado; novidade integral não auditada. Cobertura textual parcial, sem dados brutos, contratos, patentes, CIA/FOIA, GAO, NNSA, audiências ou literatura psi específica. Nenhuma hipótese promovida; Programa Anímico–Parapsicológico preservado na avaliação. RIA: acompanhar edital Altered B e exigir medidas de energia, velocidade e confiabilidade contra referência convencional; nenhum teste ou integração. Altermagnetismo: ordenamento magnético compensado com propriedades eletrônicas dependentes do spin; QBI: iniciativa de avaliação de computação quântica; baseline: referência comparativa. Ingestão a verificar.
