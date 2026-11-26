@@ -1,0 +1,38 @@
+{
+  "batch_id": "atlas-radar-matinal-20261126T100433Z",
+  "producer": "ATLAS Radar Matinal",
+  "generated_at": "2026-11-26T10:04:33Z",
+  "report_path": "docs/research/reports/2026-11-26/atlas-radar-matinal-20261126T100433Z.md",
+  "report": "# ATLAS Radar Matinal — 26/11/2026\nCorte 10:04:33 UTC. Triagem documental; sem inspeção de sensores brutos.\n## Clima espacial\nNOAA, boletim 26/11 00:30 UTC: Kp observado máximo 3; previsão G1 (Kp 5) ampliada para 26 e 27/11, máximo 28/11 de 3,67. Janelas previstas 26/11 21–00 UTC e 27/11 03–06 UTC. Radiação S1+ e blecautes R1–R2/R3+ 1% ao dia. Fonte https://services.swpc.noaa.gov/text/3-day-forecast.txt . Comparação com edição anterior: alerta antecipado em um dia. H0: previsão não supera climatologia; Brier Score com previsões arquivadas, Kp definitivo GFZ, controles por ciclo solar e validação temporal. Sem séries, não executado.\n## Energia e Brasil\nReuters 26/11 https://www.reuters.com/business/energy/oil-rises-supply-concerns-iran-claims-mine-strikes-ships-2026-11-26/ : Brent 93,79 e WTI 83,33; estoques americanos +1,1 milhão a 418,9 milhões. Alegações de minas não verificadas independentemente. H0: coeficientes de preço/estoques/risco estáveis; regressão com ruptura, controles dólar, demanda, fretes, produção; faltam séries sincronizadas EIA, preços e AIS agregado. Reuters 25/11 https://www.reuters.com/world/americas/brazil-announces-new-credit-rules-curb-household-indebtedness-2026-11-25/ : novas regras de crédito anunciadas; impacto não avaliado. Proposta tarifária americana de 10% sobre aeronaves brasileiras, não tarifa efetiva: https://theprint.in/world/us-proposes-surprise-new-tariffs-on-brazil-imports-including-10-duty-on-aircraft/3109289/ .\n## Neurociência e IA\nWang et al., eNeuro, 23/11, https://pubmed.ncbi.nlm.nih.gov/43073044/ DOI 10.1523/ENEURO.0226-26.2026; estudo humano de escuta natural com magnetoencefalografia, respostas associadas à previsão em unidades subsilábicas, caracteres e palavras, sem efeito fonêmico único robusto, segundo resumo reproduzido em https://www.booksci.cn/literature/149479006.htm . Antecedente abril 2026 https://www.nature.com/articles/s41593-026-02272-6 : previsão dependente de fronteiras sintáticas. Hipótese ATLAS: representação adaptativa multiescala melhora previsão fora da amostra. H0: diferença de perda preditiva <=0 (ganho definido como perda baseline menos perda nova). Teste pareado por blocos, controles capacidade, corpus, custo e vazamento temporal; faltam sinais MEG, áudio alinhado, probabilidades linguísticas e partições; para transferência, corpus temporal ATLAS com resultados resolvidos. Não executado.\n## Balanço\nPositivo documental: alerta NOAA ampliado, estudo humano identificado. Negativo reportado: efeito fonêmico único não robusto; não prova ausência. Inconclusivo: causalidade energética, transferência computacional, ocorrência futura G1. Triagem de organoides/CRISPR encontrou artigo de 13/11 já anterior, não selecionado por novidade; optogenética e UAP não tiveram busca dedicada nesta rodada. Sem intervenções. Horizontes 72h Kp; 7d OPEP+; 30d dados linguísticos; 90d benchmark; 1 ano validação prospectiva. Sem probabilidades próprias. Glossário: Kp índice geomagnético; G1 tempestade menor; MEG magnetoencefalografia; H0 hipótese nula; AIS identificação automática de embarcações; WTI referência americana de petróleo. Ingestão pendente até verificação.",
+  "findings": [
+    {
+      "source_id": "10.1523/ENEURO.0226-26.2026",
+      "title": "Neural Signatures of Predictive Processing during Natural Mandarin Speech Comprehension",
+      "summary": "Estudo humano de escuta natural com MEG; resumo relata efeitos preditivos em unidades subsilábicas, caracteres e palavras, sem efeito fonêmico único robusto. Sem replicação independente.",
+      "source_url": "https://doi.org/10.1523/ENEURO.0226-26.2026",
+      "published_at": "2026-11-23",
+      "source_type": "scientific_paper",
+      "ministry_id": "research_evolution",
+      "hypothesis_ids": [],
+      "tags": [
+        "neuroscience",
+        "MEG",
+        "multiscale",
+        "abstract-only"
+      ],
+      "confidence": 0.83,
+      "priority": 0.84,
+      "evidence_class": "primary_source",
+      "what_happened": "Artigo publicado em 23/11, identificado nesta edição; resumo de estudo humano de escuta natural.",
+      "background": "Estudo de abril de 2026 já indicava dependência de fronteiras sintáticas (DOI 10.1038/s41593-026-02272-6).",
+      "why_it_matters": "A unidade útil de previsão pode depender da estrutura do sinal.",
+      "implications": "Candidato a benchmark multiescala no ATLAS, não transferência comprovada.",
+      "glossary": {
+        "MEG": "magnetoencefalografia",
+        "fonema": "unidade sonora distintiva"
+      },
+      "recommended_action": "Obter MEG, áudio alinhado e probabilidades linguísticas; comparar modelos em blocos reservados, com capacidade e custo equivalentes.",
+      "limits": "Resumo apenas; dados brutos não acessados; efeito nulo não prova ausência; sem eficácia clínica ou ganho ATLAS demonstrado."
+    }
+  ]
+}
