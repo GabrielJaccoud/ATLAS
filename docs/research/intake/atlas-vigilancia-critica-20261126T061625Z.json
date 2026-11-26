@@ -1,0 +1,8 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261126T061625Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-26T06:16:25Z",
+  "report_path": "docs/research/reports/2026-11-26/atlas-vigilancia-critica-20261126T061625Z.md",
+  "report": "Triagem textual de sete dias solicitada em três buscas: DARPA/IARPA/AARO, NASA/DOE e PubMed (consciência, neurotecnologia, CRISPR e psi). Nenhum achado novo qualificado. DARPA IPTO https://www.darpa.mil/about/offices/ipto lista consulta FLASH (Formal Learning and Abstractions for System Heterogeneity), prazo 30/11/2026: solicitação de informações, não demonstração; data inicial não verificada. Interesse RIA: abstrações formais de sistemas heterogêneos, avaliar precisão e custo contra baseline antes de assimilar. Laguna https://www.darpa.mil/research/programs/laguna descreve objetivos de síntese bioinspirada e materiais, sem dados experimentais auditados. Anzio, QBI e repositório NASA de prognóstico repetidos. NASA https://www.nasa.gov/news-release/nasa-awards-moon-base-transportation-technology-science-projects/ anúncio de 07/11, fora da janela. Sem retorno específico útil de PubMed, IARPA, AARO ou DOE. Sem auditoria de contratos, patentes, CIA/FOIA, GAO, NNSA, audiências, dados brutos ou deduplicação integral. Nenhuma hipótese promovida; Programa Anímico–Parapsicológico preservado na avaliação. Nenhum teste ou integração. Glossário: DARPA = agência de pesquisa avançada de defesa; RIA = regra de investigação e assimilação; baseline = referência comparativa. Ingestão a verificar.",
+  "findings": []
+}
