@@ -1,0 +1,8 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261127T233851Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-27T23:38:51Z",
+  "report_path": "docs/research/reports/2026-11-27/atlas-vigilancia-critica-20261127T233851Z.md",
+  "report": "Triagem documental parcial em três buscas com janela de sete dias: DARPA/IARPA/AARO, Nature e DOE/NASA. Nenhum achado novo qualificado. Nature confirmou publicação de 25/11/2026 sobre fotônica integrada https://doi.org/10.1038/s41586-026-11146-7, já examinada nesta série; sem novo resultado auditado. DOE https://www.energy.gov/topics/quantum-information-science registra parceria Fermilab/Qblox em 18/11/2025, antecedente do QICK já discutido. NASA https://www.nasa.gov/missions/station/iss-research/cold-atom-laboratory/nasa-demonstrates-ultra-cool-quantum-sensor-for-first-time-in-space/ (13/08/2024) recupera demonstração física orbital já conhecida. Genesis Mission https://www.energy.gov/genesis-mission-demonstration descreve objetivos, não ganho comprovado. Sem retorno específico útil DARPA/IARPA/AARO. CIA, NNSA, GAO, contratos, patentes, audiências e psi não auditados diretamente. Sem aquisição instrumental independente. Deduplicação limitada ao histórico visível. Programa Anímico–Parapsicológico preservado; nenhuma hipótese promovida; Conhecimento & Pesquisa sem mudança material. RIA: comparar sincronização de sensores com baseline quando houver dados; nenhum teste ou integração. Glossário: DOE = Departamento de Energia dos EUA; QICK = conjunto de controle de instrumentação quântica; RIA = investigação e assimilação. Ingestão a verificar.",
+  "findings": []
+}
