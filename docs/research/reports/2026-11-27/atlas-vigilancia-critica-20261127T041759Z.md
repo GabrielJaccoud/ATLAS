@@ -1,0 +1,7 @@
+# ATLAS — Vigilância Crítica
+
+27/11/2026 — 04:17:59 UTC
+
+Triagem textual parcial em três buscas com janela de sete dias: IARPA, AARO e Nature (interfaces cerebrais, CRISPR e sensores quânticos). Nenhum achado recente qualificado. IARPA TrojAI https://www.iarpa.gov/research-programs/trojai descreve avaliação de detectores de adulteração de modelos de IA, com edital de 2019 encerrado e relatório final listado; não foi auditado o desempenho. SINTRA https://www.iarpa.gov/research-programs/sintra descreve objetivos de detecção de pequenos detritos orbitais, edital de 2022, não comprovação de capacidade operacional. Revisão de entrega de fármacos https://www.nature.com/articles/s41392-026-03086-5.pdf é anterior à janela e não constitui novo ensaio clínico. Sem retorno útil de AARO. Demais agências, contratos, patentes, psi e dados instrumentais não auditados. Deduplicação limitada às edições visíveis. RIA: avaliar futuramente benchmarks públicos TrojAI em ambiente isolado, sem integração ou ganho demonstrado. Programa Anímico–Parapsicológico mantido; nenhuma hipótese promovida; Conhecimento & Pesquisa sem mudança material. Glossário: IARPA = atividade de projetos avançados de pesquisa em inteligência; AARO = escritório de resolução de anomalias em todos os domínios; IA = inteligência artificial; RIA = regra de investigação e assimilação. Ingestão a verificar.
+
+Achados admitidos: 0.
