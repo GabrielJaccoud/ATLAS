@@ -1,0 +1,7 @@
+# ATLAS — Vigilância Crítica
+
+27/11/2026 07:33:40 UTC
+
+Triagem textual parcial em duas buscas de sete dias. Nature Medicine, 26/11/2026, https://doi.org/10.1038/s41591-026-04530-3: estudo longitudinal de desempenho de matrizes intracorticais em pessoas implantadas; metadados verificados, acesso integral falhou, sem números ou conclusões clínicas admitidos. Nature Nanotechnology, 25/11/2026, https://www.nature.com/nnano/: índice descreve integração de neurônios de Mott e memória spintrônica para redes de pulsos, sem auditoria do artigo individual. NIST, 18/11/2026, https://www.nist.gov/news-events/news/2026/11/quantum-physics-can-verify-persons-location-nist-researchers-show: demonstração laboratorial de verificação quântica de posição, anterior à janela; aplicação real distante segundo instituição. Sem deduplicação integral do acervo. Nenhum achado admitido definitivamente. Cobertura insuficiente de agências militares, UAP, propulsão, contratos, patentes, biotecnologia e psi; sem dados instrumentais independentes. Programa Anímico–Parapsicológico preservado. RIA: avaliar computação por eventos contra baseline de latência, energia e precisão, sem teste ou integração. Nenhuma hipótese promovida ou mudança material validada. Ingestão a verificar.
+
+Glossário: Mott — transição eletrônica entre estados isolante e condutor; spintrônica — uso do spin eletrônico; RIA — investigação e assimilação; UAP — fenômenos anômalos não identificados.
