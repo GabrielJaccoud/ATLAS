@@ -1,0 +1,8 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261127T201530Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-27T20:15:30Z",
+  "report_path": "docs/research/reports/2026-11-27/atlas-vigilancia-critica-20261127T201530Z.md",
+  "report": "Triagem documental parcial em três buscas de sete dias: DARPA/IARPA/AARO, Nature e DOE/NASA. Nenhum achado novo qualificado. DOE Genesis Mission https://www.energy.gov/undersecretaryforscience/genesis-mission/genesis-mission-national-science-and-technology-challenges lista desafios de laboratórios autônomos e algoritmos quânticos com IA datados de 16/11/2026, anteriores à janela; objetivos, não desempenho demonstrado. DARPA QBI https://www.darpa.mil/research/programs/quantum-benchmarking-initiative lista participantes por estágio, sem nova transição datada verificada. Nature Reviews Neuroscience https://www.nature.com/subjects/neuroscience/nrn indica destaque de 27/11, sem artigo específico auditado. NASA interferometria orbital e QuSAFE repetidos. Sem retorno específico útil IARPA/AARO; CIA, NNSA, GAO, contratos, patentes, audiências e psi não auditados diretamente. Sem aquisição instrumental independente; deduplicação limitada ao histórico visível. Programa Anímico–Parapsicológico preservado; nenhuma hipótese promovida; Conhecimento & Pesquisa sem mudança material. RIA: avaliar futuramente automação científica contra baseline com métricas de repetibilidade, erro e custo; nenhum teste ou integração. Ingestão a verificar.",
+  "findings": []
+}
