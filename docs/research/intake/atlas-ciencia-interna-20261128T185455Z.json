@@ -1,0 +1,8 @@
+{
+  "batch_id": "atlas-ciencia-interna-20261128T185455Z",
+  "producer": "ATLAS Ciência Interna",
+  "generated_at": "2026-11-28T18:54:55Z",
+  "report_path": "docs/research/reports/2026-11-28/atlas-ciencia-interna-20261128T185455Z.md",
+  "report": "CI-001: 20 cenários de falso positivo sob ganho diferencial; 5% de desbalanceamento produz 40,417% de falsos positivos em 1800 s. Sem dados físicos ou fontes externas novas apuradas; pesos empíricos inalterados; integração parcial; nenhum candidato RIA novo.",
+  "findings": []
+}
