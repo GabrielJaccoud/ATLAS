@@ -1,0 +1,8 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261128T155421Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-28T15:54:21Z",
+  "report_path": "docs/research/reports/2026-11-28/atlas-vigilancia-critica-20261128T155421Z.md",
+  "report": "Três buscas públicas com janela solicitada de sete dias. IARPA COSMIC (https://www.iarpa.gov/research-programs/cosmic), chamada de 29/04/2026 encerrada, propõe fusão de imagens comerciais multiespectrais e geolocalização em modelos temporais; não demonstra desempenho operacional. NASA anúncio de contratos lunares de 07/11/2026 (https://www.nasa.gov/news-release/nasa-awards-moon-base-transportation-technology-science-projects/) anterior à janela, inclui rover nuclear PROMISE, não propulsão extraordinária. DARPA AMCOM-DI de 03/11 já tratado. PubMed https://pubmed.ncbi.nlm.nih.gov/42815767/ artigo de 30/09 sobre estimulação de organoides corticais humanos, metadados apenas, fora da janela. Nenhum achado novo qualificado. Sem auditoria direta CIA, NNSA, GAO, AARO, contratos integrais, patentes, audiências ou psi; sem aquisição instrumental ou deduplicação integral. ASAS/ZAZA sem promoção ou recalibração; Programa Anímico–Parapsicológico preservado; Conhecimento & Pesquisa sem mudança material. RIA: avaliar fusão temporal de dados públicos contra baseline, medir erro de detecção, cobertura e latência; sem integração. Glossário: multiespectral = múltiplas bandas de luz; organoide = modelo celular tridimensional; baseline = referência comparativa. Ingestão a verificar.",
+  "findings": []
+}
