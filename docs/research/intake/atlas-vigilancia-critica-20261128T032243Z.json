@@ -1,0 +1,8 @@
+{
+  "batch_id": "atlas-vigilancia-critica-20261128T032243Z",
+  "producer": "ATLAS Vigilância Crítica",
+  "generated_at": "2026-11-28T03:22:43Z",
+  "report_path": "docs/research/reports/2026-11-28/atlas-vigilancia-critica-20261128T032243Z.md",
+  "report": "Triagem documental parcial em três buscas com janela de sete dias: IARPA/AARO/DARPA, Nature e DOE/NASA. Nenhum achado novo qualificado. NASA (Administração Nacional da Aeronáutica e Espaço dos EUA) descreve magnetômetros quânticos de estado sólido em desenvolvimento em 04/06/2024: https://science.nasa.gov/science-research/science-enabling-technology/solid-state-quantum-magnetometers-seeking-out-water-worlds-from-the-quantum-world/ . Defeitos cristalinos sensíveis a campos magnéticos permitem leitura óptica ou elétrica; autocalibração é vantagem potencial, não desempenho orbital comprovado. Experimento orbital de interferometria atômica de 13/08/2024 já conhecido. Nature retornou revisão de epilepsia de 04/11/2026 https://doi.org/10.1038/s41392-026-03104-6 e plataforma optogenética de 2016, fora da janela. Sem retorno específico útil das agências de defesa. CIA, NNSA, GAO, contratos, patentes, audiências e psi não auditados diretamente. Sem aquisição instrumental ou validação independente; deduplicação limitada ao histórico visível. RIA: comparar deriva e estabilidade de sensores com referência convencional antes de assimilação; nenhum teste ou integração. Programa Anímico–Parapsicológico preservado no escopo; nenhuma hipótese promovida; Conhecimento & Pesquisa sem mudança material. Glossário: magnetômetro = medidor de campo magnético; deriva = alteração gradual da leitura; RIA = investigação e assimilação. Ingestão a verificar.",
+  "findings": []
+}
