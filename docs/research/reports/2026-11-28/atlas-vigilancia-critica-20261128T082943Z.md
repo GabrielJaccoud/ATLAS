@@ -1,0 +1,37 @@
+# ATLAS — Vigilância Crítica
+
+2026-11-28T08:29:43Z
+
+Triagem pública em duas buscas com janela de sete dias. Guo et al., ACS Nano, 24/11/2026, https://pubmed.ncbi.nlm.nih.gov/43076592/: resumo relata interface híbrida ferroelétrica com neurônios biológicos não fotossensíveis, aumento de até 200% no sinal de cálcio sob pulsos luminosos e verificação eletrofisiológica patch-clamp. Preparação celular exata e métricas completas não auditadas; não há evidência clínica no resumo. Grafeno fotônico já registrado na edição anterior. DOE anunciou oportunidade de comercialização quântica, não capacidade demonstrada: https://www.energy.gov/technologycommercialization/articles/building-quantum-technology-energy-does-sbirsttr-programs-are. IARPA explica que pedidos de informação não garantem programa ou financiamento: https://www.iarpa.gov/engage-with-us/rfi. QuASAR DARPA encerrado, não novidade. Sem achados específicos novos de UAP ou propulsão nas buscas; CIA, NNSA, NASA, GAO, patentes, audiências, contratos e psi não auditados diretamente. Sem aquisição instrumental ou deduplicação integral. Programa Anímico–Parapsicológico preservado; nenhuma hipótese promovida. RIA: avaliar documentalmente sensores orientados a eventos; sem ganho ATLAS medido, sem integração. Ingestão pendente de verificação.
+
+## Registro científico
+
+[
+  {
+    "source_id": "10.1021/acsnano.6c14245",
+    "title": "Interface neural híbrida ferroelétrica fotossensível",
+    "summary": "Resumo relata aumento de até 200% no sinal de cálcio e verificação patch-clamp em interface experimental.",
+    "source_url": "https://pubmed.ncbi.nlm.nih.gov/43076592/",
+    "published_at": "2026-11-24",
+    "source_type": "scientific_paper",
+    "ministry_id": "research_evolution",
+    "hypothesis_ids": [],
+    "tags": [
+      "neurotecnologia",
+      "computação neuromórfica"
+    ],
+    "confidence": 0.75,
+    "priority": 0.65,
+    "evidence_class": "primary_source",
+    "what_happened": "Dispositivo intermediário permite resposta neuronal a estímulos luminosos.",
+    "background": "Optogenética usual emprega proteínas fotossensíveis.",
+    "why_it_matters": "Possível interface entre eletrônica e tecido neural.",
+    "implications": "Pesquisa de fronteira, não aplicação clínica.",
+    "glossary": {
+      "ferroeletricidade": "polarização elétrica reversível",
+      "patch-clamp": "medição eletrofisiológica de membrana"
+    },
+    "recommended_action": "Auditar controles, preparação celular e métricas; avaliar processamento orientado a eventos em dados sintéticos.",
+    "limits": "Somente resumo; preparação biológica exata, replicação e ganho ATLAS não verificados."
+  }
+]
